@@ -25,7 +25,7 @@ BRANCHES = ["Muon_pt", "Muon_eta", "Muon_phi", "Muon_mass", "Muon_charge"]
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--input", default=DEFAULT_INPUT, help="Local ROOT file or supported ROOT URL")
+    parser.add_argument("--input", required=True, help="Explicit local ROOT file or supported ROOT URL; choose and document the dataset before running")
     parser.add_argument("--tree", default="Events", help="ROOT tree name (default: Events)")
     parser.add_argument("--output-dir", type=Path, default=Path("outputs/baseline"))
     parser.add_argument("--step-size", default="100 MB", help="Uproot chunk size, e.g. '100 MB'")
