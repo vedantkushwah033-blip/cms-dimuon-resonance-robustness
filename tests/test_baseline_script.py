@@ -1,7 +1,7 @@
 import json
+from pathlib import Path
 import subprocess
 import sys
-from pathlib import Path
 
 import awkward as ak
 import numpy as np
