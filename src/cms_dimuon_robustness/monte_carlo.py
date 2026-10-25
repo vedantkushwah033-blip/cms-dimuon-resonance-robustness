@@ -24,9 +24,9 @@ def clopper_pearson(successes: int, trials: int, confidence_level: float = 0.95)
     invalid generator or test statistically valid.
     """
     if isinstance(successes, bool) or isinstance(trials, bool):
-        raise ValueError("successes and trials must be integers, not booleans")
+        raise TypeError("successes and trials must be integers, not booleans")
     if not isinstance(successes, int) or not isinstance(trials, int):
-        raise ValueError("successes and trials must be integers")
+        raise TypeError("successes and trials must be integers")
     if trials <= 0 or successes < 0 or successes > trials:
         raise ValueError("require trials > 0 and 0 <= successes <= trials")
     if not 0.0 < confidence_level < 1.0:
