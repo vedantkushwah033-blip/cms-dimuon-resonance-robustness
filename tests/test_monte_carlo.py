@@ -28,8 +28,11 @@ def test_all_successes_interval():
 
 
 def test_invalid_inputs_raise():
-    for args in [(-1, 10), (11, 10), (0, 0), (1.5, 10)]:
+    for args in [(-1, 10), (11, 10), (0, 0)]:
         with pytest.raises(ValueError):
+            clopper_pearson(*args)
+    for args in [(1.5, 10), (True, 10)]:
+        with pytest.raises(TypeError):
             clopper_pearson(*args)
     with pytest.raises(ValueError):
         clopper_pearson(1, 10, 1.0)
