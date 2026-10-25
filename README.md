@@ -9,9 +9,10 @@ The candidate objective is to evaluate the false-positive calibration of a clear
 
 ## Data records — do not confuse these
 - **Analysis example:** Wunsch (2019), DOI 10.7483/OPENDATA.CMS.AAR1.4NZQ, https://opendata.cern.ch/record/cms-12342. The record's two example files total 123.7 KiB; this is not the full event sample. It warns that the feature near 30 GeV is trigger/data-taking related.
-- **Reduced event dataset:** Wunsch (2019), DOI 10.7483/OPENDATA.CMS.LVG5.QT81, https://opendata.cern.ch/record/12341. CERN describes a 2.1 GiB file with 61,540,413 events and reduced muon kinematic/charge branches. The record says no further validation was performed on the reduced output.
+- **Education/outreach reduced event dataset:** Wunsch (2019), DOI 10.7483/OPENDATA.CMS.LVG5.QT81, https://opendata.cern.ch/record/12341. CERN describes a 2.1 GiB file with 61,540,413 events and reduced muon kinematic/charge branches. The record explicitly says no further validation was performed on the reduced output. It must not be treated as validated physics-measurement input without additional checks.
+- **Research-level Run-1 ntuples to assess next:** Run2012B DoubleMuParked, https://opendata.cern.ch/record/cms-31123, and Run2012C DoubleMuParked, https://opendata.cern.ch/record/cms-31129. CERN describes these as research-level NanoAOD-like ntuples processed from AOD using validated runs. Their exact branch schemas and suitability for trigger-aware work must still be inspected; do not assume trigger decisions or prescales are present.
 
-The reduced sample is a candidate for baseline reconstruction, not proof that all trigger information needed for trigger-misspecification studies is available.
+The education/outreach sample remains useful for pipeline development only. The research-level ntuples are stronger candidates for the scientific baseline, subject to schema and selection validation.
 
 ## Repository map
 - `research_question.md`, `analysis_plan.md` — provisional question and staged protocol.
@@ -21,7 +22,8 @@ The reduced sample is a candidate for baseline reconstruction, not proof that al
 - `docs/independent_review_plan.md`, `docs/quality_gates.md` — validation and external-review requirements.
 - `src/cms_dimuon_robustness/invariant_mass.py` — vectorized kinematic calculation.
 - `src/cms_dimuon_robustness/nanoaod.py` — Awkward-array opposite-charge pair-mass calculation.
-- `scripts/reproduce_dimuon_spectrum.py` — chunked ROOT/NanoAOD baseline reconstruction.
+- `scripts/reproduce_dimuon_spectrum.py` — chunked ROOT/NanoAOD baseline reconstruction; requires an explicit input path to prevent accidental use of the unvalidated outreach dataset.
+- `scripts/inspect_root_schema.py` — inventories tree names, entries, branch names, and possible trigger-related fields without asserting that they are sufficient.
 - `src/cms_dimuon_robustness/monte_carlo.py` — exact binomial confidence intervals and a sample-size planning approximation.
 - `tests/` — unit and synthetic-ROOT integration tests. GitHub Actions passed 17 tests plus Ruff checks on Python 3.10, 3.11 and 3.12 for commit `e6259abaaae0b9799b00ad125b20b521c00e40a3`.
 
@@ -41,10 +43,11 @@ ruff check src tests
 Start with a limited event smoke test, not a full 61-million-event run:
 
 ```bash
-python scripts/reproduce_dimuon_spectrum.py --max-events 10000
+python scripts/inspect_root_schema.py --input /path/to/official-file.root --output outputs/schema_report.json
+python scripts/reproduce_dimuon_spectrum.py --input /path/to/selected-file.root --max-events 10000
 ```
 
-By default the script reads the official reduced NanoAOD ROOT file via XRootD and writes a histogram CSV, metadata JSON and PNG under `outputs/baseline/`. This command is a proposed first run; the repository has not yet confirmed that it succeeds in your environment. Inspect its metadata and compare the spectrum with the official reference before interpreting it. The script pairs all opposite-charge muons and applies no extra trigger or quality cuts, so it is not a complete physics selection.
+The scripts require an explicit file path or supported ROOT URL. Inspect the schema first and save the report. The repository has not yet confirmed a successful run against the official event file. The spectrum script pairs all opposite-charge muons and applies no extra trigger or quality cuts, so it is not a complete physics selection. The education/outreach dataset is not considered validated physics input; prefer evaluating the research-level Run-1 ntuples first.
 
 After the smoke test, inspect the output, verify event-level masses against an independent four-vector calculation, then increase the sample size only after resolving any discrepancies.
 
