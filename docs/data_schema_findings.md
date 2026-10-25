@@ -1,0 +1,42 @@
+# Data-schema findings and open checks
+
+**Last checked:** 2026-10-26  
+**Status:** public record documentation reviewed; no ROOT file has yet been opened by this project.
+
+## Official record-level facts
+
+### Run2012B DoubleMuParked research-level ntuple
+- Record: https://opendata.cern.ch/record/31123
+- The CERN Open Data record describes a research-level NanoAOD-like ntuple processed from AOD using validated runs, with 26,084,708 events across 57 files (75.6 MiB).
+- CERN explicitly warns that not all variables are available.
+
+### Run2012C DoubleMuParked research-level ntuple
+- Record: https://opendata.cern.ch/record/cms-31129
+- The record describes a research-level NanoAOD-like ntuple processed from AOD using validated runs, with 35,455,705 events across 74 files (101.1 MiB).
+- The linked official variable-list documentation includes HLT decision bits, including several dimuon trigger paths, as well as muon quality and isolation variables.
+
+### Education/outreach reduced sample
+- Record: https://opendata.cern.ch/record/12341
+- The 61,540,413-event file is reduced to muon kinematics and charge for an educational analysis. CERN states that no further validation was performed on the reduced output.
+- Treat it as a development example unless a separate validation justifies a broader role.
+
+## What these facts do and do not establish
+
+The Run2012C variable-list documentation makes a trigger-aware study more plausible than the muon-only outreach sample. However, the record-level page is not an inspection of the actual file. We have not yet established:
+- Exact branch names in a downloaded/streamed file for each period.
+- Whether Run2012B has the same HLT fields as Run2012C.
+- Whether prescale values, trigger menus, and run-dependent trigger definitions are available.
+- Whether the selected stream and trigger path support the intended mass range and selection.
+- Whether all required run/luminosity-block and event-quality metadata are present.
+- Whether the original reference analysis can be reproduced using these reduced ntuples.
+
+An HLT decision bit indicates a stored path decision; it does not by itself establish trigger efficiency, turn-on behavior, prescale treatment, or an unbiased sample.
+
+## File-level audit protocol
+
+1. Choose one file from Run2012B and one from Run2012C; record exact official file paths and checksums where possible.
+2. Run `python scripts/inspect_root_schema.py --input <file> --output outputs/schema_run2012B.json` (and likewise for Run2012C).
+3. Check tree names, event counts, identifiers, muon kinematics/quality/isolation fields, HLT branches, and any prescale/luminosity metadata.
+4. Cross-reference the actual branches with the producer tool and the original 2012 dimuon analysis code.
+5. Record a pass/fail/unknown for each required input. Unknown is not a pass.
+6. Only then select the primary dataset and revise the research question to match what the data can genuinely support.
