@@ -14,37 +14,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 import uproot
 
+from cms_dimuon_robustness.nanoaod import opposite_charge_pair_masses
+
 DEFAULT_INPUT = (
     "root://eospublic.cern.ch//eos/opendata/cms/derived-data/"
     "AOD2NanoAODOutreachTool/Run2012BC_DoubleMuParked_Muons.root"
 )
 BRANCHES = ["Muon_pt", "Muon_eta", "Muon_phi", "Muon_mass", "Muon_charge"]
-
-
-def opposite_charge_pair_masses(arrays: dict[str, ak.Array]) -> ak.Array:
-    """Return jagged invariant masses for all opposite-charge muon pairs per event."""
-    muons = ak.zip(
-        {
-            "pt": arrays["Muon_pt"],
-            "eta": arrays["Muon_eta"],
-            "phi": arrays["Muon_phi"],
-            "mass": arrays["Muon_mass"],
-            "charge": arrays["Muon_charge"],
-        }
-    )
-    pairs = ak.combinations(muons, 2, fields=["mu1", "mu2"])
-    keep = pairs.mu1.charge * pairs.mu2.charge < 0
-
-    def energy(mu):
-        return np.sqrt((mu.pt * np.cosh(mu.eta)) ** 2 + mu.mass**2)
-
-    e = energy(pairs.mu1) + energy(pairs.mu2)
-    px = pairs.mu1.pt * np.cos(pairs.mu1.phi) + pairs.mu2.pt * np.cos(pairs.mu2.phi)
-    py = pairs.mu1.pt * np.sin(pairs.mu1.phi) + pairs.mu2.pt * np.sin(pairs.mu2.phi)
-    pz = pairs.mu1.pt * np.sinh(pairs.mu1.eta) + pairs.mu2.pt * np.sinh(pairs.mu2.eta)
-    mass_squared = e**2 - px**2 - py**2 - pz**2
-    masses = np.sqrt(ak.where(mass_squared > 0, mass_squared, 0.0))
-    return masses[keep]
 
 
 def parse_args() -> argparse.Namespace:
@@ -86,7 +62,7 @@ def main() -> None:
                 remaining = args.max_events - events_processed
                 if remaining <= 0:
                     break
-                chunk = {name: values[:remaining] for name, values in chunk.items()}
+                chunk = chunk[:remaining]
 
             masses = opposite_charge_pair_masses(chunk)
             flat = ak.to_numpy(ak.flatten(masses, axis=None))
