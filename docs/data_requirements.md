@@ -5,6 +5,9 @@
 ## A. Choose the estimand before choosing the largest dataset
 The provisional primary estimand is the null rejection probability of one explicitly specified local test under defined generating scenarios. This does not automatically require the largest collision dataset. The pseudoexperiment generator, fit procedure, trigger/selection definition, and calibration design determine feasibility.
 
+## B. Dataset suitability gate
+The 2019 education/outreach reduced dataset at https://opendata.cern.ch/record/12341 explicitly says no further validation was performed on the reduced output. Use it for software development unless independent checks establish suitability. First assess the research-level Run2012B and Run2012C DoubleMuParked ntuples (https://opendata.cern.ch/record/cms-31123 and https://opendata.cern.ch/record/cms-31129). These were processed using validated runs, but the portal notes that not all variables are available. Inspect the actual schema and producer documentation before selecting the primary input.
+
 ## B. Required observed-data inputs
 Before analysis, record and verify:
 - Official CERN Open Data record, DOI, exact file paths, checksums where available, and reuse/citation conditions.
