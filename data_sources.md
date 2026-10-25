@@ -11,22 +11,31 @@
 - It explicitly warns that the bump near 30 GeV is a trigger/data-taking effect, not a resonance.
 - **Important size distinction:** this analysis record lists two small files totalling 123.7 KiB. These are the analysis example files, not the full event dataset.
 
-## Candidate B — reduced CMS 2012 event dataset
+## Candidate B — education/outreach reduced CMS 2012 event dataset
 - Official dataset record: https://opendata.cern.ch/record/12341
 - DOI: 10.7483/OPENDATA.CMS.LVG5.QT81
 - Title: “DoubleMuParked dataset from 2012 in NanoAOD format reduced on muons”
 - CERN describes one 2.1 GiB file with 61,540,413 events. Listed branches include muon multiplicity, transverse momentum, pseudorapidity, azimuth, mass, and charge.
 - The record says the reduced sample was derived from validated runs but that no further validation was performed on the output.
 
-**Feasibility assessment:** promising for baseline invariant-mass reconstruction and pipeline validation. The listed schema does not by itself prove that all trigger decisions, selection variables, or detector information required for a trigger-misspecification study are present. Inspect the original analysis code and schema before making those claims.
+**Feasibility assessment:** suitable as a software-development example only until independently validated. The official record explicitly says no further validation was performed on the reduced output. The listed schema does not include trigger decisions or selection variables. Do not use this dataset alone to support physics-measurement claims or a trigger-misspecification study.
 
-## Candidate C — prior CMS Open Data resonance analysis
+## Candidate C — research-level Run-1 DoubleMuParked ntuples (preferred for feasibility assessment)
+
+- **Run2012B:** https://opendata.cern.ch/record/cms-31123
+- **Run2012C:** https://opendata.cern.ch/record/cms-31129
+- These are CMS Open Data group research-level NanoAOD-like ntuples processed from AOD. The portal states they were processed using validated runs; it also notes that not all variables are available.
+- They are stronger candidates for a research baseline than the education/outreach muon-only file, but that does not automatically validate a specific analysis.
+- Before use, download or stream a small sample and run `scripts/inspect_root_schema.py`. Record exact file URLs, branch names, trigger-related fields, event identifiers, muon quality/isolation fields, and relevant selection information. Branch-name matches are only leads; inspect the original producer and analysis documentation.
+- If the required trigger decisions, prescales, or event-quality information are absent, do not claim trigger-level robustness. Re-scope to what the available data genuinely support.
+
+## Candidate D — prior CMS Open Data resonance analysis
 - Cesarotti et al. (2019), *Physical Review D* 100, 015021
 - DOI: 10.1103/PhysRevD.100.015021
 - Publisher page: https://journals.aps.org/prd/abstract/10.1103/PhysRevD.100.015021
 - This is a close methodological predecessor. It uses 2.11 fb^-1 of 7 TeV CMS Open Data in a pT-enhanced dimuon search and discusses resonance-search methods. Read the full methods and references before claiming novelty.
 
-## Candidate D — research documentation and additional methods
+## Candidate E — research documentation and additional methods
 - CMS Open Data research guide: https://opendata.cern.ch/docs/cms-guide-for-research
 - CMS Open Data overview: https://opendata.cern.ch/docs/about-cms
 - Williams (2017), background-model selection and bump-hunting uncertainty: https://doi.org/10.1088/1748-0221/12/09/P09034
