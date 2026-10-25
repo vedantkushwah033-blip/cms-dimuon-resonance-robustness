@@ -23,7 +23,7 @@ The reduced sample is a candidate for baseline reconstruction, not proof that al
 - `src/cms_dimuon_robustness/nanoaod.py` — Awkward-array opposite-charge pair-mass calculation.
 - `scripts/reproduce_dimuon_spectrum.py` — chunked ROOT/NanoAOD baseline reconstruction.
 - `src/cms_dimuon_robustness/monte_carlo.py` — exact binomial confidence intervals and a sample-size planning approximation.
-- `tests/` — unit tests; CI status has not yet been verified.
+- `tests/` — unit and synthetic-ROOT integration tests. GitHub Actions passed 17 tests plus Ruff checks on Python 3.10, 3.11 and 3.12 for commit `e6259abaaae0b9799b00ad125b20b521c00e40a3`.
 
 ## Setup
 Python 3.10 or newer:
