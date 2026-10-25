@@ -45,3 +45,15 @@ A research-grade reanalysis might require an accessible primary CMS dataset with
 - Wunsch, 2019 analysis record: DOI 10.7483/OPENDATA.CMS.AAR1.4NZQ; https://opendata.cern.ch/record/cms-12342
 - Wunsch, 2019 reduced event dataset: DOI 10.7483/OPENDATA.CMS.LVG5.QT81; https://opendata.cern.ch/record/12341
 - Cesarotti et al., Phys. Rev. D 100, 015021 (2019), DOI 10.1103/PhysRevD.100.015021; https://doi.org/10.1103/PhysRevD.100.015021
+
+
+## Updated dataset decision (2026-10-26)
+
+The two research-level records are now preferred over the education/outreach muon-only reduction for feasibility assessment:
+
+- Run2012B DoubleMuParked research-level ntuple: https://opendata.cern.ch/record/31123 — 26,084,708 events, 57 files, 75.6 MiB; processed from AOD using validated runs.
+- Run2012C DoubleMuParked research-level ntuple: https://opendata.cern.ch/record/cms-31129 — 35,455,705 events, 74 files, 101.1 MiB; processed from AOD using validated runs.
+
+The official Run2012C variable-list page documents HLT decision bits and muon quality/isolation fields. This supports further feasibility checking, not a claim that the merged file definitely contains all needed branches. Run2012B, actual file branch lists, trigger-menu interpretation, prescale availability, and event-selection provenance remain open checks.
+
+Next action: run `scripts/inspect_root_schema.py` on a small representative file from each period, save JSON reports, then compare branch coverage against the original analysis requirements. Do not claim trigger-efficiency calibration from HLT booleans alone.
