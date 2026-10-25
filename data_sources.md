@@ -24,9 +24,9 @@
 
 - **Run2012B:** https://opendata.cern.ch/record/cms-31123
 - **Run2012C:** https://opendata.cern.ch/record/cms-31129
-- These are CMS Open Data group research-level NanoAOD-like ntuples processed from AOD. The portal states they were processed using validated runs; it also notes that not all variables are available.
+- These are CMS Open Data group research-level NanoAOD-like ntuples processed from AOD. The portal states they were processed using validated runs; it also notes that not all variables are available. Run2012B is listed as 26,084,708 events across 57 files (75.6 MiB); Run2012C as 35,455,705 events across 74 files (101.1 MiB).
 - They are stronger candidates for a research baseline than the education/outreach muon-only file, but that does not automatically validate a specific analysis.
-- Before use, download or stream a small sample and run `scripts/inspect_root_schema.py`. Record exact file URLs, branch names, trigger-related fields, event identifiers, muon quality/isolation fields, and relevant selection information. Branch-name matches are only leads; inspect the original producer and analysis documentation.
+- Before use, download or stream a small sample and run `scripts/inspect_root_schema.py`. Record exact file URLs, branch names, trigger-related fields, event identifiers, muon quality/isolation fields, and relevant selection information. Branch-name matches are only leads; inspect the original producer and analysis documentation. The official records provide variable-list links, but we have not yet independently confirmed which HLT decision branches, if any, survive in these specific merged ntuples.
 - If the required trigger decisions, prescales, or event-quality information are absent, do not claim trigger-level robustness. Re-scope to what the available data genuinely support.
 
 ## Candidate D — prior CMS Open Data resonance analysis
