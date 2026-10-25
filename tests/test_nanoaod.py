@@ -16,7 +16,7 @@ def test_opposite_charge_pairs_only_and_known_mass():
     result = opposite_charge_pair_masses(events)
     flat = ak.to_list(ak.flatten(result, axis=None))
     assert len(flat) == 2
-    assert sorted(flat) == pytest.approx(sorted([20.0, np.sqrt(4 * 10.0 * 7.0 * (1 - np.cos(1.0)))]))
+    assert sorted(flat) == pytest.approx(sorted([20.0, np.sqrt(140.0 * (1 + np.cos(1.0)))]))
 
 
 def test_event_with_fewer_than_two_muons_has_no_pairs():
