@@ -1,14 +1,14 @@
 import json
+import pathlib
 import subprocess
 import sys
-from pathlib import Path
 
 import awkward as ak
 import numpy as np
 import uproot
 
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
 
 
 def test_baseline_script_on_tiny_synthetic_root_file(tmp_path):
