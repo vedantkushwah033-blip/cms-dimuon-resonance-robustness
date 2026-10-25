@@ -1,43 +1,72 @@
 # Initial literature map
 
-**Status:** starter bibliography, not an exhaustive systematic review.  
+**Status:** expanded starter review, not an exhaustive systematic review.  
 **Last updated:** 2026-10-25
 
-Related work clearly exists; novelty of the proposed combination is not established. This file separates verified starting points from open review tasks.
+The proposed research gap remains **unproven**. A meaningful close predecessor exists for background-model selection and coverage in bump hunting, so the current model-selection-calibration idea may need to be narrowed or abandoned after full comparison.
 
-## Primary sources and official records
+## Data and analysis records
 
-### 1. CMS Open Data dimuon spectrum record
-Stefan Wunsch, “Analysis of the di-muon spectrum using data from the CMS detector taken in 2012” (CERN Open Data Portal, 2019), DOI: 10.7483/OPENDATA.CMS.AAR1.4NZQ. Official record: https://opendata.cern.ch/record/cms-12342
+### 1. Wunsch (2019), CMS Open Data analysis example
+“Analysis of the di-muon spectrum using data from the CMS detector taken in 2012.” DOI: 10.7483/OPENDATA.CMS.AAR1.4NZQ. Official record: https://opendata.cern.ch/record/cms-12342
 
-The record describes an opposite-charge dimuon invariant-mass spectrum over a wide mass range and explicitly notes a structure near 30 GeV caused by the trigger used in data-taking rather than a resonance. Trigger and selection documentation is therefore essential. This is a starting point for learning/reproduction, not automatically the correct dataset for a new calibration study.
+This example reconstructs opposite-charge dimuon invariant mass using the 2012 Run B/C DoubleMuParked sample and explicitly warns that a feature near 30 GeV is caused by trigger/data-taking conditions, not a resonance. The analysis record itself lists two small files totalling 123.7 KiB; this is not the full event dataset.
 
-### 2. Research use of CMS Open Data
-CERN Open Data Portal, “CMS Guide to research use of CMS Open Data.” Official documentation: https://opendata.cern.ch/docs/cms-guide-for-research
+### 2. Wunsch (2019), reduced muon event dataset
+“DoubleMuParked dataset from 2012 in NanoAOD format reduced on muons.” DOI: 10.7483/OPENDATA.CMS.LVG5.QT81. Official record: https://opendata.cern.ch/record/12341
 
-The guide explains available research datasets and example analyses. Released data require domain-specific selection and software knowledge, and the released samples/software have limitations. The exact data format, trigger, run period, luminosity, certification, and compatible simulation must be checked for the chosen analysis.
+CERN describes one 2.1 GiB file with 61,540,413 events and branches for muon multiplicity, transverse momentum, pseudorapidity, azimuth, mass and charge. The record says the output was derived from validated runs but had no further validation. This is a candidate for baseline reproduction, not automatic evidence that all trigger variables or detector-level requirements are available.
 
-### 3. Published CMS Open Data dimuon resonance search
-Cesarotti et al., “Searching in CMS open data for dimuon resonances with substantial transverse momentum,” Physical Review D 100, 015021 (2019), DOI: 10.1103/PhysRevD.100.015021. Official APS page: https://journals.aps.org/prd/abstract/10.1103/PhysRevD.100.015021
+### 3. CERN CMS Open Data research guidance
+Official documentation: https://opendata.cern.ch/docs/cms-guide-for-research and https://opendata.cern.ch/docs/about-cms
 
-This work uses CMS Open Data to search for narrow dimuon resonances and discusses local background fitting, polynomial choices, fit windows, and correlated spurious structures (“ringing”). Simply comparing polynomial orders or changing a fit window is not by itself a defensible novelty claim. The full methods and references must be read before finalizing the exact test.
+The exact dataset, format, event selections, trigger information, data-quality requirements, compatible software, and citation terms must be verified before analysis.
 
-### 4. CMS low-mass dimuon resonance search
-CMS Collaboration, “Search for direct production of GeV-scale resonances decaying to a pair of muons in proton-proton collisions at sqrt(s) = 13 TeV,” JHEP 12 (2023) 070. Official result page: https://cms-results.web.cern.ch/cms-results/public-results/publications/EXO-21-005/index.html ; arXiv: https://arxiv.org/abs/2309.16003
+## Closest resonance-search predecessor
 
-This is relevant scientific context for low-mass dimuon searches and trigger streams, but it uses a different data-taking context and is not a direct recipe for the older public dataset. Review the selection and background treatment before drawing comparisons.
+### 4. Cesarotti et al. (2019), CMS Open Data dimuon search
+“Searching in CMS open data for dimuon resonances with substantial transverse momentum,” *Physical Review D* 100, 015021. DOI: 10.1103/PhysRevD.100.015021. Publisher: https://journals.aps.org/prd/abstract/10.1103/PhysRevD.100.015021
 
-## Limitations of this initial review
-- The research question remains provisional. These sources establish close prior work, not a research gap.
-- This is not yet a comprehensive review of statistical literature on likelihood-ratio tests under misspecification, spurious-signal tests, goodness-of-fit diagnostics, trials factors/look-elsewhere corrections, or coverage calibration.
-- Claims in the supplied project brief about a 2025 anomaly-detection paper and conformal-calibration work have not been accepted as evidence here until exact title, authors, publication status, DOI/arXiv ID, and primary source are verified. Do not cite uncertain metadata.
-- Do not claim that the proposed diagnostic is new. First identify the exact diagnostic and compare it against established methods.
-- Do not assume the CMS record provides all required variables or simulations. Inspect the record's associated dataset and technical documentation.
+The paper reports a search using 2.11 fb^-1 of 7 TeV CMS Open Data, targeting dimuon masses of 14–66 GeV with transverse-momentum-enhanced selections. It is directly relevant prior work. The complete methods and supplementary details must be read before deciding whether a proposed calibration study overlaps.
 
-## Required next literature-review tasks
-1. Read the complete methods and supplementary material of the 2019 CMS Open Data resonance paper.
-2. Identify prior studies that explicitly run background-only pseudoexperiments and assess type-I error or p-value calibration under alternative background models.
-3. Review established look-elsewhere-effect methods and distinguish local from global significance.
-4. Review spurious-signal and bias tests used in resonance searches, including whether the proposed diagnostic duplicates a known method.
-5. Verify every citation against its publisher, collaboration, CERN record, or arXiv primary page.
-6. Record what each prior study does and does not test in a comparison table before calling any gap unresolved.
+## Statistical methods that constrain novelty and design
+
+### 5. Williams (2017), background-model selection and bump hunting
+“A novel approach to the bias-variance problem in bump hunting,” *Journal of Instrumentation* 12, P09034. DOI: 10.1088/1748-0221/12/09/P09034. Publisher: https://doi.org/10.1088/1748-0221/12/09/P09034
+
+This is an especially important predecessor: it examines data-driven background-model selection, signal-strength bias, variance, and interval coverage in bump hunts. Because our candidate question also concerns model selection and calibration, we must compare the exact procedure and validation design. The proposed work must not be called novel until this comparison is complete.
+
+### 6. Gross and Vitells (2010), look-elsewhere effect
+“Trial factors for the look elsewhere effect in high energy physics,” *European Physical Journal C* 70, 525–530. DOI: 10.1140/epjc/s10052-010-1470-8. Publisher: https://doi.org/10.1140/epjc/s10052-010-1470-8
+
+This paper explains why a local excess at a fixed mass and a search over many possible masses have different false-positive interpretations. Any global-significance claim requires a defined scan and a justified calibration method.
+
+### 7. Cowan et al. (2011), likelihood-based tests
+“Asymptotic formulae for likelihood-based tests of new physics,” *European Physical Journal C* 71, 1554. DOI: 10.1140/epjc/s10052-011-1554-0. Publisher: https://doi.org/10.1140/epjc/s10052-011-1554-0
+
+This is a foundational reference on likelihood-ratio test statistics, nuisance parameters, systematic uncertainties, and asymptotic distributions. Our implementation must check whether the assumptions behind any asymptotic p-value are appropriate for the chosen procedure.
+
+### 8. Hallin et al. (2023), resonant anomaly detection
+“Resonant anomaly detection without background sculpting,” *Physical Review D* 107, 114012. DOI: 10.1103/PhysRevD.107.114012. Publisher: https://doi.org/10.1103/PhysRevD.107.114012
+
+This work addresses spurious mass-structure risks in enhanced bump hunts involving anomaly scores. It is adjacent rather than identical to the proposed statistical-calibration direction, but it illustrates that selection-induced sculpting is an established concern.
+
+### 9. CMS Collaboration (2023), low-mass dimuon search
+“Search for direct production of GeV-scale resonances decaying to a pair of muons in proton-proton collisions at sqrt(s) = 13 TeV,” *JHEP* 12 (2023) 070. arXiv:2309.16003. Primary preprint: https://arxiv.org/abs/2309.16003
+
+Relevant experimental context for low-mass dimuon searches, with a different data-taking and detector context. Review the methods and triggers before comparing results.
+
+## Current assessment of originality
+
+The current idea—compare a fixed background model with a data-selected model and evaluate false-positive calibration under held-out generating distributions—**may already be substantially covered by Williams (2017) or other work**. This cannot be resolved by writing a more ambitious title. We must compare methods line by line, identify any unaddressed question, and only then freeze the project.
+
+If no distinct contribution survives the review, pivot to a narrower reproducibility/validation study and describe it honestly as such. A high-quality replication is worthwhile but should not be represented as a new statistical method.
+
+## Required next review tasks
+
+1. Read the full methods, supplementary material and references of Williams (2017) and Cesarotti et al. (2019).
+2. Compare their generating models, fitting procedures, model-selection rules, test statistics, uncertainty intervals, coverage tests, and failure handling with our candidate design.
+3. Search the primary literature for post-selection calibration and bump-hunt background-model uncertainty; add sources only after verifying title, authors, DOI or arXiv identifier, and actual claims.
+4. Inspect the official CMS analysis source and dataset schema; reproduce the baseline spectrum.
+5. Write a concise novelty decision: proceed, narrow, or stop. Record the evidence for that decision.
+6. Keep local significance separate from global significance and model-based toy calibration separate from detector-level evidence.
