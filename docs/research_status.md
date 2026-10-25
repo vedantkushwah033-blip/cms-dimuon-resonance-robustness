@@ -27,4 +27,4 @@
 - Manuscript submission or publication.
 
 ## Evidence policy
-A planned task is not a result. A unit-tested interval or kinematic function does not validate the complete scientific procedure. The baseline script has not yet been run against the official ROOT file, and CI has not yet been verified. A passing CI workflow would validate only the checks that actually ran. A repository commit is not evidence of novelty, peer review, or admissions impact.
+A planned task is not a result. A passing CI run validates the current automated software checks, not the scientific hypothesis. The baseline script has only been exercised on a tiny synthetic ROOT file; it has not yet been run against the official CMS event file. A passing CI workflow would validate only the checks that actually ran. A repository commit is not evidence of novelty, peer review, or admissions impact.
