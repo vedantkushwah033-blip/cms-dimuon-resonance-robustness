@@ -9,6 +9,9 @@ Deliverables: verified source table; precise data record and format; documented 
 **Stop condition:** if the closest prior work already answers the same question with an equivalent experimental design, do not proceed under a novelty claim. Reframe only if a genuinely distinct question is supported by evidence.
 
 ## Stage 1 — reproducible baseline
+
+A chunked starter script is available at `scripts/reproduce_dimuon_spectrum.py`. Begin with `python scripts/reproduce_dimuon_spectrum.py --max-events 10000`; this is a proposed smoke test and has not yet been run against the official file. The script applies only opposite-charge pairing and is not a trigger/quality-selection analysis. Compare its output to the official reference before proceeding.
+
 1. Reproduce a documented CMS dimuon mass spectrum using the official record and technical instructions.
 2. Record file identifiers, dataset DOI, data-taking period, luminosity information where documented, software versions, event filters, trigger requirements, muon quality requirements, opposite-charge condition, mass range, and binning.
 3. Validate the invariant-mass calculation independently on a small sample using four-vectors and a known implementation.
@@ -19,6 +22,9 @@ Deliverables: verified source table; precise data record and format; documented 
 The baseline is not complete until the analysis can be rerun from documented inputs and its key selection steps have tests.
 
 ## Stage 2 — define a testable procedure
+
+The literature audit must explicitly compare the candidate design against Williams (2017), which already addresses data-driven background-model selection, bias/variance, and interval coverage in bump hunting. If the proposed comparison is materially equivalent, do not proceed under a novelty claim.
+
 Before the main pseudoexperiment set, prespecify: target mass range and fixed-mass versus scan design; baseline background family and parameterization; fit range/window and binning; test statistic and p-value calculation; fit-failure and boundary handling; nuisance parameters and constraints; feasible nominal alpha levels; definition of calibration failure; diagnostic and decision threshold; and development versus held-out evaluation scenarios.
 
 Do not choose these after looking at which option produces the strongest result.
