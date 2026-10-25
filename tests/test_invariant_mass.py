@@ -20,7 +20,7 @@ def test_vectorized_inputs_broadcast():
         np.array([10.0, 20.0]), 0, np.array([np.pi, np.pi]), 0,
     )
     assert result.shape == (2,)
-    assert result == pytest.approx(np.array([20.0, 30.0]))
+    assert result == pytest.approx(np.array([20.0, np.sqrt(800.0)]))
 
 
 def test_nonzero_muon_mass_produces_physical_result():
