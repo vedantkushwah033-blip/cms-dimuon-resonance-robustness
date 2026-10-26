@@ -1,3 +1,4 @@
+import hashlib
 import json
 import subprocess
 import sys
@@ -50,6 +51,7 @@ def test_spectrum_script_writes_reproducible_smoke_outputs(tmp_path):
             "100",
             "--step-size",
             "1 KB",
+            "--sha256-input",
         ],
         cwd=REPO_ROOT,
         check=True,
@@ -66,7 +68,7 @@ def test_spectrum_script_writes_reproducible_smoke_outputs(tmp_path):
     assert metadata["pairs_in_histogram_range"] == 2
     assert metadata["input_is_local_file"] is True
     assert metadata["input_bytes"] > 0
-    assert metadata["input_sha256"] is None
+    assert metadata["input_sha256"] == hashlib.sha256(input_path.read_bytes()).hexdigest()
     assert metadata["tree_entries_available"] == 3
     assert metadata["branch_types"]["Muon_pt"]
     assert metadata["software"]["python"]
