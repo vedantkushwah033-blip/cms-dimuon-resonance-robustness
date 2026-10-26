@@ -108,3 +108,30 @@ def test_reference_selection_mismatch_fails(tmp_path):
     assert report["cutflow_and_configuration_agree"] is False
     failed = {item["check"] for item in report["checks"] if not item["passed"]}
     assert "reference_uses_expected_selection" in failed
+
+
+def test_output_cannot_overwrite_candidate_metadata(tmp_path):
+    candidate_path = tmp_path / "candidate.json"
+    reference_path = tmp_path / "reference.json"
+    candidate_path.write_text(json.dumps(candidate_metadata()), encoding="utf-8")
+    reference_path.write_text(json.dumps(reference_metadata()), encoding="utf-8")
+    original_bytes = candidate_path.read_bytes()
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(COMPARATOR),
+            "--candidate",
+            str(candidate_path),
+            "--reference",
+            str(reference_path),
+            "--output",
+            str(candidate_path),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 2
+    assert "refusing to overwrite an input metadata file" in result.stderr
+    assert candidate_path.read_bytes() == original_bytes
