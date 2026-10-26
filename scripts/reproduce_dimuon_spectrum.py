@@ -16,10 +16,6 @@ import uproot
 
 from cms_dimuon_robustness.nanoaod import opposite_charge_pair_masses
 
-DEFAULT_INPUT = (
-    "root://eospublic.cern.ch//eos/opendata/cms/derived-data/"
-    "AOD2NanoAODOutreachTool/Run2012BC_DoubleMuParked_Muons.root"
-)
 BRANCHES = ["Muon_pt", "Muon_eta", "Muon_phi", "Muon_mass", "Muon_charge"]
 
 
