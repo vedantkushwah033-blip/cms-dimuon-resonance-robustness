@@ -1,0 +1,60 @@
+name: research-level CMS ROOT schema audit
+
+on:
+  push:
+    branches:
+      - research-plan/initial-protocol
+    paths:
+      - .github/workflows/research-level-schema-audit.yml
+      - scripts/inspect_root_schema.py
+      - pyproject.toml
+
+permissions:
+  contents: read
+
+jobs:
+  schema-audit:
+    name: Inspect one official Run2012B/C ROOT file each
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check out research branch
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install schema inspection dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[remote]" cernopendata-client
+      - name: Download one verified ROOT file from each official DoubleMuParked record
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p outputs/research_level_schema
+          for record_id in 31123 31129; do
+            cernopendata-client download-files \
+              --recid "$record_id" \
+              --filter-regexp '\\.root$' \
+              --filter-range 1-1 \
+              --server https://opendata.cern.ch \
+              --verify
+            input_file="$(find "$record_id" -type f -name '*.root' -print -quit)"
+            test -n "$input_file"
+            python scripts/inspect_root_schema.py \
+              --input "$input_file" \
+              --output "outputs/research_level_schema/schema_${record_id}.json"
+            printf '%s\t%s\t%s\n' \
+              "$record_id" "$input_file" "$(sha256sum "$input_file" | awk '{print $1}')" \
+              >> outputs/research_level_schema/manifest.tsv
+          done
+      - name: Upload schema reports and file manifest
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: research-level-schema-audit
+          path: outputs/research_level_schema/
+          if-no-files-found: warn
+          retention-days: 14
