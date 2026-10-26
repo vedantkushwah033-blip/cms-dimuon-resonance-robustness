@@ -40,3 +40,18 @@ def test_same_sign_pair_is_excluded():
         "Muon_charge": [[1, 1]],
     })
     assert ak.to_list(opposite_charge_pair_masses(events)) == [[]]
+
+
+def test_nonfinite_kinematics_are_not_silently_changed_to_zero_mass():
+    events = ak.Array(
+        {
+            "Muon_pt": [[float("nan"), 10.0]],
+            "Muon_eta": [[0.0, 0.0]],
+            "Muon_phi": [[0.0, np.pi]],
+            "Muon_mass": [[0.105658, 0.105658]],
+            "Muon_charge": [[1, -1]],
+        }
+    )
+    result = ak.to_list(opposite_charge_pair_masses(events))[0]
+    assert len(result) == 1
+    assert np.isnan(result[0])
