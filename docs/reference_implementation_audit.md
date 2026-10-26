@@ -28,7 +28,7 @@ It opens the reduced Run2012BC muon-only ROOT file, filters events with exactly 
 
 A generic predicate `q1 * q2 < 0` is not identical to `q1 != q2` for arbitrary malformed charge values. For example, a charge of zero differs from +1 but is not opposite-sign. Physical reconstructed muon charges should be -1 or +1. The project now fails explicitly if other values occur, rather than silently changing the reference's meaning.
 
-The baseline runner now checks the scalar `nMuon` branch against the jagged `Muon_pt` count before applying the reference-aligned selection, and reports the first global event index and observed counts on disagreement. The guard does not prove the source file is valid; it makes an assumption visible and testable.
+The baseline runner now checks the scalar `nMuon` branch against the jagged `Muon_pt` count and checks all four other muon collections against `Muon_pt` for every event before selection. It reports the first global event index and observed counts on disagreement. The guard does not prove the source file is valid; it makes an assumption visible and testable.
 
 ## Required real-data parity run
 
