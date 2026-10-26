@@ -11,7 +11,7 @@
    - Preprint: https://arxiv.org/abs/1902.07227
 
 2. **Williams (2017), “A novel approach to the bias-variance problem in bump hunting.”** This work evaluates data-driven background-model selection and uncertainty/coverage in toy ensembles. Generic background misspecification, coverage, or false-positive comparisons therefore cannot be claimed as new without a more precise distinction.
-   - Journal: https://doi.org/10.1088/1748-0211/12/09/P09034
+   - Journal: https://doi.org/10.1088/1748-0221/12/09/P09034
    - Preprint: https://arxiv.org/abs/1705.03578
 
 3. **Volkovich, De Vito Halevy and Bressler (2022), “A data-directed paradigm for BSM searches: the bump-hunting example.”** This proposes an algorithmic/data-directed approach to finding deviations from smoothly falling mass spectra. It reinforces that a new diagnostic or decision procedure needs direct comparison with existing algorithms, not only a new toy setup.
