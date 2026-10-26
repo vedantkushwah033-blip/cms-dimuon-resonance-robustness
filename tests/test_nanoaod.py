@@ -198,3 +198,30 @@ def test_finite_negative_kinematics_are_rejected(field, bad_values, message):
     values[field] = bad_values
     with pytest.raises(ValueError, match=message):
         opposite_charge_pair_masses(ak.Array(values))
+
+
+def test_all_empty_muon_collections_preserve_event_structure():
+    events = ak.Array(
+        {
+            "Muon_pt": [[], [], []],
+            "Muon_eta": [[], [], []],
+            "Muon_phi": [[], [], []],
+            "Muon_mass": [[], [], []],
+            "Muon_charge": [[], [], []],
+        }
+    )
+    result = opposite_charge_pair_masses(events)
+    assert ak.to_list(result) == [[], [], []]
+
+
+def test_missing_required_muon_field_names_the_missing_field():
+    events = ak.Array(
+        {
+            "Muon_pt": [[10.0, 10.0]],
+            "Muon_eta": [[0.0, 0.0]],
+            "Muon_phi": [[0.0, np.pi]],
+            "Muon_mass": [[0.105658, 0.105658]],
+        }
+    )
+    with pytest.raises(KeyError, match=r"Required muon fields missing:.*Muon_charge"):
+        opposite_charge_pair_masses(events)
