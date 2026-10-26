@@ -107,6 +107,19 @@ python scripts/compare_histograms.py \
 
 The comparator returns exit code 0 only for exact bin-by-bin count parity, exit code 2 for valid histograms with differing counts, and raises an error for malformed CSVs, invalid counts, or incompatible bin edges. Preserve the JSON report even when parity fails; discrepancies are evidence to investigate, not a reason to silently relax the criterion. This comparator checks regular-bin edges and counts. It does not by itself compare underflow/overflow, event cut-flow, mass values, or trigger semantics, so those must be recorded and assessed separately.
 
+
+After the histogram comparison, run the metadata/provenance audit:
+
+```bash
+python scripts/audit_baseline_metadata.py \
+  --reference-metadata outputs/reference/reference_metadata.json \
+  --candidate-metadata outputs/outreach-full/run_metadata.json \
+  --histogram-report outputs/comparison/histogram_comparison.json \
+  --output outputs/comparison/baseline_audit.json
+```
+
+This audit requires the reference and candidate metadata to identify the same input by matching SHA-256 and byte size, and checks tree entries, exactly-two-muon event count, binning, regular-bin totals, underflow/overflow, and the comparator's exact-parity result. It exits 0 only when every required check passes; otherwise it exits 2 and preserves a machine-readable list of failed checks. Both scripts must use the same local file and `--sha256-input`; a matching filename is not evidence of matching bytes. A passing audit establishes software-level reproduction evidence only, not trigger or detector validation.
+
 ## 8. Reproduction acceptance checklist
 
 Do not mark the baseline reproduced until all of the following are attached to one run record:
