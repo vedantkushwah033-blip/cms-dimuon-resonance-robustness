@@ -179,3 +179,11 @@ The fixture correction itself exposed a duplicate-key mistake in the metadata-au
 ## Comparator discrepancy-list consistency — 2026-10-26
 
 The metadata audit now also requires the comparator report's `differing_bins` field to be a list of objects whose length equals the strict integer `differing_bin_count`. This closes a further report-integrity gap: a report could otherwise claim zero differing bins and zero numerical discrepancy while retaining a nonempty list of individual mismatches. Exact-parity fixtures now explicitly contain an empty list, and a regression test covers the contradictory case. The latest CI must pass before this change is considered validated.
+
+
+## Duplicate-key rejection in audit JSON — 2026-10-26
+
+- Commit `e5b580aecdd40d78493ed913a66b3f855ce07916` changes the metadata reader to reject duplicate keys at any JSON object depth rather than silently accepting the last value. Duplicate keys can conceal contradictory counts or provenance values in otherwise parseable JSON.
+- Commit `7405599e09f845bc443d823aaf5180589f428568` adds regression cases for duplicate keys in each of the reference metadata, candidate metadata, and histogram comparison report.
+- GitHub Actions run [40278168904](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40278168904) passed on Python 3.10, 3.11, and 3.12, including pytest, compileall, and Ruff. The ROOT integration run [40278168818](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40278168818) also succeeded.
+- These results validate the metadata-parser regression tests and the synthetic ROOT integration workflow only. They do not constitute execution on the official CMS data or a real-data histogram parity result.
