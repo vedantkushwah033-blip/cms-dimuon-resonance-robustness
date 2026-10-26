@@ -52,7 +52,7 @@ jobs:
             filename="${url##*/}"
             expected_bytes="$(awk '{print $2}' <<< "$selected")"
             expected_checksum="$(awk '{print $3}' <<< "$selected")"
-            printf "%s\t%s\t%s\t%s\n" "$record_id" "$filename" "$expected_bytes" "$expected_checksum" \
+            printf "record_id\tfilename\tbytes\tcern_checksum\n%s\t%s\t%s\t%s\n" "$record_id" "$filename" "$expected_bytes" "$expected_checksum" \\
               > "outputs/research_level_schema/selected_$record_id.tsv"
             cernopendata-client download-files \
               --recid "$record_id" \
