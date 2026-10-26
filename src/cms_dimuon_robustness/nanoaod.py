@@ -41,6 +41,15 @@ def opposite_charge_pair_masses(arrays: ak.Array) -> ak.Array:
     if not np.all(np.isin(charges, (-1, 1))):
         raise ValueError("Muon_charge must contain only -1 or +1 values")
 
+    # Match the standalone kinematic helper's physical-domain checks while
+    # leaving non-finite values visible for downstream accounting.
+    pt_values = ak.to_numpy(ak.flatten(arrays["Muon_pt"], axis=None))
+    mass_values = ak.to_numpy(ak.flatten(arrays["Muon_mass"], axis=None))
+    if np.any(np.isfinite(pt_values) & (pt_values < 0)):
+        raise ValueError("Muon_pt must be non-negative when finite")
+    if np.any(np.isfinite(mass_values) & (mass_values < 0)):
+        raise ValueError("Muon_mass must be non-negative when finite")
+
     # ROOT NanoAOD kinematic branches are commonly float32. Promote before
     # arithmetic, then use a cancellation-resistant expression for the mass.
     # The direct E**2-|p|**2 form can lose the physical mass for highly boosted,
