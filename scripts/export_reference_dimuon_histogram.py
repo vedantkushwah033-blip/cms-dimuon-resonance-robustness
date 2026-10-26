@@ -60,7 +60,7 @@ def parse_args() -> argparse.Namespace:
         parser.error("bins must be positive and mass bounds must be finite with 0 < mass-min < mass-max")
     if args.max_events is not None and args.max_events <= 0:
         parser.error("--max-events must be positive")
-    if not Path(args.input).is_file():
+    if not Path(args.input).expanduser().is_file():
         parser.error("--input must point to an existing local ROOT file")
     return args
 
