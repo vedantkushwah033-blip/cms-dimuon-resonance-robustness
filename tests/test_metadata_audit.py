@@ -313,3 +313,17 @@ def test_audit_cli_writes_structured_failure_for_duplicate_json_keys(
     assert report["status"] == "FAIL"
     assert report["checks_total"] == 0
     assert "duplicate JSON object key" in report["error"]
+
+
+
+@pytest.mark.parametrize("metadata_index", [0, 1, 2])
+@pytest.mark.parametrize("constant", ["NaN", "Infinity", "-Infinity"])
+def test_metadata_audit_rejects_nonstandard_json_constants(
+    tmp_path: Path, metadata_index: int, constant: str,
+) -> None:
+    paths = _fixtures(tmp_path)
+    paths[metadata_index].write_text(
+        '{"unrecognized_field": ' + constant + '}', encoding="utf-8"
+    )
+    with pytest.raises(ValueError, match="non-standard JSON numeric constant"):
+        audit(*paths)
