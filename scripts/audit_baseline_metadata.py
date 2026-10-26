@@ -39,11 +39,17 @@ def _unique_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
     return result
 
 
+def _reject_json_constant(value: str) -> Any:
+    """Reject NaN and Infinity tokens, which are not valid standard JSON."""
+    raise ValueError(f"non-standard JSON numeric constant: {value}")
+
+
 def _read_json(path: Path) -> dict[str, Any]:
     try:
         value = json.loads(
             path.read_text(encoding="utf-8"),
             object_pairs_hook=_unique_object,
+            parse_constant=_reject_json_constant,
         )
     except (OSError, ValueError) as exc:
         raise ValueError(f"Cannot read unambiguous valid JSON from {path}: {exc}") from exc
