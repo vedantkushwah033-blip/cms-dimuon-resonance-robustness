@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 import platform
 from pathlib import Path
@@ -19,6 +20,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--input", required=True, help="Local CMS ROOT file used by both implementations")
     parser.add_argument("--tree", default="Events")
     parser.add_argument("--output-dir", type=Path, default=Path("outputs/reference"))
+    parser.add_argument("--sha256-input", action="store_true", help="Hash the full input file (adds one full file read)")
     parser.add_argument("--bins", type=int, default=30000)
     parser.add_argument("--mass-min", type=float, default=0.25)
     parser.add_argument("--mass-max", type=float, default=300.0)
@@ -41,6 +43,14 @@ def main() -> int:
         ) from exc
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
+    input_path = Path(args.input).resolve()
+    input_sha256 = None
+    if args.sha256_input:
+        digest = hashlib.sha256()
+        with input_path.open("rb") as stream:
+            for block in iter(lambda: stream.read(8 * 1024 * 1024), b""):
+                digest.update(block)
+        input_sha256 = digest.hexdigest()
     ROOT.ROOT.EnableImplicitMT(1)
     ROOT.gInterpreter.Declare(
         """
@@ -95,7 +105,9 @@ def main() -> int:
             )
 
     metadata = {
-        "input": str(Path(args.input).resolve()),
+        "input": str(input_path),
+        "input_bytes": input_path.stat().st_size,
+        "input_sha256": input_sha256,
         "tree": args.tree,
         "root_version": str(ROOT.gROOT.GetVersion()),
         "python_version": platform.python_version(),
