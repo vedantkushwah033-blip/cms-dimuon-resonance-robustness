@@ -42,20 +42,21 @@ If the files do not contain the needed path-specific trigger decisions and presc
 
 ## Follow-up: what the published schema actually says about triggers
 
-The linked Run2012B variable documentation exposes a more specific distinction than broad field-family names alone suggest:
+A closer reading of the detailed variable-list tables changes one part of the initial interpretation: the top-level collection summary names HLT_Activity_Ecal_SC7, but the detailed Run2012B and Run2012C variable lists also enumerate many individual Boolean HLT branches, including HLT_Mu13_Mu8 and HLT_Mu17_Mu8. Therefore it would be incorrect to conclude from the top-level summary alone that no path-specific HLT decision branches are documented.
 
-- The documented HLT collection is described as HLT_Activity_Ecal_SC7/O, not a documented family of DoubleMuParked path decisions.
-- The documented L1 collection is L1_AlwaysTrue/O.
-- HLTriggerFirstPath and HLTriggerFinalPath are documented as Boolean fields, but the published semantics page does not define them as per-path decisions for the DoubleMuParked muon triggers.
-- Trig is explicitly a generic flag for triggers suitable for Minimum Bias analysis.
-- TrigObj is described as only partially filled.
-- The documentation includes Dataset_DoubleMu as a dataset-membership flag. Membership in a primary dataset is not equivalent to a per-event decision for a particular HLT path, and it does not provide prescale information.
+What the public documentation does and does not establish:
 
-These details strengthen the current no-go decision for a trigger-efficiency or trigger-emulation claim based solely on the documented fields. They do not prove that every possible trigger-related input is absent from every file; the exact ROOT schema and relevant trigger-condition metadata still require file-level inspection.
+- It documents path-named Boolean branches such as HLT_Mu13_Mu8 and HLT_Mu17_Mu8 in both Run2012B and Run2012C semantics tables.
+- It also documents HLTriggerFirstPath and HLTriggerFinalPath, but these generic fields should not be substituted for a target path decision.
+- Trig is described as a generic flag suitable for Minimum Bias analysis, and TrigObj is described as only partially filled.
+- Dataset_DoubleMu is a dataset-membership flag, not itself a trigger-efficiency denominator.
+- The published schema documentation does not by itself establish the exact branch presence and values in the specific downloaded files, the precise run-dependent meaning/version of each path bit, the correct denominator for an efficiency measurement, or the prescale/luminosity treatment.
+
+This means path-specific HLT branches are a **plausible file-inspection lead**, not an automatic no-go. Trigger-efficiency or trigger-emulation claims remain blocked until the exact ROOT files, run-dependent path definitions, denominator, data-quality selection, and prescale/luminosity requirements are validated. The original AOD path lists must not be treated as a substitute for derived-file schema evidence.
 
 ## Exact-file access status
 
-The official records identify the merged filenames Run2012B_DoubleMuParked_merged.root and Run2012C_DoubleMuParked_merged.root, and state that the collections can be accessed through XRootD or direct download. In this session, the record pages expose the descriptive metadata and semantics links but not a directly verifiable file URL in the parsed page. Therefore no guessed EOS path is recorded and no file-level schema result is claimed.
+The official records identify the merged filenames Run2012B_DoubleMuParked_merged.root and Run2012C_DoubleMuParked_merged.root and state that the collections can be accessed through XRootD or direct download. In this session, the record pages expose descriptive metadata and semantics links but not a directly verifiable file URL in the parsed page. No guessed EOS path is recorded and no file-level schema result is claimed.
 
 Official references:
 - https://opendata.cern.ch/record/31123
