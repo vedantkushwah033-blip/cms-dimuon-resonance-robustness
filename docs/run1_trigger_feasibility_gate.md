@@ -50,3 +50,8 @@ For each Run2012B and Run2012C input, record one of **PASS**, **FAIL**, or **UNK
 ## Non-claims
 
 This document does not claim that any research-level ROOT file has been downloaded, that file-level schema inspection has succeeded, that trigger efficiency has been measured, or that a novel method has been established.
+
+
+## Exact-path caveat — 2026-10-26
+
+The published derived variable lists document many HLT decision branches, with examples including `HLT_Mu13_Mu8` and `HLT_Mu17_Mu8`. Direct searches did not find `HLT_Dimuon0_Jpsi`, `HLT_DoubleMu11_Acoplanarity03`, or `HLT_DoubleMu5_IsoMu5` on those derived-schema pages. The original AOD record's list of possible paths must not be treated as evidence that the same-named branch exists in the derived files. Select a target path only after checking its exact branch in each file and validating its run-dependent meaning.
