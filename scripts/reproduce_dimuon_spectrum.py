@@ -108,6 +108,7 @@ def main() -> None:
     edges = np.linspace(args.mass_min, args.mass_max, args.bins + 1)
     events_read = 0
     events_selected = 0
+    events_with_opposite_charge_pair = 0
     opposite_charge_pairs = 0
     pairs_below_range = 0
     pairs_at_or_above_upper_edge = 0
@@ -166,6 +167,12 @@ def main() -> None:
                 selected = chunk
             events_selected += len(selected[BRANCHES[0]])
             masses = opposite_charge_pair_masses(selected)
+            # Keep event-level cut flow separate from pair-level histogram fills.
+            # In all-pairs mode one event can contribute multiple pairs, so the
+            # number of pairs must not be mistaken for the number of selected events.
+            events_with_opposite_charge_pair += int(
+                ak.sum(ak.num(masses, axis=1) > 0)
+            )
             flat = ak.to_numpy(ak.flatten(masses, axis=None))
             opposite_charge_pairs += int(len(flat))
             chunk_counts, accounting = histogram_masses(
@@ -226,6 +233,7 @@ def main() -> None:
         "branches": BRANCHES,
         "events_read": events_read,
         "events_selected": events_selected,
+        "events_with_opposite_charge_pair": events_with_opposite_charge_pair,
         "events_processed": events_read,
         "opposite_charge_pairs_total": opposite_charge_pairs,
         "pairs_below_mass_range": pairs_below_range,
