@@ -71,3 +71,8 @@ Both documents list named HLT decision branches for dimuon and single-muon paths
 Neither published variable list documents prescale values. Trigger efficiency or unbiased trigger calibration therefore remains **no-go pending further evidence**: HLT path decisions alone are insufficient, and run-dependent trigger versions, path semantics, prescales, good-lumisection coverage, and the denominator/sample definition must be established.
 
 The immediate next step remains a small file-level schema audit for each period, followed by a documented pass/fail/unknown table for every input required by the intended analysis. Do not begin the main Monte Carlo campaign or claim trigger calibration until that gate is passed.
+
+
+## Precision correction to named HLT branch claims — 2026-10-26
+
+The official variable lists were checked for exact path names. They document HLT boolean branches such as `HLT_Mu13_Mu8` and `HLT_Mu17_Mu8`, but a search did not find `HLT_Dimuon0_Jpsi`, `HLT_DoubleMu11_Acoplanarity03`, or `HLT_DoubleMu5_IsoMu5` on those derived-schema pages. The original AOD dataset record's possible-trigger list is a different source and does not prove that those paths are branches in the derived ntuple. Therefore, only the general availability of many HLT decisions is established by the variable lists; target-path presence and semantics remain a file-level unknown.
