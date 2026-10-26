@@ -34,7 +34,7 @@ Do not assume the research-level files share the outreach file's branches or sel
 The repository includes `.github/workflows/official-data-smoke-test.yml`. On `research-plan/initial-protocol`, it now runs on scoped pushes affecting the workflow, dependency manifest, inspection/reconstruction scripts, or analysis source; this allows a bounded test before the PR is merged. It also supports manual dispatch after the workflow reaches the default branch. The job is bounded to 30 minutes, hard-capped at 10,000 events (not merely defaulted to that value), and uploads diagnostic outputs for 14 days. A workflow definition is not execution evidence: inspect the actual run and artifact before calling the smoke test successful.
 
 
-Run from the repository root in an environment with dependencies installed using `python -m pip install -e ".[dev,remote]"`. The `remote` extra installs Uproot optional XRootD bindings; the ordinary test/development install does not include this remote-access dependency.
+Run from the repository root in an environment with dependencies installed using `python -m pip install -e ".[dev,remote]"`. The `remote` extra installs both the XRootD client bindings and the `fsspec-xrootd` adapter required by Uproot's `root://` filesystem; the ordinary test/development install does not include these remote-access dependencies.
 
 Set the public reference URL:
 
