@@ -86,6 +86,25 @@ def main() -> int:
             f"Tree {args.tree!r} is missing required branches: {missing_columns}"
         )
 
+    # Validate collection integrity before any expression indexes muon 0 or 1.
+    # This deliberately performs a preflight event loop: malformed vector lengths
+    # must be rejected before the opposite-sign filter dereferences those vectors.
+    invalid_collections = dataframe.Filter(
+        "nMuon != (int)Muon_pt.size() || "
+        "Muon_pt.size() != Muon_eta.size() || "
+        "Muon_pt.size() != Muon_phi.size() || "
+        "Muon_pt.size() != Muon_mass.size() || "
+        "Muon_pt.size() != Muon_charge.size()",
+        "Events with inconsistent muon collection lengths",
+    )
+    invalid_collection_count = int(invalid_collections.Count().GetValue())
+    if invalid_collection_count:
+        raise ValueError(
+            "Input ROOT tree contains "
+            f"{invalid_collection_count} events with inconsistent nMuon or muon "
+            "collection lengths; refusing to index muon vectors"
+        )
+
     exactly_two = dataframe.Filter("nMuon == 2", "Events with exactly two muons")
     opposite_sign = exactly_two.Filter(
         "Muon_charge[0] != Muon_charge[1]", "Muons with opposite charge"
