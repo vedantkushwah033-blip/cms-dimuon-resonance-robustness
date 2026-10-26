@@ -54,6 +54,9 @@ def _fixtures(tmp_path: Path):
         "bin_count": 3,
         "reference_total_count": 5,
         "candidate_total_count": 5,
+        "differing_bin_count": 0,
+        "total_absolute_bin_count_difference": 0,
+        "maximum_absolute_bin_count_difference": 0,
     }
     return (
         _write(tmp_path / "reference.json", reference),
@@ -201,3 +204,21 @@ def test_metadata_audit_rejects_boolean_reference_flow_count(tmp_path: Path) -> 
         and not check["passed"]
         for check in report["checks"]
     )
+
+
+def test_metadata_audit_rejects_parity_boolean_with_nonzero_discrepancy_summary(
+    tmp_path: Path,
+) -> None:
+    reference_path, candidate_path, histogram_path = _fixtures(tmp_path)
+    histogram = json.loads(histogram_path.read_text(encoding="utf-8"))
+    histogram["exact_bin_by_bin_parity"] = True
+    histogram["differing_bin_count"] = 1
+    histogram["total_absolute_bin_count_difference"] = 2
+    histogram["maximum_absolute_bin_count_difference"] = 2
+    histogram_path.write_text(json.dumps(histogram), encoding="utf-8")
+    report = audit(reference_path, candidate_path, histogram_path)
+    assert report["status"] == "FAIL"
+    failed = {check["name"] for check in report["checks"] if not check["passed"]}
+    assert "histogram_differing_bin_count_zero" in failed
+    assert "histogram_total_absolute_bin_count_difference_zero" in failed
+    assert "histogram_maximum_absolute_bin_count_difference_zero" in failed
