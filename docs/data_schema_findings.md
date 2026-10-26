@@ -2,7 +2,7 @@
 
 **Last checked:** 2026-10-26
 **Implementation note:** the schema tool reports candidate branch groups, but group absence is not proof that an analysis is impossible; branch semantics and the exact intended selection must be checked against producer documentation.  
-**Status:** public record documentation reviewed; no ROOT file has yet been opened by this project.
+**Status:** public record documentation reviewed; no CMS ROOT file has yet been opened by this project. The schema inspector itself is tested on a synthetic ROOT file.
 
 ## Official record-level facts
 
