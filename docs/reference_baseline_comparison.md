@@ -24,7 +24,7 @@ https://opendata.cern.ch/record/12341
 
 ## Implementation alignment
 
-The repository's baseline script now defaults to the reference's exactly-two-muon opposite-charge selection, 30,000 bins, 0.25–300 GeV mass range, and logarithmic axes. It retains a separately labelled `all-opposite-charge-pairs` option for exploratory work. It writes CSV counts and run metadata as well as a PNG plot.
+The repository's baseline script now defaults to the reference's exactly-two-muon opposite-charge selection using scalar `nMuon == 2`, checks `nMuon` against the `Muon_pt` collection length per event, and uses 30,000 bins, a 0.25–300 GeV mass range, and logarithmic axes. It retains a separately labelled `all-opposite-charge-pairs` option for exploratory work. It writes CSV counts and run metadata as well as a PNG plot.
 
 The Python implementation uses Uproot/Awkward and NumPy rather than ROOT RDataFrame. This is an independent software implementation, but it is not a reproduction until the actual input data are processed and the histogram is compared quantitatively with the reference.
 
