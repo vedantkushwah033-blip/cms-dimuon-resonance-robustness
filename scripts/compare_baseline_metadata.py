@@ -124,6 +124,16 @@ def main() -> int:
     parser.add_argument("--reference", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
     args = parser.parse_args()
+    output_path = args.output.resolve()
+    protected_inputs = {
+        args.candidate.resolve(): "--candidate",
+        args.reference.resolve(): "--reference",
+    }
+    if output_path in protected_inputs:
+        parser.error(
+            f"--output resolves to the same path as {protected_inputs[output_path]}; "
+            "refusing to overwrite an input metadata file"
+        )
     try:
         report = compare(load_json(args.candidate), load_json(args.reference))
     except (OSError, json.JSONDecodeError, ValueError) as exc:
