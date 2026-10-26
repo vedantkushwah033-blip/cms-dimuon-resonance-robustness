@@ -225,3 +225,23 @@ def test_metadata_audit_rejects_parity_boolean_with_nonzero_discrepancy_summary(
     assert "histogram_differing_bin_count_zero" in failed
     assert "histogram_total_absolute_bin_count_difference_zero" in failed
     assert "histogram_maximum_absolute_bin_count_difference_zero" in failed
+
+
+def test_metadata_audit_rejects_missing_comparator_discrepancy_metrics(
+    tmp_path: Path,
+) -> None:
+    reference_path, candidate_path, histogram_path = _fixtures(tmp_path)
+    histogram = json.loads(histogram_path.read_text(encoding="utf-8"))
+    del histogram["differing_bin_count"]
+    del histogram["total_absolute_bin_count_difference"]
+    del histogram["maximum_absolute_bin_count_difference"]
+    histogram_path.write_text(json.dumps(histogram), encoding="utf-8")
+    report = audit(reference_path, candidate_path, histogram_path)
+    assert report["status"] == "FAIL"
+    failed = {check["name"] for check in report["checks"] if not check["passed"]}
+    assert "histogram_report_differing_bin_count_valid_nonnegative_integer" in failed
+    assert "histogram_report_total_absolute_bin_count_difference_valid_nonnegative_integer" in failed
+    assert "histogram_report_maximum_absolute_bin_count_difference_valid_nonnegative_integer" in failed
+    assert "histogram_differing_bin_count_zero" in failed
+    assert "histogram_total_absolute_bin_count_difference_zero" in failed
+    assert "histogram_maximum_absolute_bin_count_difference_zero" in failed
