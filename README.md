@@ -27,7 +27,7 @@ The education/outreach sample remains useful for pipeline development only. The 
 - `tests/test_independent_four_vector.py` — compares vectorized mass calculations with an independently implemented four-vector reference on 250 fixed-seed random cases.
 - `tests/test_spectrum_script.py` — runs the baseline command-line script on a synthetic ROOT file and checks event limits, counts, metadata, CSV and plot outputs.
 - `tests/test_spectrum_selection_modes.py` — verifies that exactly-two-muon event selection and all-opposite-charge-pairs selection produce distinct, expected event/pair counts on a mixed-multiplicity sample.
-- `tests/test_spectrum_input_validation.py` — checks that malformed muon counts, mismatched jagged-branch lengths, and missing required branches fail explicitly.
+- `tests/test_spectrum_input_validation.py` — checks that malformed muon counts, mismatched jagged-branch lengths, missing required branches, invalid charge values, and negative finite muon kinematics fail explicitly.
 - `docs/selection_semantics.md` — defines event-level versus pair-level selection and explains the statistical consequences of multiple pairs per event.
 - `docs/data_schema_findings.md`, `docs/data_feasibility_decision.md` — separate record-level facts from file-level checks and define trigger-aware, limited-scope, and reproducibility-only routes.
 - `docs/reference_baseline_comparison.md` — maps the implementation to the official public example's event selection, binning, mass range, and axes.
