@@ -203,3 +203,10 @@ A planned task is not a result. A passing CI run validates the current automated
 - The vectorized and NanoAOD mass paths now use a cancellation-resistant invariant-mass expression based on transverse masses, rapidities, and half-angle identities rather than direct subtraction of large squared four-vector components.
 - Regression coverage includes two nearly collinear muons at pT=1e8 GeV with float32 NanoAOD inputs; the physical nonzero mass is retained. The latest code/test commit passed the Python 3.10–3.12 test, compilation, and Ruff matrix and the ROOT synthetic integration workflow (runs 40282993593 and 40282993559).
 - This is a numerical robustness result, not a real-data validation result. Exact 30,000-bin parity against the pinned reference remains unmeasured on the official CMS input.
+
+
+## Bounded reference-export smoke tests — 2026-10-26
+
+- The PyROOT reference exporter supports `--max-events N`, using single-threaded `RDataFrame.Range` to limit processing during a smoke test. Full runs retain implicit multithreading; metadata identifies the event cap so a partial sample is not confused with a full-data run.
+- Synthetic integration confirms the one-event capped reference run and full-fixture candidate/reference parity. The Python 3.10–3.12 matrix and ROOT integration passed on code/test commit `cde7b263ee404bdbebe0659518c837dbef080858` (runs 40283199640 and 40283199631).
+- No bounded or full export has yet been executed on the official CMS file. The next scientific acceptance milestone remains checksum/schema capture, full-data reference and candidate exports, and an exact 30,000-bin comparison.
