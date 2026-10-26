@@ -304,3 +304,11 @@ The revised bounded baseline/parity workflow has not run. A dispatch-path audit 
 - Added `scripts/compare_baseline_metadata.py` and tests to independently compare candidate/ROOT event cut flow, event limit, selection mode, bin count, mass range, and reference selection definition. The research-level workflow now preserves this report and fails if either histogram parity or metadata agreement fails.
 - Protected comparator output paths from overwriting their inputs and included the new scripts in CI lint configuration.
 - Latest verified PR head at the time of this entry: `5f30177304bfd2c7e1e290ca36fbc3d027f5c8bc`. The PR remains a draft and unmerged. Combined status and workflow-run lookups returned no records; current CI is **unverified**, not passed. The revised manual research-level workflow has not run, and no numerical parity or physics result is claimed.
+
+
+## Monte Carlo precision planning update — 2026-10-27
+
+- Added `docs/monte_carlo_precision_plan.md` with transparent binomial Monte Carlo precision calculations for null false-positive rates near 5%, a planning table from 500 to 20,000 independent pseudoexperiments per scenario, and cautions about paired comparisons, false-alarm rates, failures, and global scan calibration.
+- The calculations are illustrative planning guidance only. They do not select the final replicate count, freeze the protocol, or report any simulation outcome. The existing confirmatory protocol remains a draft and explicitly blocks the confirmatory campaign until the scenario grid, diagnostic, comparators, data feasibility, and precision target are resolved.
+- Commit `19840992939299d419a3e59e2c73d9ada4a222e7` adds the document. The GitHub combined-status lookup returned no status entries for the commit; treat latest-head CI as **unverified**, not passed.
+- The bounded 100,000-entry research-level ROOT workflow still requires manual dispatch and artifact review. No candidate/reference parity result or confirmatory physics result is claimed.
