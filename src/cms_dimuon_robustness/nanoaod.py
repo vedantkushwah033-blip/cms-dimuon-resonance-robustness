@@ -44,12 +44,18 @@ def opposite_charge_pair_masses(arrays: ak.Array) -> ak.Array:
     if not np.all(np.isin(charges, (-1, 1))):
         raise ValueError("Muon_charge must contain only -1 or +1 values")
 
+    # ROOT NanoAOD kinematic branches are commonly float32. Promote the
+    # kinematic inputs before transcendental functions and invariant-mass
+    # arithmetic: otherwise Awkward/NumPy may perform intermediate operations
+    # in float32, increasing cancellation error in E^2 - |p|^2 and creating
+    # avoidable negative mass-squared values. Keep charge values in their
+    # original integer representation for exact selection semantics.
     muons = ak.zip(
         {
-            "pt": arrays["Muon_pt"],
-            "eta": arrays["Muon_eta"],
-            "phi": arrays["Muon_phi"],
-            "mass": arrays["Muon_mass"],
+            "pt": ak.values_astype(arrays["Muon_pt"], np.float64),
+            "eta": ak.values_astype(arrays["Muon_eta"], np.float64),
+            "phi": ak.values_astype(arrays["Muon_phi"], np.float64),
+            "mass": ak.values_astype(arrays["Muon_mass"], np.float64),
             "charge": arrays["Muon_charge"],
         }
     )
