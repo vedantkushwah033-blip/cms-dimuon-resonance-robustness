@@ -34,6 +34,7 @@ The education/outreach sample remains useful for pipeline development only. The 
 - The baseline records file size, optional SHA-256, tree entries/types, software versions, and in-range/out-of-range/non-finite pair accounting. The latest CI run also verifies non-finite mass handling end-to-end on a synthetic ROOT event.
 - `docs/novelty_comparison.md` — documents overlap with closest prior work and explicit novelty no-go criteria.
 - `docs/literature_search_update_2026-10-26.md` — records a focused follow-up search, additional CMS context, and why novelty remains unproven; this is not a systematic review.
+- `docs/first_official_file_runbook_2026-10-26.md` — gives staged commands and explicit acceptance gates for inspecting the public outreach ROOT file first, then separately auditing research-level Run2012B/C files. It is a runbook, not evidence that these commands have been executed.
 - `src/cms_dimuon_robustness/monte_carlo.py` — exact binomial confidence intervals and a sample-size planning approximation.
 - `tests/` — unit and synthetic-ROOT integration tests. GitHub Actions passed 20 tests plus Ruff checks on Python 3.10, 3.11 and 3.12 for commit `a9c3bf1dc56f911893d7bad928d060e41be6a519`. The suite includes an independent four-vector cross-check, a synthetic-ROOT schema-inspector test, and end-to-end synthetic-ROOT spectrum CLI tests.
 
