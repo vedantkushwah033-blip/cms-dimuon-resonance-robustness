@@ -81,3 +81,46 @@ Mark the attempt **inconclusive**, not successful, if the required branches or m
 ## Scientific boundary
 
 This run card concerns spectrum reconstruction. It does not establish trigger efficiency, trigger prescale correction, signal significance, a discovery, or novelty of the proposed statistical method. Those require separate methods and evidence.
+
+
+## Bounded official-file schema smoke test
+
+The following uses the official CERN Open Data client to download **one ROOT file per record**, verify the portal checksum when available, and create a schema report. It is not a full-data run and does not establish trigger efficiency.
+
+Install the client:
+
+```bash
+python -m pip install cernopendata-client
+```
+
+Run from the repository root in Bash:
+
+```bash
+set -euo pipefail
+mkdir -p outputs/real_data_schema
+printf "record_id\tfilename\tbytes\tsha256\n" > outputs/real_data_schema/manifest.tsv
+
+for record_id in 31123 31129 31127 31133; do
+  cernopendata-client download-files \
+    --recid "$record_id" \
+    --filter-regexp '\.root$' \
+    --filter-range 1-1 \
+    --server https://opendata.cern.ch \
+    --verify
+
+  input_file="$(find "$record_id" -type f -name '*.root' -print -quit)"
+  test -n "$input_file"
+  python scripts/inspect_root_schema.py \
+    --input "$input_file" \
+    --output "outputs/real_data_schema/schema_${record_id}.json"
+
+  bytes="$(stat -c '%s' "$input_file")"
+  sha256="$(sha256sum "$input_file" | awk '{print $1}')"
+  printf "%s\t%s\t%s\t%s\n" "$record_id" "$input_file" "$bytes" "$sha256" \
+    >> outputs/real_data_schema/manifest.tsv
+done
+```
+
+Record mapping: 31123 = Run2012B DoubleMuParked; 31129 = Run2012C DoubleMuParked; 31127 = Run2012B SingleMu; 31133 = Run2012C SingleMu. The SingleMu records are optional candidates for denominator feasibility, not automatically unbiased samples. Keep the reports and manifest with the exact Git commit and environment version.
+
+If download or checksum verification fails, preserve the complete error output and mark the audit **inconclusive**; do not silently switch records or use a different file.
