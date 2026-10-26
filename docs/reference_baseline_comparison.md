@@ -28,6 +28,10 @@ The repository's baseline script now defaults to the reference's exactly-two-muo
 
 The Python implementation uses Uproot/Awkward and NumPy rather than ROOT RDataFrame. This is an independent software implementation, but it is not a reproduction until the actual input data are processed and the histogram is compared quantitatively with the reference.
 
+## Histogram edge-semantics audit
+
+The baseline now explicitly uses the half-open interval `[mass_min, mass_max)`: values exactly at the configured upper edge are overflow, consistent with ROOT histogram convention. A shared helper counts non-finite masses separately and enforces the accounting invariant `total = nonfinite + below + in-range + at-or-above-upper-edge`. The upper-edge case is covered by `tests/test_histogram.py`. This fixes an implementation risk where NumPy's default final-bin behavior can otherwise include a value equal to the final edge, unlike ROOT. This software-level correction is necessary but does not establish numerical agreement with the official spectrum.
+
 ## Remaining reproduction checks
 
 - Inspect the exact input file's schema and record its official dataset identifier.
