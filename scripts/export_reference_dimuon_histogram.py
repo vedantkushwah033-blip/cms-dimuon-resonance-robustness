@@ -108,6 +108,19 @@ def main() -> int:
             }
             return false;
         }
+
+        bool hasNegativeFiniteKinematics(
+            const ROOT::VecOps::RVec<float>& pt,
+            const ROOT::VecOps::RVec<float>& mass
+        ) {
+            for (float value : pt) {
+                if (std::isfinite(value) && value < 0.0f) return true;
+            }
+            for (float value : mass) {
+                if (std::isfinite(value) && value < 0.0f) return true;
+            }
+            return false;
+        }
         """
     )
 
@@ -138,15 +151,17 @@ def main() -> int:
         "Muon_pt.size() != Muon_phi.size() || "
         "Muon_pt.size() != Muon_mass.size() || "
         "Muon_pt.size() != Muon_charge.size() || "
-        "hasInvalidMuonCharge(Muon_charge)",
-        "Events with invalid muon collection lengths or charge values",
+        "hasInvalidMuonCharge(Muon_charge) || "
+        "hasNegativeFiniteKinematics(Muon_pt, Muon_mass)",
+        "Events with invalid muon collection lengths, charge, or kinematics",
     )
     invalid_collection_count = int(invalid_collections.Count().GetValue())
     if invalid_collection_count:
         raise ValueError(
             "Input ROOT tree contains "
             f"{invalid_collection_count} events with inconsistent nMuon or muon "
-            "collection lengths or invalid charge values; refusing to index muon vectors"
+            "collection lengths, invalid charge values, or negative finite kinematics; "
+            "refusing to index muon vectors"
         )
 
     exactly_two = dataframe.Filter("nMuon == 2", "Events with exactly two muons")
