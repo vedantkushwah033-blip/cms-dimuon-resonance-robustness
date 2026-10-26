@@ -23,7 +23,15 @@ def load_histogram(path: Path) -> tuple[np.ndarray, np.ndarray, list[int]]:
         reader = csv.DictReader(stream)
         if reader.fieldnames is None or not set(COLUMNS).issubset(reader.fieldnames):
             raise ValueError(f"{path}: required CSV columns are {', '.join(COLUMNS)}")
+        if len(reader.fieldnames) != len(set(reader.fieldnames)):
+            raise ValueError(f"{path}: duplicate CSV column names are not allowed")
         rows = list(reader)
+        for line_number, row in enumerate(rows, start=2):
+            if None in row or any(row[column] is None for column in COLUMNS):
+                raise ValueError(
+                    f"{path}: malformed CSV row at line {line_number}; "
+                    "field count does not match header"
+                )
     if not rows:
         raise ValueError(f"{path}: histogram has no bins")
     try:
