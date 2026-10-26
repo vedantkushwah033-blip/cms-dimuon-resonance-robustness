@@ -17,7 +17,7 @@ It opens the reduced Run2012BC muon-only ROOT file, filters events with exactly 
 | Component | Reference | Project implementation | Audit conclusion |
 |---|---|---|---|
 | Tree | `Events` | configurable tree, default `Events` | Same default; must verify actual file |
-| Exactly two muons | `nMuon == 2` | `ak.num(Muon_pt, axis=1) == 2` | Intended equivalent if branch lengths are consistent |
+| Exactly two muons | `nMuon == 2` | `nMuon == 2`, after checking it equals `len(Muon_pt)` event-by-event | Directly follows reference scalar selection and fails on multiplicity disagreement |
 | Opposite sign | `Muon_charge[0] != Muon_charge[1]` | product of charges < 0 | Equivalent only when charges are exactly +1 or -1; input-domain validation now enforces this |
 | Four-vector mass | ROOT `PtEtaPhiMVector` | explicit cylindrical-coordinate four-vector | Independent cross-implementation test passes on synthetic events; not yet compared on real events |
 | Histogram | 30,000 bins, 0.25–300 GeV | same defaults | Same configured range/bin count |
@@ -28,7 +28,7 @@ It opens the reduced Run2012BC muon-only ROOT file, filters events with exactly 
 
 A generic predicate `q1 * q2 < 0` is not identical to `q1 != q2` for arbitrary malformed charge values. For example, a charge of zero differs from +1 but is not opposite-sign. Physical reconstructed muon charges should be -1 or +1. The project now fails explicitly if other values occur, rather than silently changing the reference's meaning.
 
-The guard does not prove the source file is valid; it makes an assumption visible and testable.
+The baseline runner now checks the scalar `nMuon` branch against the jagged `Muon_pt` count before applying the reference-aligned selection, and reports the first global event index and observed counts on disagreement. The guard does not prove the source file is valid; it makes an assumption visible and testable.
 
 ## Required real-data parity run
 
