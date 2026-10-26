@@ -42,7 +42,7 @@ python scripts/reproduce_dimuon_spectrum.py \
   --output-dir outputs/outreach-smoke
 ```
 
-The schema inventory is heuristic: branch-name matches are leads, not proof of variable semantics. Inspect the JSON and cite the authoritative record/documentation for each branch interpretation. The spectrum script requires `nMuon` plus the five muon branches documented in its source. It checks `nMuon` against the per-event `Muon_pt` collection length before selection.
+The schema inventory is heuristic: branch-name matches are leads, not proof of variable semantics. Inspect the JSON and cite the authoritative record/documentation for each branch interpretation. The spectrum script requires `nMuon` plus the five muon branches documented in its source. Before selection, it checks `nMuon` against the per-event `Muon_pt` collection length and verifies that `Muon_eta`, `Muon_phi`, `Muon_mass`, and `Muon_charge` have matching per-event collection lengths.
 
 Inspect the metadata JSON, histogram CSV, and PNG. Confirm that:
 - The input checksum and byte size are present.
