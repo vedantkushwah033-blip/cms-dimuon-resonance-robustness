@@ -327,3 +327,9 @@ The revised bounded baseline/parity workflow has not run. A dispatch-path audit 
 - Added `docs/confirmatory_protocol_freeze_checklist.md` (commit `50bfc14a7fa4fca8efecbb1993e964ac7130b559`). It defines unresolved gates for the primary estimand, development/calibration/held-out partitions, complete scan calibration, fair comparator, Monte Carlo precision, CMS provenance, and independent reproduction. It intentionally does not choose unresolved scientific settings on the user's behalf.
 - The GitHub combined-status lookup returned no status entries for either commit; CI for both is **unverified**, not passed.
 - The main decision remains **NO-GO for confirmatory simulation**. The exact CMS baseline comparison and methods-level comparator choice are unresolved. The candidate research question remains provisional; no novelty, trigger-efficiency, discovery, or publication claim is supported by these documentation changes.
+
+## Primary-estimand decision memo — 2026-10-27
+
+- Added `docs/estimand_choice_decision_memo.md` in commit `f89031990dc1caccd0e60b2f30c580a25f0ca352`. It recommends considering scenario-specific global type-I error as the primary outcome if the project remains about full-pipeline discovery calibration; diagnostic false-alarm rate and interval coverage are explicitly distinct estimands, not interchangeable headline metrics.
+- The memo is a provisional recommendation, not a preregistration freeze. The primary estimand, comparator, held-out scenario population, and analysis rules remain OPEN pending baseline validation and methods comparison.
+- CI for the new memo and the preceding documentation commits has not been confirmed; no missing status entries are treated as passes.
