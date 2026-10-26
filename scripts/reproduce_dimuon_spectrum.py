@@ -99,6 +99,7 @@ def main() -> None:
     args.output_dir.mkdir(parents=True, exist_ok=True)
     local_input = Path(args.input).expanduser()
     is_local_file = "://" not in args.input and local_input.is_file()
+    input_source = args.input if "://" in args.input else str(local_input.resolve())
     if args.sha256_input and not is_local_file:
         raise ValueError("--sha256-input requires a local input file")
     input_sha256 = sha256_file(local_input) if args.sha256_input else None
@@ -114,7 +115,7 @@ def main() -> None:
     tree_entries = None
     branch_types = None
 
-    with uproot.open(args.input) as root_file:
+    with uproot.open(input_source) as root_file:
         if args.tree not in root_file:
             raise KeyError(f"Tree {args.tree!r} not found in {args.input!r}")
         tree = root_file[args.tree]
@@ -207,7 +208,7 @@ def main() -> None:
         fmt=["%.17g", "%.17g", "%d"],
     )
     metadata = {
-        "input": args.input,
+        "input": input_source,
         "input_is_local_file": is_local_file,
         "input_bytes": input_bytes,
         "input_sha256": input_sha256,
