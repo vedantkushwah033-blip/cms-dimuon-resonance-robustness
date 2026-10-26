@@ -52,7 +52,7 @@ def test_spectrum_script_writes_reproducible_smoke_outputs(tmp_path):
             "--mass-max",
             "100",
             "--step-size",
-            "1 KB",
+            "1",
             "--sha256-input",
         ],
         cwd=REPO_ROOT,
