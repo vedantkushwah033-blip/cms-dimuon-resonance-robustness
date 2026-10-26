@@ -79,9 +79,21 @@ def audit(reference_path: Path, candidate_path: Path, histogram_report_path: Pat
     check("tree_name", ref.get("tree"), cand.get("tree"))
     check("available_tree_entries", ref.get("events_total"), cand.get("tree_entries_available"))
 
-    # The candidate's events_selected is the exactly-two-muon stage for the
-    # reference-aligned default selection.
+    # The candidate must use the reference-aligned selection, not merely
+    # happen to produce a similar selected-event count under another mode.
+    check(
+        "selection_mode",
+        "exactly-two-opposite-charge",
+        cand.get("selection_mode"),
+    )
     check("exactly_two_muon_events", ref.get("events_exactly_two_muons"), cand.get("events_selected"))
+    # With exactly two muons per selected event, every opposite-sign event
+    # contributes exactly one opposite-charge pair, independent of its mass.
+    check(
+        "opposite_sign_event_pair_accounting",
+        ref.get("events_opposite_sign"),
+        cand.get("opposite_charge_pairs_total"),
+    )
     check("bin_count", ref.get("bins"), cand.get("bins"))
     check(
         "mass_range_GeV",
