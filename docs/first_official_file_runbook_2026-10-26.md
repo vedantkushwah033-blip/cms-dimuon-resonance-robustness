@@ -31,7 +31,7 @@ Do not assume the research-level files share the outreach file's branches or sel
 
 ## Reproducible commands
 
-The repository now includes a manually triggered GitHub Actions workflow at `.github/workflows/official-data-smoke-test.yml`. GitHub only allows a manually dispatched workflow when its workflow file is present on the default branch. Because this PR remains unmerged, this workflow is not dispatchable from the branch yet. After it reaches the default branch, open the Actions tab, choose **official-data-smoke-test**, and keep the default 10,000-event limit for the first attempt. The job is bounded to 30 minutes, hard-capped at 10,000 events (not merely defaulted to that value), and uploads diagnostic outputs for 14 days. It has been added but has **not** been dispatched or validated yet; a workflow definition is not execution evidence.
+The repository includes `.github/workflows/official-data-smoke-test.yml`. On `research-plan/initial-protocol`, it now runs on scoped pushes affecting the workflow, dependency manifest, inspection/reconstruction scripts, or analysis source; this allows a bounded test before the PR is merged. It also supports manual dispatch after the workflow reaches the default branch. The job is bounded to 30 minutes, hard-capped at 10,000 events (not merely defaulted to that value), and uploads diagnostic outputs for 14 days. A workflow definition is not execution evidence: inspect the actual run and artifact before calling the smoke test successful.
 
 
 Run from the repository root in an environment with dependencies installed using `python -m pip install -e ".[dev,remote]"`. The `remote` extra installs Uproot optional XRootD bindings; the ordinary test/development install does not include this remote-access dependency.
