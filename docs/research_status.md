@@ -243,3 +243,10 @@ A planned task is not a result. A passing CI run validates the current automated
 - Added an opt-in bounded real-data schema-audit workflow for one file each from Run2012B/C DoubleMuParked and SingleMu. The workflow's initial Actions runs failed before creating any jobs (zero jobs returned), so no real-data schema audit has run yet. This needs workflow-level diagnosis; do not report the data audit as complete.
 - Existing synthetic ROOT integration passed on commit `9931de407e6d5e53d3f9c0f1136cbd8eb8f7c8f2` (run `40299849754`). The full Python test workflow after the branch-type change and compatibility test is still pending/ambiguous; earlier overlapping runs reported a failure in a test path that was not present in the reported commit tree. Verify the latest commit's checks before treating the code change as accepted.
 - The scientific blocker remains actual ROOT-file provenance/schema and event-level inspection. Trigger efficiency, a novel method, and full-data 30,000-bin parity remain unestablished.
+
+
+## Real-data execution path correction — 2026-10-26
+
+- The initial GitHub Actions workflow intended to download and inspect one ROOT file per CERN record repeatedly failed before creating any jobs. To avoid leaving a broken workflow in the research branch, I removed it and documented a bounded manual procedure in `docs/real_data_baseline_run_card.md` using the official `cernopendata-client`, checksum verification, `scripts/inspect_root_schema.py`, and a provenance manifest.
+- No actual CMS ROOT file has been downloaded or inspected in this environment; outbound DNS/network access from the local execution container is unavailable, and the repository connector does not expose a workflow-dispatch action. The next data step therefore requires running the documented commands in an environment with CERN Open Data access, or fixing/enabling a validated remote execution path.
+- The PR remains open and in draft. Latest Python and ROOT integration runs on the newest commit are queued, so the schema type enhancement and regression test must not be described as fully CI-validated yet.
