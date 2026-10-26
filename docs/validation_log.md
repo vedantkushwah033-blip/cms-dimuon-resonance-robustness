@@ -307,3 +307,10 @@ Cross-chat consistency notes:
 - Decision recorded: hold large Monte Carlo runs and novelty claims until a defensible gap is shown against the closest prior methods and exact-file data feasibility is established. This is a research-design decision, not an empirical finding.
 - Latest code was not changed in this step. The new memo and README link were verified through the repository file API. Documentation commits: `7e5a82f5b969a8bc1244b3f0ba0ec2ce112dc559` (memo), `febb4e9cf1d4e0ef3177ef09eb7be30196285a46` (README link), and `d06f92ec820b01879a398cf4e741ea1965b84aad` (status ledger).
 - CI status for the latest head has not been established: the available combined-status and commit-run lookups returned empty arrays. Do not interpret this as either a pass or a failure.
+
+
+## Literature citation cross-check — 2026-10-27
+
+- During a link-level audit of the literature memos, corrected the arXiv identifier label for Cesarotti et al. (2019) to **1902.07227** and corrected the Williams (2017) DOI in the scope-update memo to **10.1088/1748-0221/12/09/P09034**. The Cesarotti article DOI is **10.1103/PhysRevD.100.015021**. These are citation corrections only; no scientific result or novelty conclusion changed.
+- Added `docs/literature_scope_update_2026-10-27.md` to the README index so the newer cross-chat literature review is discoverable alongside the original scope decision.
+- Citation correction commits: `45a70195bade5a2028ee1dce7bdea35e36f3a5a4`, `ddd8e6b4d4da1ea21a4a3b9899f43a9bc15803f2`, `e93f4ba06002eca26e4ac26182823d701711e7c4`; README index commit: `887307b252bf5866a26dfebc9ff5b488045f7b1d`.
