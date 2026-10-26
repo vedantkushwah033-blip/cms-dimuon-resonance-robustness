@@ -22,6 +22,7 @@ def _fixtures(tmp_path: Path):
         "events_total": 100,
         "events_exactly_two_muons": 40,
         "events_opposite_sign": 8,
+        "histogram_entries_including_flow": 8,
         "bins": 3,
         "mass_min_GeV": 0.25,
         "mass_max_GeV": 300.0,
