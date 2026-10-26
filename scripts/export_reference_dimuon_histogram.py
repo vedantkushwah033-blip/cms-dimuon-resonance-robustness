@@ -91,6 +91,7 @@ def main() -> int:
         ROOT.ROOT.EnableImplicitMT(1)
     ROOT.gInterpreter.Declare(
         """
+        #include <cmath>
         float computeInvariantMassReference(
             ROOT::VecOps::RVec<float>& pt,
             ROOT::VecOps::RVec<float>& eta,
