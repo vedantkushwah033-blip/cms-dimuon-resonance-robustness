@@ -96,6 +96,35 @@ def test_sub_precision_bin_edge_roundoff_is_tolerated_and_reported(tmp_path):
     assert report["maximum_absolute_bin_edge_difference_GeV"] > 0
 
 
+def test_sub_precision_internal_edge_roundoff_is_tolerated(tmp_path):
+    rows = [
+        {"mass_low_GeV": 0.25, "mass_high_GeV": 1.0, "pair_count": 3},
+        {
+            "mass_low_GeV": 1.0000000000000002,
+            "mass_high_GeV": 2.0,
+            "pair_count": 0,
+        },
+    ]
+    result, report_path = run_comparison(tmp_path, rows, rows)
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+
+    assert result.returncode == 0, result.stderr
+    assert report["exact_bin_by_bin_parity"] is True
+
+
+def test_material_internal_edge_gap_is_rejected(tmp_path):
+    rows = [
+        {"mass_low_GeV": 0.25, "mass_high_GeV": 1.0, "pair_count": 3},
+        {"mass_low_GeV": 1.000001, "mass_high_GeV": 2.0, "pair_count": 0},
+    ]
+    result, report_path = run_comparison(tmp_path, rows, rows)
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+
+    assert result.returncode == 2
+    assert "bins must be contiguous and ordered" in result.stderr
+    assert report["exact_bin_by_bin_parity"] is False
+
+
 def test_different_bin_edges_fail_closed(tmp_path):
     reference = [{"mass_low_GeV": 0.25, "mass_high_GeV": 1.0, "pair_count": 3}]
     candidate = [{"mass_low_GeV": 0.25, "mass_high_GeV": 1.1, "pair_count": 3}]
