@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -44,9 +45,37 @@ def audit(reference_path: Path, candidate_path: Path, histogram_report_path: Pat
             "detail": detail,
         })
 
-    # Input identity must be established, not inferred from matching filenames.
-    check("input_sha256", ref.get("input_sha256"), cand.get("input_sha256"))
-    check("input_bytes", ref.get("input_bytes"), cand.get("input_bytes"))
+    # Matching strings are not sufficient: provenance fields must also be well-formed.
+    ref_digest = ref.get("input_sha256")
+    cand_digest = cand.get("input_sha256")
+    digest_valid = all(
+        isinstance(value, str) and re.fullmatch(r"[0-9a-f]{64}", value) is not None
+        for value in (ref_digest, cand_digest)
+    )
+    checks.append({
+        "name": "input_sha256_format",
+        "passed": digest_valid,
+        "reference": ref_digest,
+        "candidate": cand_digest,
+        "detail": "both values are lowercase 64-character SHA-256 hex digests"
+        if digest_valid else "missing or malformed SHA-256 digest",
+    })
+    check("input_sha256", ref_digest, cand_digest)
+    ref_bytes = ref.get("input_bytes")
+    cand_bytes = cand.get("input_bytes")
+    sizes_valid = all(
+        isinstance(value, int) and not isinstance(value, bool) and value > 0
+        for value in (ref_bytes, cand_bytes)
+    )
+    checks.append({
+        "name": "input_bytes_positive_integer",
+        "passed": sizes_valid,
+        "reference": ref_bytes,
+        "candidate": cand_bytes,
+        "detail": "both file sizes are positive integers"
+        if sizes_valid else "missing or invalid file size",
+    })
+    check("input_bytes", ref_bytes, cand_bytes)
     check("tree_name", ref.get("tree"), cand.get("tree"))
     check("available_tree_entries", ref.get("events_total"), cand.get("tree_entries_available"))
 
