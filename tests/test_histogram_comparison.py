@@ -77,6 +77,25 @@ def test_count_discrepancy_exits_two_and_lists_affected_interval(tmp_path):
     assert [row["bin_index"] for row in report["differing_bins"]] == [0, 1]
 
 
+def test_sub_precision_bin_edge_roundoff_is_tolerated_and_reported(tmp_path):
+    reference = [
+        {"mass_low_GeV": 0.25, "mass_high_GeV": 1.0, "pair_count": 3},
+        {"mass_low_GeV": 1.0, "mass_high_GeV": 2.0, "pair_count": 0},
+    ]
+    candidate = [
+        {"mass_low_GeV": 0.25, "mass_high_GeV": 1.0000000000000002, "pair_count": 3},
+        {"mass_low_GeV": 1.0000000000000002, "mass_high_GeV": 2.0, "pair_count": 0},
+    ]
+    result, report_path = run_comparison(tmp_path, reference, candidate)
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+
+    assert result.returncode == 0, result.stderr
+    assert report["exact_bin_by_bin_parity"] is True
+    assert report["bin_edges_compatible_within_tolerance"] is True
+    assert report["bin_edge_absolute_tolerance_GeV"] == 1e-12
+    assert report["maximum_absolute_bin_edge_difference_GeV"] > 0
+
+
 def test_different_bin_edges_fail_closed(tmp_path):
     reference = [{"mass_low_GeV": 0.25, "mass_high_GeV": 1.0, "pair_count": 3}]
     candidate = [{"mass_low_GeV": 0.25, "mass_high_GeV": 1.1, "pair_count": 3}]
