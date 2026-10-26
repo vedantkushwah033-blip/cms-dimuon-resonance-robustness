@@ -203,3 +203,10 @@ The metadata audit now also requires the comparator report's `differing_bins` fi
 - Commit `18a9bf60b63dd096622b747b57830d4d1faabb3c` adds nine parameterized regression cases spanning all three audit inputs and all three non-standard constants.
 - GitHub Actions run [40278427091](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40278427091) passed on Python 3.10, 3.11, and 3.12 with pytest, compileall, and Ruff. Synthetic ROOT integration run [40278427089](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40278427089) also passed.
 - These checks validate strict metadata parsing and synthetic integration only; official CMS input processing and real-data parity remain uncompleted.
+
+
+## Float32 cancellation guard for NanoAOD kinematics — 2026-10-26
+
+- Commit `92ff8d4aa339be0bd15ff8f6b5de4e8ff566d50a` promotes the kinematic branches to float64 before evaluating hyperbolic/trigonometric functions and invariant-mass arithmetic. NanoAOD kinematic branches are commonly stored as float32; doing all intermediate operations in that dtype can round the energy to the momentum for high-pT, nearly collinear massive particles and erase their nonzero invariant mass.
+- Commit `401c2253c50a89cb300ac4194ab68fd081ec4691` adds a regression test using float32 branches with two 1,000 GeV nearly collinear muons. The test asserts that the nonzero mass is retained.
+- This change prioritizes numerically stable candidate kinematics. The official reference implementation returns a C++ `float`; exact bin parity against it must still be measured on the same real input. Higher-precision candidate arithmetic does not imply the candidate will match every reference bin, and any mismatch must be reported rather than hidden.
