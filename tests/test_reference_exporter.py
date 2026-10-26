@@ -139,3 +139,48 @@ def test_reference_exporter_on_tiny_synthetic_root_file(tmp_path):
     report = json.loads(comparison_path.read_text(encoding="utf-8"))
     assert report["exact_bin_by_bin_parity"] is True
     assert report["differing_bin_count"] == 0
+
+@pytest.mark.skipif(
+    importlib.util.find_spec("ROOT") is None,
+    reason="PyROOT integration test runs in the dedicated ROOT-enabled CI job",
+)
+def test_reference_exporter_rejects_missing_required_branch(tmp_path):
+    root_path = tmp_path / "missing_charge.root"
+    with uproot.recreate(root_path) as root_file:
+        tree = root_file.mktree(
+            "Events",
+            {
+                "nMuon": "int32",
+                "Muon_pt": "var * float32",
+                "Muon_eta": "var * float32",
+                "Muon_phi": "var * float32",
+                "Muon_mass": "var * float32",
+            },
+        )
+        tree.extend(
+            {
+                "nMuon": np.array([2], dtype=np.int32),
+                "Muon_pt": ak.Array([[10.0, 10.0]]),
+                "Muon_eta": ak.Array([[0.0, 0.0]]),
+                "Muon_phi": ak.Array([[0.0, np.pi]]),
+                "Muon_mass": ak.Array([[0.105658, 0.105658]]),
+            }
+        )
+
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(REPO_ROOT / "scripts" / "export_reference_dimuon_histogram.py"),
+            "--input",
+            str(root_path),
+            "--output-dir",
+            str(tmp_path / "missing-branch-output"),
+        ],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert completed.returncode != 0
+    assert "missing required branches: ['Muon_charge']" in completed.stderr
+
