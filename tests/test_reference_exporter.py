@@ -138,8 +138,43 @@ def test_reference_exporter_on_tiny_synthetic_root_file(tmp_path):
     )
     assert comparison.returncode == 0, comparison.stderr
     report = json.loads(comparison_path.read_text(encoding="utf-8"))
+
     assert report["exact_bin_by_bin_parity"] is True
     assert report["differing_bin_count"] == 0
+
+    # A bounded reference smoke test must stop at the requested entry count.
+    limited_dir = tmp_path / "limited-reference"
+    limited = subprocess.run(
+        [
+            sys.executable,
+            str(REPO_ROOT / "scripts" / "export_reference_dimuon_histogram.py"),
+            "--input",
+            str(root_path),
+            "--output-dir",
+            str(limited_dir),
+            "--max-events",
+            "1",
+            "--bins",
+            "40",
+            "--mass-min",
+            "0.25",
+            "--mass-max",
+            "40",
+        ],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert limited.returncode == 0, limited.stderr
+    limited_metadata = json.loads(
+        (limited_dir / "reference_metadata.json").read_text(encoding="utf-8")
+    )
+    assert limited_metadata["max_events"] == 1
+    assert limited_metadata["events_total"] == 1
+    assert limited_metadata["events_exactly_two_muons"] == 1
+    assert limited_metadata["events_opposite_sign"] == 1
+    assert limited_metadata["histogram_regular_bin_total"] == 1
 
 @pytest.mark.skipif(
     importlib.util.find_spec("ROOT") is None,
