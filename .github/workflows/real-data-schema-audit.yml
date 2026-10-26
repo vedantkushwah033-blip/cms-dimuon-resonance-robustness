@@ -42,7 +42,51 @@ jobs:
             echo "::group::CERN Open Data record ${record_id}"
             cernopendata-client download-files \
               --recid "${record_id}" \
-              --filter-regexp '\\.root$' \
+              --filter-regexp '\.root
+              --filter-range 1-1 \
+              --server https://opendata.cern.ch \
+              --verify
+
+            input_file="$(find "${record_id}" -type f -name '*.root' -print -quit)"
+            if [[ -z "${input_file}" ]]; then
+              echo "No ROOT file was downloaded for record ${record_id}" >&2
+              exit 1
+            fi
+
+            report="outputs/real_data_schema/schema_${record_id}.json"
+            python scripts/inspect_root_schema.py --input "${input_file}" --output "${report}"
+            bytes="$(stat -c '%s' "${input_file}")"
+            sha256="$(sha256sum "${input_file}" | awk '{print $1}')"
+            printf "%s\t%s\t%s\t%s\n" "${record_id}" "${input_file}" "${bytes}" "${sha256}" \
+              >> outputs/real_data_schema/manifest.tsv
+            echo "Record ${record_id}: inspected ${input_file} (${bytes} bytes)"
+            echo "::endgroup::"
+          done
+
+      - name: Summarize schema audit
+        if: always()
+        run: |
+          {
+            echo "## Real CMS Open Data schema smoke test"
+            echo
+            echo "This workflow inspects one downloaded ROOT file from each official record: DoubleMuParked Run2012B/C and SingleMu Run2012B/C."
+            echo "It does not perform full-data spectrum reproduction or establish trigger efficiency."
+            echo
+            if [[ -f outputs/real_data_schema/manifest.tsv ]]; then
+              echo "### Input manifest"
+              cat outputs/real_data_schema/manifest.tsv
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload schema reports and provenance manifest
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: real-cms-open-data-schema-audit
+          path: outputs/real_data_schema/
+          if-no-files-found: warn
+          retention-days: 30
+ \
               --filter-range 1-1 \
               --server https://opendata.cern.ch \
               --verify
