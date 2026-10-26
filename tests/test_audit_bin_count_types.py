@@ -57,6 +57,7 @@ def _valid_metadata() -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
         "differing_bin_count": 0,
         "total_absolute_bin_count_difference": 0,
         "maximum_absolute_bin_count_difference": 0,
+        "differing_bins": [],
     }
     return reference, candidate, histogram
 
