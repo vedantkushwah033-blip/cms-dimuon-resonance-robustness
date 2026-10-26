@@ -81,6 +81,7 @@ def main() -> None:
     opposite_charge_pairs = 0
     pairs_below_range = 0
     pairs_above_range = 0
+    pairs_nonfinite = 0
     tree_entries = None
     branch_types = None
 
@@ -110,9 +111,11 @@ def main() -> None:
             masses = opposite_charge_pair_masses(selected)
             flat = ak.to_numpy(ak.flatten(masses, axis=None))
             opposite_charge_pairs += int(len(flat))
-            pairs_below_range += int(np.count_nonzero(flat < args.mass_min))
-            pairs_above_range += int(np.count_nonzero(flat > args.mass_max))
-            counts += np.histogram(flat, bins=edges)[0]
+            finite_flat = flat[np.isfinite(flat)]
+            pairs_nonfinite += int(len(flat) - len(finite_flat))
+            pairs_below_range += int(np.count_nonzero(finite_flat < args.mass_min))
+            pairs_above_range += int(np.count_nonzero(finite_flat > args.mass_max))
+            counts += np.histogram(finite_flat, bins=edges)[0]
             if args.max_events is not None and events_read >= args.max_events:
                 break
 
@@ -152,6 +155,7 @@ def main() -> None:
         "pairs_below_mass_range": pairs_below_range,
         "pairs_in_histogram_range": int(counts.sum()),
         "pairs_above_mass_range": pairs_above_range,
+        "pairs_nonfinite_mass": pairs_nonfinite,
         "bins": args.bins,
         "mass_range_GeV": [args.mass_min, args.mass_max],
         "selection_mode": args.selection,
