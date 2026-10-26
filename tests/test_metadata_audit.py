@@ -169,3 +169,35 @@ def test_metadata_audit_rejects_float_encoded_count_even_when_equal(tmp_path: Pa
         and not check["passed"]
         for check in report["checks"]
     )
+
+
+def test_metadata_audit_rejects_reference_flow_counts_that_do_not_conserve_entries(
+    tmp_path: Path,
+) -> None:
+    reference_path, candidate_path, histogram_path = _fixtures(tmp_path)
+    reference = json.loads(reference_path.read_text(encoding="utf-8"))
+    # Keep GetEntries and cut-flow internally consistent while corrupting the
+    # independently recorded regular/flow-bin accounting.
+    reference["histogram_overflow"] = 3
+    reference_path.write_text(json.dumps(reference), encoding="utf-8")
+    report = audit(reference_path, candidate_path, histogram_path)
+    assert report["status"] == "FAIL"
+    assert any(
+        check["name"] == "reference_histogram_flow_count_conservation"
+        and not check["passed"]
+        for check in report["checks"]
+    )
+
+
+def test_metadata_audit_rejects_boolean_reference_flow_count(tmp_path: Path) -> None:
+    reference_path, candidate_path, histogram_path = _fixtures(tmp_path)
+    reference = json.loads(reference_path.read_text(encoding="utf-8"))
+    reference["histogram_underflow"] = True
+    reference_path.write_text(json.dumps(reference), encoding="utf-8")
+    report = audit(reference_path, candidate_path, histogram_path)
+    assert report["status"] == "FAIL"
+    assert any(
+        check["name"] == "reference_histogram_flow_count_conservation"
+        and not check["passed"]
+        for check in report["checks"]
+    )
