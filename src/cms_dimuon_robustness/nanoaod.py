@@ -32,5 +32,14 @@ def opposite_charge_pair_masses(arrays: ak.Array) -> ak.Array:
     py = pairs.mu1.pt * np.sin(pairs.mu1.phi) + pairs.mu2.pt * np.sin(pairs.mu2.phi)
     pz = pairs.mu1.pt * np.sinh(pairs.mu1.eta) + pairs.mu2.pt * np.sinh(pairs.mu2.eta)
     mass_squared = e**2 - px**2 - py**2 - pz**2
-    masses = np.sqrt(ak.where(mass_squared > 0, mass_squared, 0.0))
+    scale = e**2 + px**2 + py**2 + pz**2
+    tolerance = 64 * np.finfo(float).eps * scale
+    # Clamp only small negative round-off. Preserve non-finite inputs as non-finite
+    # so data-quality problems cannot silently become zero-mass pairs.
+    stable_mass_squared = ak.where(
+        mass_squared >= 0,
+        mass_squared,
+        ak.where(mass_squared >= -tolerance, 0.0, np.nan),
+    )
+    masses = np.sqrt(stable_mass_squared)
     return masses[keep]
