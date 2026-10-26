@@ -92,11 +92,14 @@ def main() -> int:
     ROOT.gInterpreter.Declare(
         """
         #include <cmath>
-        float computeInvariantMassReference(
-            ROOT::VecOps::RVec<float>& pt,
-            ROOT::VecOps::RVec<float>& eta,
-            ROOT::VecOps::RVec<float>& phi,
-            ROOT::VecOps::RVec<float>& mass
+        // Keep the computed mass in double precision. Returning float here
+        // would quantize the invariant mass back to float32 before histogramming,
+        // which can move values lying near narrow bin edges.
+        double computeInvariantMassReference(
+            const ROOT::VecOps::RVec<float>& pt,
+            const ROOT::VecOps::RVec<float>& eta,
+            const ROOT::VecOps::RVec<float>& phi,
+            const ROOT::VecOps::RVec<float>& mass
         ) {
             ROOT::Math::PtEtaPhiMVector m1(pt[0], eta[0], phi[0], mass[0]);
             ROOT::Math::PtEtaPhiMVector m2(pt[1], eta[1], phi[1], mass[1]);
