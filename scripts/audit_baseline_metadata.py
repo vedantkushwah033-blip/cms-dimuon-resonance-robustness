@@ -70,6 +70,15 @@ def audit(reference_path: Path, candidate_path: Path, histogram_report_path: Pat
             "detail": "nonnegative integer" if valid else "missing or non-integer count",
         })
 
+    def positive_integer(name: str, value: Any) -> None:
+        valid = isinstance(value, int) and not isinstance(value, bool) and value > 0
+        checks.append({
+            "name": f"{name}_valid_positive_integer",
+            "passed": valid,
+            "value": value,
+            "detail": "positive integer" if valid else "missing or non-positive integer",
+        })
+
     # Matching strings are not sufficient: provenance fields must also be well-formed.
     ref_digest = ref.get("input_sha256")
     cand_digest = cand.get("input_sha256")
@@ -117,11 +126,13 @@ def audit(reference_path: Path, candidate_path: Path, histogram_report_path: Pat
         ("candidate_pairs_in_range", cand.get("pairs_in_histogram_range")),
         ("candidate_underflow", cand.get("pairs_below_mass_range")),
         ("candidate_overflow", cand.get("pairs_at_or_above_mass_max")),
-        ("histogram_report_bin_count", hist.get("bin_count")),
         ("histogram_report_reference_total", hist.get("reference_total_count")),
         ("histogram_report_candidate_total", hist.get("candidate_total_count")),
     ):
         nonnegative_integer(name, value)
+    positive_integer("reference_bins", ref.get("bins"))
+    positive_integer("candidate_bins", cand.get("bins"))
+    positive_integer("histogram_report_bin_count", hist.get("bin_count"))
     check("available_tree_entries", ref.get("events_total"), cand.get("tree_entries_available"))
 
     # The candidate must use the reference-aligned selection, not merely
