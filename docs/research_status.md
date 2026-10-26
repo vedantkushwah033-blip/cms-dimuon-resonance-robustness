@@ -139,3 +139,10 @@ A planned task is not a result. A passing CI run validates the current automated
 - Histogram counts are parsed as decimal integer strings, not through floating-point conversion; malformed forms are rejected and large counts remain exact.
 - Regression tests cover malformed files and exact integer behavior. The initial malformed-fixture test run failed due to incorrect newline escaping in the test data; the fixture was corrected, and CI run [40257190269](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40257190269) passed pytest and Ruff on Python 3.10, 3.11, and 3.12.
 - Evidence boundary unchanged: automated CI validates the tested software paths, not real-data correctness. Official ROOT-file execution, provenance capture from the actual input, reference histogram export, and bin-by-bin parity remain uncompleted.
+
+
+## Independent numerical reference exporter — 2026-10-26
+- Added `scripts/export_reference_dimuon_histogram.py`, a PyROOT/RDataFrame path that follows the official selection and mass calculation, exports ROOT regular-bin counts to CSV, and writes ROOT version, selection cut-flow, and underflow/overflow metadata.
+- Updated the real-data guide with the command, artifact requirements, and warning that the script has not yet been executed against the CMS ROOT file. The generated reference artifact must be checked against the exact input checksum and official source before use.
+- CI now compiles project scripts and lints the new exporter in addition to existing tests. The workflow result for this change is pending; no passing status is claimed yet.
+- This closes an implementation gap, not the empirical gap: no real CMS spectrum or bin-by-bin parity result has been produced.
