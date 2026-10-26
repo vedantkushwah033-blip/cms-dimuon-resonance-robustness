@@ -125,3 +125,10 @@ A planned task is not a result. A passing CI run validates the current automated
 - Added a regression test that compares adjacent counts above 2^53 and confirms the one-count discrepancy is detected exactly; malformed fractional/non-integer count strings are rejected.
 - Commits: comparator `53c0ee6463d4366f6f27edda9d6edcbd6016294a`; tests `dafce3bbed28e18fe6c6ac9f61ed732805f9605c`. The CI result for these commits must be checked before describing the change as validated.
 - This improves the comparison tool only. It is not evidence that the real CMS file has been processed or that candidate/reference parity has been achieved.
+
+
+## Histogram comparator validation closure — 2026-10-26
+
+- The corrective test commit `4e8fd45c14e865713790e8f9ad47d3f81033dac1` passed all three configured Python jobs in GitHub Actions run [40256388844](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40256388844). The following ledger/documentation commit `ee2265993c9236f4b286874883e378f336f4ae82` passed run [40256407530](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40256407530).
+- The earlier failed comparator workflow remains documented in `docs/validation_log.md`; its cause was stale invalid-count error-message assertions after exact-integer parsing was introduced. Those assertions were updated and the corrected workflow is green.
+- Current validated scope: synthetic histogram fixtures and automated tests/lint across Python 3.10, 3.11, and 3.12. Still not validated: the official ROOT input, its checksum/schema, the candidate full-data spectrum, the official reference export, and numerical histogram parity. Do not describe the analysis as reproduced until those steps are executed and archived.
