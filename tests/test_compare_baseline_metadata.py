@@ -13,6 +13,10 @@ def candidate_metadata():
         "events_selected": 40,
         "events_with_opposite_charge_pair": 31,
         "opposite_charge_pairs_total": 31,
+        "pairs_below_mass_range": 2,
+        "pairs_in_histogram_range": 27,
+        "pairs_at_or_above_mass_max": 2,
+        "pairs_nonfinite_mass": 0,
         "bins": 30000,
         "max_events": 100,
         "mass_range_GeV": [0.25, 300.0],
@@ -25,6 +29,10 @@ def reference_metadata():
         "events_total": 100,
         "events_exactly_two_muons": 40,
         "events_opposite_sign": 31,
+        "histogram_entries_including_flow": 31,
+        "histogram_underflow": 2,
+        "histogram_regular_bin_total": 27,
+        "histogram_overflow": 2,
         "bins": 30000,
         "max_events": 100,
         "mass_min_GeV": 0.25,
@@ -57,7 +65,7 @@ def run_comparison(tmp_path, candidate, reference):
     return result, output_path
 
 
-def test_matching_cutflow_and_configuration_pass(tmp_path):
+def test_matching_cutflow_configuration_and_mass_accounting_pass(tmp_path):
     result, report_path = run_comparison(
         tmp_path, candidate_metadata(), reference_metadata()
     )
@@ -81,6 +89,33 @@ def test_cutflow_mismatch_fails_with_machine_readable_report(tmp_path):
     assert report["cutflow_and_configuration_agree"] is False
     failed = {item["check"] for item in report["checks"] if not item["passed"]}
     assert "events_selected_vs_exactly_two_muons" in failed
+
+
+def test_flow_bin_mismatch_fails(tmp_path):
+    reference = reference_metadata()
+    reference["histogram_overflow"] = 3
+    result, report_path = run_comparison(
+        tmp_path, candidate_metadata(), reference
+    )
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+
+    assert result.returncode == 2
+    failed = {item["check"] for item in report["checks"] if not item["passed"]}
+    assert "candidate_pairs_at_or_above_max_vs_reference_overflow" in failed
+
+
+def test_nonfinite_masses_prevent_flow_parity_claim(tmp_path):
+    candidate = candidate_metadata()
+    candidate["pairs_nonfinite_mass"] = 1
+    candidate["pairs_in_histogram_range"] = 26
+    result, report_path = run_comparison(
+        tmp_path, candidate, reference_metadata()
+    )
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+
+    assert result.returncode == 2
+    failed = {item["check"] for item in report["checks"] if not item["passed"]}
+    assert "candidate_nonfinite_mass_count_is_zero_for_flow_parity" in failed
 
 
 def test_float_count_is_rejected_not_silently_coerced(tmp_path):
