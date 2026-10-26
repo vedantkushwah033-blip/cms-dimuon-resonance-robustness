@@ -103,3 +103,11 @@ Commit: `e277b4cac0dc88418a9b086857501f78109a09c0`
 - The subsequent documentation/ledger update also passed in run [40256407530](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40256407530) for commit `ee2265993c9236f4b286874883e378f336f4ae82`.
 - The comparator's regression test detects a one-count difference between values above 2^53, where binary floating-point conversion could otherwise erase the difference. Invalid fractional/non-integer counts are rejected; bin-edge equality is checked separately from count parity.
 - The earlier failed run remains part of the audit trail; it revealed stale test expectations after an error-message change. The corrected run now passes. These workflows validate automated software checks only. No official CMS ROOT file has been processed, and no reference histogram parity result exists yet.
+
+
+## CSV structure-hardening follow-up — 2026-10-26
+
+- Commit `a95a60f6f21ba38adb61253bcbfb7151c41fc293` added rejection of duplicate CSV column names and rows with too many or too few fields. Its CI run completed successfully before the malformed-row regression cases were added.
+- The first regression-test run, [40256955302](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40256955302), failed because the test fixture wrote literal backslash-n sequences instead of actual newline characters. This malformed the *reference fixture itself*, so the failures did not establish a defect in the comparator. The fixture escaping was corrected in commit `e1c756eaf4fea25a9e59087b1f2470b6003fbeb8`.
+- Corrected CI run [40257190269](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40257190269) completed successfully: Python 3.10, 3.11, and 3.12 each passed pytest and Ruff.
+- The comparator now has automated coverage for malformed CSV structure, duplicate column names, strict integer count syntax, exact integer comparison beyond (2^{53}), and independent bin-edge validation. These are software-contract checks only; they do not demonstrate that the official CMS histogram has been reproduced.
