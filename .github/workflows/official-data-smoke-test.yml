@@ -1,0 +1,64 @@
+name: official-data-smoke-test
+
+on:
+  workflow_dispatch:
+    inputs:
+      max_events:
+        description: "Maximum number of events for the bounded remote smoke test"
+        required: true
+        default: "10000"
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  outreach-smoke-test:
+    name: Bounded CERN Open Data access and pipeline smoke test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out selected branch
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install project and XRootD remote access support
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[remote]"
+      - name: Validate requested event limit
+        env:
+          MAX_EVENTS: ${{ inputs.max_events }}
+        run: |
+          if ! [[ "$MAX_EVENTS" =~ ^[1-9][0-9]*$ ]]; then
+            echo "max_events must be a positive integer" >&2
+            exit 2
+          fi
+      - name: Inspect official outreach file schema
+        env:
+          CMS_DIMUON_OUTREACH_URL: root://eospublic.cern.ch//eos/opendata/cms/derived-data/AOD2NanoAODOutreachTool/Run2012BC_DoubleMuParked_Muons.root
+        run: |
+          mkdir -p outputs/official_data_smoke
+          python scripts/inspect_root_schema.py \
+            --input "$CMS_DIMUON_OUTREACH_URL" \
+            --output outputs/official_data_smoke/schema.json
+      - name: Run bounded spectrum smoke test
+        env:
+          CMS_DIMUON_OUTREACH_URL: root://eospublic.cern.ch//eos/opendata/cms/derived-data/AOD2NanoAODOutreachTool/Run2012BC_DoubleMuParked_Muons.root
+          MAX_EVENTS: ${{ inputs.max_events }}
+        run: |
+          python scripts/reproduce_dimuon_spectrum.py \
+            --input "$CMS_DIMUON_OUTREACH_URL" \
+            --max-events "$MAX_EVENTS" \
+            --output-dir outputs/official_data_smoke/spectrum
+      - name: Upload diagnostic outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: official-data-smoke-test
+          path: outputs/official_data_smoke/
+          if-no-files-found: warn
+          retention-days: 14
