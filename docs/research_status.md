@@ -266,3 +266,11 @@ A planned task is not a result. A passing CI run validates the current automated
 - The new workflow file was inspected before removal: it installed the project and CERN Open Data client, attempted to download one ROOT file from records 31123 and 31129, and would have uploaded schema JSON and a checksum manifest. Its command sequence was not executed in this session; its intended behavior is not evidence of a successful download.
 - The canonical next step remains the bounded manual procedure in `docs/real_data_baseline_run_card.md`, which also includes candidate Run2012B/C SingleMu records 31127 and 31133. A successful file-level audit must preserve exact file identity, checksum, schema JSON, tree entries, and branch types. Do not claim that research-level ROOT files have been inspected until those outputs exist.
 - No CMS collision ROOT file was opened by this session. Trigger path availability, run-dependent path semantics, valid denominator, prescales/luminosity handling, and quantitative reference-spectrum reproduction remain unverified. This workflow cleanup does not change the scientific status.
+
+
+## Literature-scope decision — 2026-10-27
+
+- Added `docs/literature_scope_decision_2026-10-27.md` after screening primary-source records for Williams (2017), Cesarotti et al. (2019), data-directed bump hunting (2022), resonant anomaly detection/background sculpting (2023), and a newer model-parameter-space paper (2025). This is a focused source-screening memo, not a systematic review or a claim that every paper's methods have been fully audited.
+- The current broad question—background misspecification plus fixed-versus-selected model comparison—has substantial overlap risk. The memo places large Monte Carlo runs and novelty claims on hold until the closest methods are compared and a distinct estimand/decision is justified.
+- The next priority remains the exact-file feasibility gate for Run2012B/C research-level ROOT data. The successful outreach smoke test is only a bounded software check; it does not establish trigger semantics, valid denominator/prescale handling, full reference parity, or a physics result.
+- README now links the scope memo. Latest documentation commit: `febb4e9cf1d4e0ef3177ef09eb7be30196285a46`. The available status/run lookup returned no entries for this commit; latest-head CI is **unverified**, not a pass.
