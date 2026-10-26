@@ -177,6 +177,9 @@ def audit(reference_path: Path, candidate_path: Path, histogram_report_path: Pat
         ("candidate_nonfinite_mass_pairs", cand.get("pairs_nonfinite_mass")),
         ("histogram_report_reference_total", hist.get("reference_total_count")),
         ("histogram_report_candidate_total", hist.get("candidate_total_count")),
+        ("histogram_report_differing_bin_count", hist.get("differing_bin_count")),
+        ("histogram_report_total_absolute_bin_count_difference", hist.get("total_absolute_bin_count_difference")),
+        ("histogram_report_maximum_absolute_bin_count_difference", hist.get("maximum_absolute_bin_count_difference")),
     ):
         nonnegative_integer(name, value)
     positive_integer("reference_bins", ref.get("bins"))
@@ -354,6 +357,21 @@ def audit(reference_path: Path, candidate_path: Path, histogram_report_path: Pat
 
     check_boolean("histogram_bin_edges_exactly_equal", True, hist.get("bin_edges_exactly_equal"))
     check_boolean("histogram_exact_bin_by_bin_parity", True, hist.get("exact_bin_by_bin_parity"))
+
+    # Do not trust a parity boolean alone: cross-check the comparator's
+    # discrepancy summary so a stale, hand-edited, or internally inconsistent
+    # report cannot pass while claiming nonzero bin differences.
+    check("histogram_differing_bin_count_zero", 0, hist.get("differing_bin_count"))
+    check(
+        "histogram_total_absolute_bin_count_difference_zero",
+        0,
+        hist.get("total_absolute_bin_count_difference"),
+    )
+    check(
+        "histogram_maximum_absolute_bin_count_difference_zero",
+        0,
+        hist.get("maximum_absolute_bin_count_difference"),
+    )
     check("histogram_bin_count", ref.get("bins"), hist.get("bin_count"))
     check("histogram_regular_total", ref.get("histogram_regular_bin_total"), hist.get("reference_total_count"))
     check("candidate_regular_total", cand.get("pairs_in_histogram_range"), hist.get("candidate_total_count"))
