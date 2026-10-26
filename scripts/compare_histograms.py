@@ -15,6 +15,10 @@ from pathlib import Path
 import numpy as np
 
 COLUMNS = ("mass_low_GeV", "mass_high_GeV", "pair_count")
+# ROOT and NumPy can construct mathematically identical uniform edges with
+# slightly different last-bit rounding. This tolerance is tiny relative to
+# the 0.00999 GeV bins and does not permit a physically meaningful rebinning.
+BIN_EDGE_ATOL_GEV = 1e-12
 
 
 def load_histogram(path: Path) -> tuple[np.ndarray, np.ndarray, list[int]]:
@@ -68,14 +72,23 @@ def compare(reference_path: Path, candidate_path: Path) -> dict:
             f"histogram bin-count differs: reference={len(ref_counts)}, "
             f"candidate={len(cand_counts)}"
         )
-    if not np.array_equal(ref_low, cand_low) or not np.array_equal(ref_high, cand_high):
-        low_mismatch = np.flatnonzero(ref_low != cand_low)
-        high_mismatch = np.flatnonzero(ref_high != cand_high)
+    low_difference = np.abs(ref_low - cand_low)
+    high_difference = np.abs(ref_high - cand_high)
+    max_edge_difference = float(max(np.max(low_difference), np.max(high_difference)))
+    if not np.allclose(ref_low, cand_low, rtol=0.0, atol=BIN_EDGE_ATOL_GEV) or not np.allclose(
+        ref_high, cand_high, rtol=0.0, atol=BIN_EDGE_ATOL_GEV
+    ):
+        low_mismatch = np.flatnonzero(low_difference > BIN_EDGE_ATOL_GEV)
+        high_mismatch = np.flatnonzero(high_difference > BIN_EDGE_ATOL_GEV)
         first = min(
             [int(i) for i in low_mismatch] + [int(i) for i in high_mismatch],
             default=-1,
         )
-        raise ValueError(f"histogram bin edges differ; first mismatching bin index={first}")
+        raise ValueError(
+            "histogram bin edges differ beyond tolerance "
+            f"{BIN_EDGE_ATOL_GEV:g} GeV; first mismatching bin index={first}, "
+            f"maximum absolute edge difference={max_edge_difference:.17g} GeV"
+        )
     delta = [candidate - reference for reference, candidate in zip(ref_counts, cand_counts)]
     differing = [i for i, difference in enumerate(delta) if difference != 0]
     intervals = [
@@ -93,7 +106,9 @@ def compare(reference_path: Path, candidate_path: Path) -> dict:
         "reference_csv": str(reference_path),
         "candidate_csv": str(candidate_path),
         "bin_count": len(ref_counts),
-        "bin_edges_exactly_equal": True,
+        "bin_edges_compatible_within_tolerance": True,
+        "bin_edge_absolute_tolerance_GeV": BIN_EDGE_ATOL_GEV,
+        "maximum_absolute_bin_edge_difference_GeV": max_edge_difference,
         "reference_total_count": sum(ref_counts),
         "candidate_total_count": sum(cand_counts),
         "total_absolute_bin_count_difference": sum(abs(value) for value in delta),
