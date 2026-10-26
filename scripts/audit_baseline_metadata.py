@@ -272,6 +272,39 @@ def audit(reference_path: Path, candidate_path: Path, histogram_report_path: Pat
         ref.get("events_opposite_sign"),
         ref.get("histogram_entries_including_flow"),
     )
+
+    # ROOT's GetEntries counts fills, while regular/underflow/overflow bins
+    # account for where those fills landed. These are distinct metadata paths;
+    # require both the fill count and the bin-content conservation identity.
+    reference_flow_keys = (
+        "histogram_regular_bin_total",
+        "histogram_underflow",
+        "histogram_overflow",
+        "histogram_entries_including_flow",
+    )
+    reference_flow_values = [ref.get(key) for key in reference_flow_keys]
+    reference_flow_types_valid = all(
+        isinstance(value, int) and not isinstance(value, bool) and value >= 0
+        for value in reference_flow_values
+    )
+    reference_flow_sum = (
+        sum(reference_flow_values[:3]) if reference_flow_types_valid else None
+    )
+    reference_flow_conserved = (
+        reference_flow_types_valid
+        and reference_flow_sum == ref.get("histogram_entries_including_flow")
+    )
+    checks.append({
+        "name": "reference_histogram_flow_count_conservation",
+        "passed": reference_flow_conserved,
+        "reference": {
+            "regular_bins_plus_underflow_plus_overflow": reference_flow_sum,
+            "histogram_entries_including_flow": ref.get("histogram_entries_including_flow"),
+        },
+        "detail": "regular-bin, underflow, and overflow counts sum to histogram entries"
+        if reference_flow_conserved else
+        "reference histogram counts must be nonnegative integer counts and conserve all entries",
+    })
     check(
         "opposite_sign_event_pair_accounting",
         ref.get("events_opposite_sign"),
