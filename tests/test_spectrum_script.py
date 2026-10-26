@@ -77,7 +77,7 @@ def test_spectrum_script_writes_reproducible_smoke_outputs(tmp_path):
     assert metadata["tree_entries_available"] == 3
     assert metadata["branch_types"]["Muon_pt"]
     assert metadata["software"]["python"]
-    assert "git_commit" in metadata
+    assert metadata["git_commit"]
     assert metadata["max_events"] == 3
     assert metadata["selection_mode"] == "exactly-two-opposite-charge"
     assert metadata["selection"].startswith("exactly two reconstructed muons")
