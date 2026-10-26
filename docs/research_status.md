@@ -196,3 +196,10 @@ A planned task is not a result. A passing CI run validates the current automated
 
 
 - Both histogram CLIs now reject non-finite mass bounds before touching the ROOT input. Candidate and reference run metadata also record the checked-out project commit, separately from the pinned upstream reference-source revision. Regression tests were added for invalid bounds and project-commit metadata; the corrected tests passed on Python 3.10–3.12 and the ROOT integration workflow passed on commit `33f703fcad9f4609b730f928277ba19c0a5a8dee`. See `docs/validation_log.md` for run links and the note about correcting the negative-infinity argparse fixture.
+
+
+## Numerical-stability follow-up — 2026-10-26
+
+- The vectorized and NanoAOD mass paths now use a cancellation-resistant invariant-mass expression based on transverse masses, rapidities, and half-angle identities rather than direct subtraction of large squared four-vector components.
+- Regression coverage includes two nearly collinear muons at pT=1e8 GeV with float32 NanoAOD inputs; the physical nonzero mass is retained. The latest code/test commit passed the Python 3.10–3.12 test, compilation, and Ruff matrix and the ROOT synthetic integration workflow (runs 40282993593 and 40282993559).
+- This is a numerical robustness result, not a real-data validation result. Exact 30,000-bin parity against the pinned reference remains unmeasured on the official CMS input.
