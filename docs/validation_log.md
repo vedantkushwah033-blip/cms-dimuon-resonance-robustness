@@ -361,3 +361,11 @@ Cross-chat consistency notes:
 - No workflow run has been created for the revised bounded baseline/parity workflow, and no numerical output has been inspected. The previous schema-only run (40403830670) is not evidence that this newer workflow ran.
 - I have not merged the draft PR or modified the default branch to expose a multi-gigabyte data-download workflow. The safe next gate is a deliberate maintainer decision to put the workflow on the default branch, then dispatch it against the reviewed research branch; alternatively, run the documented bounded commands in a controlled environment and preserve the same artifacts.
 - This is an execution-path finding, not a scientific result. No spectrum parity, trigger efficiency, discovery significance, novelty, or publication readiness is claimed.
+
+
+## Histogram CSV edge-continuity audit — 2026-10-27
+
+- A follow-up source review found that the comparator tolerated sub-1e-12 GeV differences when comparing reference and candidate edges, but still required exact floating-point equality between adjacent edges *within each CSV*. ROOT's uniform-axis arithmetic may represent the shared edge of adjacent bins with a last-bit difference, so that internal check could reject a histogram before the cross-histogram tolerance was applied.
+- Updated `scripts/compare_histograms.py` to apply the same absolute edge tolerance (`1e-12 GeV`, zero relative tolerance) to internal adjacent-edge continuity. Larger gaps/overlaps still fail closed and report the maximum adjacent-edge mismatch. Integer bin counts remain exact.
+- Added tests for a sub-precision internal edge discrepancy and a material internal gap. Commits: `b3d6e192ee784cd82a0937714ac18fcf18105fd3` (comparator) and `57aea5884d13e833f1dca3a7708e75654ce2cc5c` (tests).
+- **Execution status: not run in this session.** These are source-level changes; no passing test or CI claim is made until the latest head's tests execute. The real-data parity workflow also remains unexecuted. This fix addresses a potential comparator false-negative, not any measured CMS discrepancy or physics result.
