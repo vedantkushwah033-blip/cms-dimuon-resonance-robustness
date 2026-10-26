@@ -58,10 +58,11 @@ Check the report before running the spectrum script. Confirm the tree name, even
 python scripts/reproduce_dimuon_spectrum.py \
   --input "$CMS_DIMUON_OUTREACH_URL" \
   --max-events 10000 \
+  --step-size 1000 \
   --output-dir outputs/outreach_smoke
 ```
 
-Inspect the JSON metadata, CSV histogram and plot. A successful smoke test is not full-data parity and does not validate trigger modelling.
+Inspect the JSON metadata, CSV histogram and plot. The numeric `--step-size 1000` asks Uproot to iterate by entry count, avoiding a remote XRootD failure observed when its memory-sized chunk estimate attempted a read with a non-native integer offset. A successful smoke test is not full-data parity and does not validate trigger modelling.
 
 3. **Run the complete outreach reference sample only after the smoke test passes**:
 
