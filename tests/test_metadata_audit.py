@@ -25,7 +25,7 @@ def _fixtures(tmp_path: Path):
         "bins": 3,
         "mass_min_GeV": 0.25,
         "mass_max_GeV": 300.0,
-        "histogram_regular_bin_total": 8,
+        "histogram_regular_bin_total": 5,
         "histogram_underflow": 1,
         "histogram_overflow": 2,
     }
@@ -34,21 +34,25 @@ def _fixtures(tmp_path: Path):
         "input_bytes": 1000,
         "tree": "Events",
         "tree_entries_available": 100,
+        "events_read": 100,
+        "events_processed": 100,
+        "max_events": None,
         "events_selected": 40,
         "opposite_charge_pairs_total": 8,
         "selection_mode": "exactly-two-opposite-charge",
         "bins": 3,
         "mass_range_GeV": [0.25, 300.0],
-        "pairs_in_histogram_range": 8,
+        "pairs_in_histogram_range": 5,
         "pairs_below_mass_range": 1,
         "pairs_at_or_above_mass_max": 2,
+        "pairs_nonfinite_mass": 0,
     }
     histogram = {
         "bin_edges_exactly_equal": True,
         "exact_bin_by_bin_parity": True,
         "bin_count": 3,
-        "reference_total_count": 8,
-        "candidate_total_count": 8,
+        "reference_total_count": 5,
+        "candidate_total_count": 5,
     }
     return (
         _write(tmp_path / "reference.json", reference),
