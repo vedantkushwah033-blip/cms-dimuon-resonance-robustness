@@ -96,3 +96,8 @@ The official Run2012B/C SingleMu derived records may be worth checking before de
 - Run2012C SingleMu: 85,731,835 events, 157 files, 206.0 MiB; https://opendata.cern.ch/record/cms-31133
 
 Because these samples are selected by single-muon triggers, they may be candidates for a carefully designed tag-and-probe or conditional trigger study. They are not automatically unbiased for a dimuon trigger, and no efficiency denominator has been established. Check the actual HLT/trigger-object branches, path overlap, run coverage, and prescale treatment before choosing an estimand.
+
+
+## SingleMu variable-list caveat — 2026-10-26
+
+The published Run2012B and Run2012C SingleMu variable lists include HLT decision branches and trigger-object fields (`TrigObj_pt/eta/phi/id/filterBits`), but explicitly describe `nTrigObj` as only partially filled and `GoodLumisection` as not available in every dataset. This weakens any assumption that the SingleMu records automatically solve the denominator problem. The actual file-level fraction of events with usable trigger objects and valid data-quality metadata must be measured before deciding whether a tag-and-probe design is defensible.
