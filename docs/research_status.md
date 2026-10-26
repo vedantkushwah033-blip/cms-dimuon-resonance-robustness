@@ -296,3 +296,11 @@ A planned task is not a result. A passing CI run validates the current automated
 ## Manual baseline workflow execution gate — 2026-10-27
 
 The revised bounded baseline/parity workflow has not run. A dispatch-path audit found that the workflow exists only on the unmerged research branch, while GitHub requires a `workflow_dispatch` workflow file to exist on the default branch before the manual dispatch control/event is available. The run card, README, and validation log now state this prerequisite. I have not merged the draft PR or changed the default branch merely to expose the workflow. The next gate is an intentional review/merge decision or execution of the documented bounded run in a controlled environment with CERN Open Data access. Until then, candidate/reference numerical parity is unknown.
+
+
+## Additional validation-gate hardening — 2026-10-27
+
+- Histogram CSV validation now uses the declared `1e-12 GeV` tolerance for internal adjacent-edge continuity as well as cross-implementation edge comparisons; integer counts remain exact. Regression tests cover tolerated floating-point roundoff and material gaps.
+- Added `scripts/compare_baseline_metadata.py` and tests to independently compare candidate/ROOT event cut flow, event limit, selection mode, bin count, mass range, and reference selection definition. The research-level workflow now preserves this report and fails if either histogram parity or metadata agreement fails.
+- Protected comparator output paths from overwriting their inputs and included the new scripts in CI lint configuration.
+- Latest verified PR head at the time of this entry: `5f30177304bfd2c7e1e290ca36fbc3d027f5c8bc`. The PR remains a draft and unmerged. Combined status and workflow-run lookups returned no records; current CI is **unverified**, not passed. The revised manual research-level workflow has not run, and no numerical parity or physics result is claimed.
