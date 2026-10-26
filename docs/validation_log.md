@@ -174,3 +174,8 @@ The first CI run after adding the discrepancy-summary checks exposed two valid-a
 
 
 The fixture correction itself exposed a duplicate-key mistake in the metadata-audit test fixture, caught by Ruff's F601 rule. The duplicated discrepancy-metric keys have now been removed in commit `0844aca6`. This is precisely why CI remains a gate rather than being treated as a formality; the current head's test, lint, and ROOT-integration workflows must be checked after this repair.
+
+
+## Comparator discrepancy-list consistency — 2026-10-26
+
+The metadata audit now also requires the comparator report's `differing_bins` field to be a list of objects whose length equals the strict integer `differing_bin_count`. This closes a further report-integrity gap: a report could otherwise claim zero differing bins and zero numerical discrepancy while retaining a nonempty list of individual mismatches. Exact-parity fixtures now explicitly contain an empty list, and a regression test covers the contradictory case. The latest CI must pass before this change is considered validated.
