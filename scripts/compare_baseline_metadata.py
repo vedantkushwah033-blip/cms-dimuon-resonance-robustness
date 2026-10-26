@@ -60,17 +60,24 @@ def compare(candidate: dict[str, Any], reference: dict[str, Any]) -> dict[str, A
     for name, candidate_key, reference_key in mappings:
         candidate_value = candidate.get(candidate_key)
         reference_value = reference.get(reference_key)
-        if candidate_key != "max_events":
-            candidate_value = exact_nonnegative_int(candidate, candidate_key, "candidate")
-            reference_value = exact_nonnegative_int(reference, reference_key, "reference")
+        candidate_value = exact_nonnegative_int(candidate, candidate_key, "candidate")
+        reference_value = exact_nonnegative_int(reference, reference_key, "reference")
         check_equal(name, candidate_value, reference_value)
 
     selection = candidate.get("selection_mode")
+    expected_reference_selection = ["nMuon == 2", "Muon_charge[0] != Muon_charge[1]"]
     checks.append({
         "check": "candidate_uses_exactly_two_opposite_charge_selection",
         "candidate": selection,
-        "reference": ["nMuon == 2", "Muon_charge[0] != Muon_charge[1]"],
+        "reference": expected_reference_selection,
         "passed": selection == "exactly-two-opposite-charge",
+    })
+    reference_selection = reference.get("selection")
+    checks.append({
+        "check": "reference_uses_expected_selection",
+        "candidate": selection,
+        "reference": reference_selection,
+        "passed": reference_selection == expected_reference_selection,
     })
     candidate_range = candidate.get("mass_range_GeV")
     reference_range = [reference.get("mass_min_GeV"), reference.get("mass_max_GeV")]
