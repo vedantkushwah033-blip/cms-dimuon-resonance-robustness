@@ -118,6 +118,18 @@ def main() -> None:
                     f"len(Muon_pt)={int(observed_multiplicity[local_index])}"
                 )
 
+            for field in BRANCHES[2:]:
+                field_multiplicity = ak.to_numpy(ak.num(chunk[field], axis=1))
+                field_mismatches = np.flatnonzero(field_multiplicity != observed_multiplicity)
+                if field_mismatches.size:
+                    local_index = int(field_mismatches[0])
+                    raise ValueError(
+                        f"Muon_pt and {field} collection lengths differ at event "
+                        f"{events_read + local_index}: "
+                        f"len(Muon_pt)={int(observed_multiplicity[local_index])}, "
+                        f"len({field})={int(field_multiplicity[local_index])}"
+                    )
+
             events_read += len(chunk[BRANCHES[0]])
             if args.selection == "exactly-two-opposite-charge":
                 selected = chunk[chunk["nMuon"] == 2]
