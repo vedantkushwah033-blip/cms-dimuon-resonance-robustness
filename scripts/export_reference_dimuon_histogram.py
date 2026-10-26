@@ -12,11 +12,32 @@ import csv
 import hashlib
 import json
 import math
+import os
 import platform
+import subprocess
 from pathlib import Path
 
 REFERENCE_SOURCE_COMMIT = "19a4a64fd58ef66a6ee3cf4f2a469fba61c60a09"
 REFERENCE_SOURCE_URL = "https://github.com/cms-opendata-analyses/DimuonSpectrumNanoAODOutreachAnalysis/blob/19a4a64fd58ef66a6ee3cf4f2a469fba61c60a09/dimuonSpectrum.py"
+
+
+def repository_commit() -> str | None:
+    """Return the checked-out project commit in CI and local executions."""
+    ci_commit = os.environ.get("GITHUB_SHA")
+    if ci_commit:
+        return ci_commit
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "--verify", "HEAD"],
+            cwd=Path(__file__).resolve().parents[1],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except OSError:
+        return None
+    commit = result.stdout.strip()
+    return commit if result.returncode == 0 and commit else None
 
 
 def parse_args() -> argparse.Namespace:
@@ -156,6 +177,7 @@ def main() -> int:
         "python_version": platform.python_version(),
         "implementation": "official-style ROOT RDataFrame + PtEtaPhiMVector + TH1D",
         "reference_source_commit": REFERENCE_SOURCE_COMMIT,
+        "project_git_commit": repository_commit(),
         "reference_source_url": REFERENCE_SOURCE_URL,
         "selection": [
             "nMuon == 2",
