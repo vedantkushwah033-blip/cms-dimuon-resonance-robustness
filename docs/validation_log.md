@@ -262,3 +262,12 @@ The metadata audit now also requires the comparator report's `differing_bins` fi
 - Cross-checked official CERN source records and the CMS trigger-system guide. The 2019 muon-only sample's documented six branches support spectrum reconstruction, not trigger-efficiency measurement. The separate Run2012B/C derived records warrant file-level inspection, but their published variable lists do not establish the exact contents or validity of the downloaded files.
 - CI runs `40287725284` (Python 3.10–3.12 matrix) and `40287725431` (ROOT synthetic integration) passed on commit `55728e154ee0c26ac9a0ff7cf8f3f48999194b5f`. An overlapping run `40287731148` failed at a branch-count assertion in a test path/content that does not match the test file returned for that exact commit; its failed jobs were requested for rerun and require follow-up inspection.
 - These are documentation and synthetic CI results only. They are not evidence of real CMS data processing, trigger efficiency, or 30,000-bin full-data parity.
+
+
+## Schema-report enhancement and real-data audit workflow — 2026-10-26
+
+- Added `branch_types` to the schema inspector JSON so reports can distinguish branch-name presence from ROOT type information. Added test assertions that type entries cover the reported branch names.
+- Added a regression test that treats jagged/split branch counts as implementation-dependent and asserts a lower bound rather than exactly four visible branches.
+- Added a bounded GitHub Actions workflow intended to download one ROOT file each from official records 31123, 31129, 31127, and 31133, then preserve schema JSON plus input size and SHA-256. The workflow's initial runs were marked failed with zero jobs, so it has **not** produced any real-data reports. The workflow definition must be debugged or enabled before relying on it.
+- The synthetic ROOT integration workflow passed on commit `9931de407e6d5e53d3f9c0f1136cbd8eb8f7c8f2`. Latest Python matrix results for the branch-type and compatibility-test changes are not yet conclusively green; do not infer success from older commits.
+- Official-source audit refined the feasibility decision: derived DoubleMuParked schemas list some HLT decisions, while SingleMu schemas also list trigger objects but explicitly say their collection is only partially filled and that GoodLumisection is not available in every dataset. These are documentation-level findings only; no actual file-level audit has completed.
