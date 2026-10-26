@@ -75,3 +75,38 @@ Do not compare against cut-flow numbers from a different Run-1 NanoAOD example u
 The official analysis record explicitly warns that the feature near 30 GeV is a trigger/data-taking effect, not a new resonance. Reproducing that feature is not a discovery, nor does a muon-only derived file establish the trigger mechanism quantitatively.
 
 The full run is a software/reference-reproduction milestone only. Trigger-aware inference requires a separate audit of a suitable research-level file, exact trigger semantics, data-quality requirements, and any needed prescale information.
+
+
+## 7. Produce and compare a numerical reference artifact
+
+The official reference currently documents a plotted histogram and a cut-flow report; a PNG alone is not a valid input to the exact comparator. Before claiming numerical parity, create a reference CSV from the official ROOT implementation (or a separately reviewed ROOT-based exporter) with exactly these columns:
+
+```text
+mass_low_GeV,mass_high_GeV,pair_count
+```
+
+The exporter must use the same input file, the official `nMuon == 2` and opposite-charge selections, ROOT's invariant-mass calculation, and the 30,000-bin `[0.25, 300)` GeV histogram. Record the ROOT version, exact command/source revision, input checksum, selection cut-flow, and underflow/overflow counts alongside that CSV. Do not digitize the reference PNG or infer counts from its pixels. The reference CSV exporter is a required precondition for this comparison; it has not yet been implemented or executed in this repository.
+
+Once both numerical CSVs exist, run:
+
+```bash
+python scripts/compare_histograms.py \
+  --reference outputs/reference/dimuon_mass_histogram.csv \
+  --candidate outputs/outreach-full/dimuon_mass_histogram.csv \
+  --output outputs/comparison/histogram_comparison.json
+```
+
+The comparator returns exit code 0 only for exact bin-by-bin count parity, exit code 2 for valid histograms with differing counts, and raises an error for malformed CSVs, invalid counts, or incompatible bin edges. Preserve the JSON report even when parity fails; discrepancies are evidence to investigate, not a reason to silently relax the criterion. This comparator checks regular-bin edges and counts. It does not by itself compare underflow/overflow, event cut-flow, mass values, or trigger semantics, so those must be recorded and assessed separately.
+
+## 8. Reproduction acceptance checklist
+
+Do not mark the baseline reproduced until all of the following are attached to one run record:
+
+- Input URL/record, file byte size, SHA-256, tree name, entry count, and software versions.
+- Schema inventory and evidence that the required branches have the expected semantics.
+- Candidate metadata, CSV, and plot from the full run.
+- Reference CSV produced by a documented ROOT-based method, plus ROOT version and source revision.
+- Reference and candidate cut-flow counts and explicit underflow/overflow accounting.
+- Machine-readable comparison JSON and an explanation for every discrepancy; exact parity is the preregistered target.
+
+If any item is unavailable, report the reproduction as incomplete and state which evidence is missing. A successful unit-test or synthetic-ROOT CI run is not a substitute for this checklist.
