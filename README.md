@@ -38,6 +38,7 @@ The education/outreach sample remains useful for pipeline development only. The 
 - `docs/run1_trigger_feasibility_gate.md` — records the requirements for a valid trigger estimand and why HLT bits alone are insufficient.
 - `docs/literature_search_update_2026-10-26.md` — records a focused follow-up search; this is not a systematic review and novelty remains unproven.
 - `docs/literature_scope_decision_2026-10-27.md` — records a critical source-screening memo, identifies close prior work, and puts large simulations/novelty claims on hold until a defensible gap and data feasibility are demonstrated.
+- `docs/literature_scope_update_2026-10-27.md` — extends the focused literature screening to Bayesian background modelling, background sculpting, and the data-feasibility constraints.
 - `docs/first_official_file_runbook_2026-10-26.md` — gives staged commands and acceptance gates for the outreach file and research-level Run2012B/C files.
 - `.github/workflows/official-data-smoke-test.yml` — hard-capped 10,000-event remote access/pipeline smoke test with a 30-minute limit and artifact upload; the successful run is linked in the smoke-test report.
 - `src/cms_dimuon_robustness/monte_carlo.py` — exact binomial confidence intervals and a sample-size planning approximation.
