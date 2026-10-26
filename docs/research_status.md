@@ -162,3 +162,9 @@ A planned task is not a result. A passing CI run validates the current automated
 - Corrected fixtures after earlier CI failures exposed missing new metadata and a non-conserving synthetic count example. Latest code/test commit `475c0eb8dc5d7354442a515436a16c749ed90b54` passed the ordinary Python 3.10/3.11/3.12 tests, compilation, and Ruff workflow [40275514023](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40275514023) and ROOT synthetic integration workflow [40275522182](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40275522182).
 - A later documentation-only commit `c21d98e8537d70d92ef4eb2f33647c8527b3fecf` records these changes; its own CI was still running when this status entry was added.
 - None of these checks substitutes for processing the official CMS file. Actual data checksum/schema capture, full candidate run, independent reference CSV, and exact 30,000-bin comparison remain uncompleted.
+
+## Reference histogram flow-count conservation — 2026-10-26
+- Added a strict invariant requiring regular-bin counts + underflow + overflow to equal the reference histogram's recorded fill-entry count.
+- Added regression tests for a non-conserving flow-count sum and a boolean masquerading as an integer count.
+- Code, tests, and validation-log updates are committed. Check CI on the current head before treating this latest addition as validated.
+- Empirical boundary unchanged: no full official CMS input processing, reference export, or 30,000-bin parity claim has been completed.
