@@ -1,0 +1,6 @@
+scenario_id,role,generating_family,fit_family,background_parameters,fit_range_GeV,binning,nominal_alpha,test_statistic,model_selection_rule,diagnostic_rule,replicates,seed_scheme,fit_failure_rule,held_out,notes
+NULL-BASE-DEV,development,TO_DEFINE,TO_DEFINE,TO_DEFINE,TO_DEFINE,TO_DEFINE,0.05,TO_DEFINE,TO_DEFINE,TO_DEFINE,20,TO_DEFINE,TO_DEFINE,false,Implementation smoke test only; not a result
+NULL-BASE-PILOT,pilot,TO_DEFINE,TO_DEFINE,TO_DEFINE,TO_DEFINE,TO_DEFINE,0.05,TO_DEFINE,TO_DEFINE,TO_DEFINE,500,TO_DEFINE,TO_DEFINE,false,Pilot estimates runtime and failure rate; not confirmatory
+MISSPEC-DEV-01,development,TO_DEFINE,TO_DEFINE,TO_DEFINE,TO_DEFINE,TO_DEFINE,0.05,TO_DEFINE,TO_DEFINE,TO_DEFINE,TO_SET_AFTER_PILOT,TO_DEFINE,TO_DEFINE,false,Specify physical/statistical rationale and parameter ranges before use
+MISSPEC-HOLDOUT-01,held-out,TO_DEFINE,TO_DEFINE,TO_DEFINE,TO_DEFINE,TO_DEFINE,0.05,TO_DEFINE,TO_DEFINE,TO_DEFINE,TO_SET_FROM_PRECISION_TARGET,TO_DEFINE,TO_DEFINE,true,Freeze scenario before main outcomes are examined
+SIGNAL-POWER-01,secondary,TO_DEFINE,TO_DEFINE,TO_DEFINE,TO_DEFINE,TO_DEFINE,0.05,TO_DEFINE,TO_DEFINE,TO_DEFINE,TO_SET_FROM_PRECISION_TARGET,TO_DEFINE,TO_DEFINE,true,Optional signal-injection study; report separately from null calibration
