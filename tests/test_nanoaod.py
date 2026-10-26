@@ -98,3 +98,16 @@ def test_invalid_muon_charge_values_are_rejected():
     )
     with pytest.raises(ValueError, match="Muon_charge must contain only"):
         opposite_charge_pair_masses(events)
+
+
+def test_inconsistent_muon_branch_multiplicities_are_rejected():
+    events = ak.Array({
+        "Muon_pt": [[10.0, 10.0]],
+        "Muon_eta": [[0.0]],
+        "Muon_phi": [[0.0, np.pi]],
+        "Muon_mass": [[0.105658, 0.105658]],
+        "Muon_charge": [[1, -1]],
+    })
+    with pytest.raises(ValueError, match="multiplicities differ"):
+        opposite_charge_pair_masses(events)
+
