@@ -76,7 +76,7 @@
 - Confirmation that the candidate research contribution is novel.
 - Direct file-level inspection of the Run2012B/Run2012C research-level ntuples and verification of HLT/prescale branches.
 - Download/inspection of the full 2.1 GiB outreach reduced event dataset (not a priority for physics claims).
-- Execution of the baseline script against the official ROOT file and comparison with the reference spectrum.
+- Full-file processing and quantitative comparison with the official reference spectrum. A bounded first-10,000-entry prefix of the official outreach ROOT file has passed a software smoke test; research-level Run2012B/C files have not yet been inspected at file level.
 - Baseline reproduction against the official reference plot.
 - Schema validation and event-level invariant-mass cross-check.
 - Selection/trigger feasibility analysis.
@@ -86,7 +86,7 @@
 - Manuscript submission or publication.
 
 ## Evidence policy
-A planned task is not a result. A passing CI run validates the current automated software checks, not the scientific hypothesis. The baseline script has only been exercised on a tiny synthetic ROOT file; it has not yet been run against the official CMS event file. The schema inspector and independent four-vector test passed in the confirmed CI run recorded in `docs/validation_log.md`. A passing CI workflow would validate only the checks that actually ran. A repository commit is not evidence of novelty, peer review, or admissions impact.
+A planned task is not a result. A passing CI run validates the current automated software checks, not the scientific hypothesis. The baseline script has been exercised on synthetic ROOT fixtures and on the first 10,000 entries of the official outreach ROOT file. This establishes bounded software execution only; full-file processing and quantitative reference-spectrum reproduction remain unestablished. The schema inspector and independent four-vector test passed in the confirmed CI run recorded in `docs/validation_log.md`. A passing CI workflow would validate only the checks that actually ran. A repository commit is not evidence of novelty, peer review, or admissions impact.
 
 ## Latest validation update — 2026-10-26
 
@@ -250,3 +250,11 @@ A planned task is not a result. A passing CI run validates the current automated
 - The initial GitHub Actions workflow intended to download and inspect one ROOT file per CERN record repeatedly failed before creating any jobs. To avoid leaving a broken workflow in the research branch, I removed it and documented a bounded manual procedure in `docs/real_data_baseline_run_card.md` using the official `cernopendata-client`, checksum verification, `scripts/inspect_root_schema.py`, and a provenance manifest.
 - No actual CMS ROOT file has been downloaded or inspected in this environment; outbound DNS/network access from the local execution container is unavailable, and the repository connector does not expose a workflow-dispatch action. The next data step therefore requires running the documented commands in an environment with CERN Open Data access, or fixing/enabling a validated remote execution path.
 - The PR remains open and in draft. Latest Python and ROOT integration runs on the newest commit are queued, so the schema type enhancement and regression test must not be described as fully CI-validated yet.
+
+
+## Latest status correction — 2026-10-26 (after outreach smoke test)
+
+- The bounded outreach ROOT smoke test is confirmed successful: GitHub Actions run [40372505488](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40372505488), code commit `8ead6521c726442f8766433554e709186ed2426a`. It read the first 10,000 entries in file order, found 5,750 exactly-two-muon events and 4,504 opposite-charge pairs, and reconciled 24 below-range + 4,478 in-range + 2 at/above-range + 0 non-finite = 4,504 pairs.
+- This does **not** supersede the outstanding research-level schema audit: no exact file from records 31123, 31129, 31127, or 31133 has been verified by a schema report in this repository. The documented CERN-client run card remains unexecuted.
+- The README was corrected in commit `2f0e50789803ca394f7d63a146a485f9ee9847ac` so it no longer contradicts the successful bounded outreach smoke test. No successful CI result has yet been observed for that newest documentation commit; the GitHub combined-status connector returned no status entries, which is inconclusive rather than a pass.
+- Current scientific decision: do not claim trigger efficiency or trigger-aware robustness from the outreach file. The next acceptance gate is exact-file schema/provenance for research-level data, followed by an explicit trigger-denominator/prescale feasibility decision. If that cannot be established, narrow the data claim to spectrum reconstruction and clearly labelled pseudoexperiment stress tests.
