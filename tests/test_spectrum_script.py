@@ -27,7 +27,7 @@ def test_spectrum_script_writes_reproducible_smoke_outputs(tmp_path):
         tree.extend(
             {
                 "Muon_pt": ak.Array([[10.0, 10.0], [float("nan"), 12.0], [50.0, 50.0]]),
-                "Muon_eta": ak.Array([[0.0, 0.0], [0.0, 0.0], [0.0, np.pi]]),
+                "Muon_eta": ak.Array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]),
                 "Muon_phi": ak.Array([[0.0, np.pi], [0.0, np.pi], [0.0, np.pi]]),
                 "Muon_mass": ak.Array([[0.105658, 0.105658], [0.105658, 0.105658], [0.0, 0.0]]),
                 "Muon_charge": ak.Array([[1, -1]] * 3),
