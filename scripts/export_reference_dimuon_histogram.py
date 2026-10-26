@@ -76,7 +76,7 @@ def main() -> int:
         ) from exc
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
-    input_path = Path(args.input).resolve()
+    input_path = Path(args.input).expanduser().resolve()
     input_sha256 = None
     if args.sha256_input:
         digest = hashlib.sha256()
@@ -125,7 +125,7 @@ def main() -> int:
         """
     )
 
-    dataframe = ROOT.RDataFrame(args.tree, args.input)
+    dataframe = ROOT.RDataFrame(args.tree, str(input_path))
     if args.max_events is not None:
         dataframe = dataframe.Range(args.max_events)
     required_columns = {
