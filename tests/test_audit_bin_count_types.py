@@ -76,3 +76,21 @@ def test_string_encoded_bin_count_cannot_pass_by_matching(tmp_path: Path) -> Non
     failed_names = {item["name"] for item in report["checks"] if not item["passed"]}
     assert "reference_bins_valid_positive_integer" in failed_names
     assert "candidate_bins_valid_positive_integer" in failed_names
+
+
+def test_string_encoded_mass_range_cannot_pass_by_matching(tmp_path: Path) -> None:
+    reference, candidate, histogram = _valid_metadata()
+    reference["mass_min_GeV"] = "0.25"
+    reference["mass_max_GeV"] = "300"
+    candidate["mass_range_GeV"] = ["0.25", "300"]
+    report = audit(
+        _write_json(tmp_path / "reference.json", reference),
+        _write_json(tmp_path / "candidate.json", candidate),
+        _write_json(tmp_path / "histogram.json", histogram),
+    )
+    assert report["status"] == "FAIL"
+    failed_names = {item["name"] for item in report["checks"] if not item["passed"]}
+    assert "reference_mass_min_GeV_valid_finite_number" in failed_names
+    assert "reference_mass_max_GeV_valid_finite_number" in failed_names
+    assert "reference_mass_range_valid" in failed_names
+    assert "candidate_mass_range_valid" in failed_names
