@@ -22,6 +22,7 @@ def _valid_metadata() -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
         "events_total": 10,
         "events_exactly_two_muons": 5,
         "events_opposite_sign": 4,
+        "histogram_entries_including_flow": 4,
         "histogram_regular_bin_total": 3,
         "histogram_underflow": 1,
         "histogram_overflow": 0,
@@ -174,3 +175,16 @@ def test_impossible_event_and_pair_count_relationships_fail(tmp_path: Path) -> N
     failed_names = {item["name"] for item in report["checks"] if not item["passed"]}
     assert "reference_opposite_sign_events_within_exactly_two" in failed_names
     assert "candidate_pairs_within_selected_events" in failed_names
+
+
+def test_reference_histogram_entries_match_opposite_sign_cutflow(tmp_path: Path) -> None:
+    reference, candidate, histogram = _valid_metadata()
+    reference["histogram_entries_including_flow"] = 3
+    report = audit(
+        _write_json(tmp_path / "reference.json", reference),
+        _write_json(tmp_path / "candidate.json", candidate),
+        _write_json(tmp_path / "histogram.json", histogram),
+    )
+    assert report["status"] == "FAIL"
+    failed_names = {item["name"] for item in report["checks"] if not item["passed"]}
+    assert "reference_opposite_sign_histogram_entries" in failed_names
