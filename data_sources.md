@@ -1,7 +1,7 @@
 # Data sources and provenance
 
 **Status:** candidate sources inspected at the record level; no event-level analysis has yet been run.  
-**Last updated:** 2026-10-25
+**Last updated:** 2026-10-26
 
 ## Candidate A — CMS 2012 dimuon analysis example
 - Official analysis record: https://opendata.cern.ch/record/cms-12342
