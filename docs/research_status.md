@@ -3,6 +3,10 @@
 **Last updated:** 2026-10-26
 
 ## Confirmed completed in this repository
+- Added a shared mass-histogram helper with explicit half-open `[mass_min, mass_max)` semantics, separate non-finite accounting, and a count-conservation invariant.
+- Added unit tests for empty inputs, invalid configurations, non-finite values, and the upper-edge overflow case; corrected a test's expected bin counts after checking the exact bin edges.
+- Updated the baseline spectrum script to use the helper and record the histogram interval convention in run metadata.
+- Documented the ROOT-versus-NumPy upper-edge discrepancy and its correction in `docs/reference_baseline_comparison.md`.
 - Added `docs/scenario_matrix_template.csv` to distinguish development, pilot, held-out null-misspecification, and optional signal-injection scenarios; unresolved design choices remain explicitly marked for definition.
 - Added `docs/next_experiment_decision.md` with stop/go gates and criteria for narrowing claims when provenance, reference agreement, novelty, or validation fails.
 - Added `docs/monte_carlo_precision_planning.md` with illustrative binomial precision calculations and explicit limits on what 10,000 null trials can establish.
@@ -29,6 +33,9 @@
 - GitHub Actions run for commit `3ed0f9e` (decision gates): completed successfully.
 - GitHub Actions run for commit `40b819d` (scenario matrix): completed successfully.
 - GitHub Actions run for commit `1a40e06` (Monte Carlo precision planning): was still in progress at the last check; do not report it as passing until completed.
+
+## Latest workflow status for histogram changes
+- At the last check, GitHub Actions runs for the new histogram helper, tests, and script integration were still in progress/queued. Treat them as unverified until completed.
 
 ## Not yet completed
 - Exhaustive or systematic literature review.
