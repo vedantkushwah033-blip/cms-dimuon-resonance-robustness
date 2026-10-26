@@ -190,3 +190,6 @@ A planned task is not a result. A passing CI run validates the current automated
 
 
 - Strict JSON parsing now rejects non-standard `NaN`/infinity tokens in all three audit inputs, with regression coverage for each token and input position. The updated test suite passed across Python 3.10–3.12 and the synthetic ROOT integration workflow passed. See `docs/validation_log.md`; this is metadata validation, not a real-data result.
+
+
+- Added a numerical-stability guard for float32 NanoAOD branches: kinematic fields are promoted to float64 before invariant-mass arithmetic. A regression test targets nearly collinear high-pT muons, where float32 intermediate rounding can erase a nonzero invariant mass. The pinned reference returns a C++ `float`, so exact histogram parity remains an empirical question; this fix is not a parity claim. See `docs/validation_log.md`.
