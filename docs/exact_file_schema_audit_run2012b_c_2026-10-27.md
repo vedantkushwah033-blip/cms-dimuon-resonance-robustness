@@ -71,3 +71,13 @@ A reproducible comparison of the two schema JSON artifacts gives the following c
 | Names beginning `L1_` | 128 | 126 | 122 | 6 | 4 |
 
 **Interpretation:** the sampled files share most branch names but the HLT menus are not identical. In particular, the absence of a branch in one file must not be treated as a zero-valued trigger decision. The analysis should explicitly define a common-path set or period-specific mapping, validate path versions against run ranges, and report period-specific results before any combination. This comparison is between two files only and cannot establish the full menu evolution across all runs or files.
+
+
+## Data-volume metadata discrepancy
+
+The official record landing pages currently display aggregate sizes of **75.6 MiB** for Run2012B and **101.1 MiB** for Run2012C, while the checksum-verified sampled ROOT files are **1,454,534,615 bytes** and **1,542,887,879 bytes**, respectively. Those statements cannot both describe the total bytes of the listed ROOT files as written. The record pages also list 57 and 74 files, respectively.
+
+- Official Run2012B record: https://opendata.cern.ch/record/cms-31123
+- Official Run2012C record: https://opendata.cern.ch/record/cms-31129
+
+This is an unresolved portal metadata/unit inconsistency; it is plausible that the aggregate unit label is wrong, but that explanation has **not** been independently confirmed and must not be silently substituted as fact. For reproducibility, use the exact filename, byte count, and SHA-256 for each file actually processed, and record the displayed aggregate-size discrepancy as a source caveat. The workflow's successful checksum verification supports the integrity of the downloaded bytes against the file metadata returned by the portal; it does not resolve the aggregate-size label.
