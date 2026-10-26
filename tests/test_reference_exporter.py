@@ -230,3 +230,29 @@ def test_reference_exporter_rejects_inconsistent_muon_collection_lengths(tmp_pat
     assert completed.returncode != 0
     assert "inconsistent nMuon or muon collection lengths" in completed.stderr
 
+
+
+
+def test_reference_exporter_cli_rejects_nonfinite_mass_bounds_before_input_check(
+    tmp_path,
+):
+    missing_input = tmp_path / "does-not-exist.root"
+    script = REPO_ROOT / "scripts" / "export_reference_dimuon_histogram.py"
+    for invalid_bound in ("nan", "inf", "-inf"):
+        completed = subprocess.run(
+            [
+                sys.executable,
+                str(script),
+                "--input",
+                str(missing_input),
+                "--mass-max",
+                invalid_bound,
+            ],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        assert completed.returncode == 2
+        assert "mass bounds must be finite" in completed.stderr
+        assert "does-not-exist.root" not in completed.stderr
