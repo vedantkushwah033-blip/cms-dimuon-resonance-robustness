@@ -175,3 +175,9 @@ A planned task is not a result. A passing CI run validates the current automated
 - Added a regression test for a contradictory report claiming parity while reporting nonzero discrepancies.
 - Latest code and test commits are committed; check their GitHub Actions results before describing this addition as validated.
 - The actual official CMS dataset has not been processed, and no full-data 30,000-bin parity result is claimed.
+
+
+## Comparator discrepancy-list consistency — 2026-10-26
+- Added an audit invariant requiring the `differing_bins` list length to match `differing_bin_count` and each entry to be an object.
+- Updated exact-parity fixtures and added a regression test for a zero count paired with a nonempty mismatch list.
+- Latest code/test CI remains the acceptance gate; full CMS data processing and 30,000-bin parity remain outstanding.
