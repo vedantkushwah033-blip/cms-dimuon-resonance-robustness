@@ -155,3 +155,22 @@ def test_malformed_pair_count_does_not_crash_audit(tmp_path: Path) -> None:
     failed_names = {item["name"] for item in report["checks"] if not item["passed"]}
     assert "candidate_nonfinite_mass_pairs_valid_nonnegative_integer" in failed_names
     assert "candidate_pair_accounting_conservation" in failed_names
+
+
+def test_impossible_event_and_pair_count_relationships_fail(tmp_path: Path) -> None:
+    reference, candidate, histogram = _valid_metadata()
+    reference["events_opposite_sign"] = 6
+    candidate["opposite_charge_pairs_total"] = 6
+    candidate["pairs_in_histogram_range"] = 5
+    candidate["pairs_below_mass_range"] = 1
+    histogram["reference_total_count"] = 3
+    histogram["candidate_total_count"] = 6
+    report = audit(
+        _write_json(tmp_path / "reference.json", reference),
+        _write_json(tmp_path / "candidate.json", candidate),
+        _write_json(tmp_path / "histogram.json", histogram),
+    )
+    assert report["status"] == "FAIL"
+    failed_names = {item["name"] for item in report["checks"] if not item["passed"]}
+    assert "reference_opposite_sign_events_within_exactly_two" in failed_names
+    assert "candidate_pairs_within_selected_events" in failed_names
