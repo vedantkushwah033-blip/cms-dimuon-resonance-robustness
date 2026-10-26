@@ -17,6 +17,7 @@ def test_baseline_script_on_tiny_synthetic_root_file(tmp_path):
         tree = root_file.mktree(
             "Events",
             {
+                "nMuon": "int32",
                 "Muon_pt": "var * float64",
                 "Muon_eta": "var * float64",
                 "Muon_phi": "var * float64",
@@ -26,6 +27,7 @@ def test_baseline_script_on_tiny_synthetic_root_file(tmp_path):
         )
         tree.extend(
             {
+                "nMuon": np.array([2, 2], dtype=np.int32),
                 "Muon_pt": ak.Array([[10.0, 10.0], [10.0, 10.0]]),
                 "Muon_eta": ak.Array([[0.0, 0.0], [0.0, 0.0]]),
                 "Muon_phi": ak.Array([[0.0, np.pi], [0.0, np.pi]]),
@@ -71,3 +73,50 @@ def test_baseline_script_on_tiny_synthetic_root_file(tmp_path):
     assert int(histogram["pair_count"].sum()) == 1
     assert (output_dir / "dimuon_mass_spectrum.png").is_file()
     assert '"events_processed": 2' in completed.stdout
+
+
+def test_baseline_script_rejects_nmuon_collection_mismatch(tmp_path):
+    root_path = tmp_path / "inconsistent.root"
+    with uproot.recreate(root_path) as root_file:
+        tree = root_file.mktree(
+            "Events",
+            {
+                "nMuon": "int32",
+                "Muon_pt": "var * float64",
+                "Muon_eta": "var * float64",
+                "Muon_phi": "var * float64",
+                "Muon_mass": "var * float64",
+                "Muon_charge": "var * int32",
+            },
+        )
+        tree.extend(
+            {
+                "nMuon": np.array([2], dtype=np.int32),
+                "Muon_pt": ak.Array([[10.0]]),
+                "Muon_eta": ak.Array([[0.0]]),
+                "Muon_phi": ak.Array([[0.0]]),
+                "Muon_mass": ak.Array([[0.105658]]),
+                "Muon_charge": ak.Array([[1]]),
+            }
+        )
+
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(REPO_ROOT / "scripts" / "reproduce_dimuon_spectrum.py"),
+            "--input",
+            str(root_path),
+            "--output-dir",
+            str(tmp_path / "mismatch-output"),
+            "--max-events",
+            "1",
+            "--bins",
+            "10",
+        ],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert completed.returncode != 0
+    assert "nMuon disagrees with Muon_pt collection length at event 0" in completed.stderr
