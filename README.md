@@ -27,8 +27,10 @@ The education/outreach sample remains useful for pipeline development only. The 
 - `tests/test_independent_four_vector.py` — compares vectorized mass calculations with an independently implemented four-vector reference on 250 fixed-seed random cases.
 - `tests/test_spectrum_script.py` — runs the baseline command-line script on a synthetic ROOT file and checks event limits, counts, metadata, CSV and plot outputs.
 - `docs/data_schema_findings.md`, `docs/data_feasibility_decision.md` — separate record-level facts from file-level checks and define trigger-aware, limited-scope, and reproducibility-only routes.
+- `docs/reference_baseline_comparison.md` — maps the implementation to the official public example's event selection, binning, mass range, and axes.
+- `docs/novelty_comparison.md` — documents overlap with closest prior work and explicit novelty no-go criteria.
 - `src/cms_dimuon_robustness/monte_carlo.py` — exact binomial confidence intervals and a sample-size planning approximation.
-- `tests/` — unit and synthetic-ROOT integration tests. GitHub Actions passed 20 tests plus Ruff checks on Python 3.10, 3.11 and 3.12 for commit `1056145fe5708f6c6983262180f4cf845e29953e`. The suite includes an independent four-vector cross-check, a synthetic-ROOT schema-inspector test, and an end-to-end synthetic-ROOT spectrum CLI test.
+- `tests/` — unit and synthetic-ROOT integration tests. GitHub Actions passed 20 tests plus Ruff checks on Python 3.10, 3.11 and 3.12 for commit `a9c3bf1dc56f911893d7bad928d060e41be6a519`. The suite includes an independent four-vector cross-check, a synthetic-ROOT schema-inspector test, and end-to-end synthetic-ROOT spectrum CLI tests.
 
 ## Setup
 Python 3.10 or newer:
@@ -50,7 +52,7 @@ python scripts/inspect_root_schema.py --input /path/to/official-file.root --outp
 python scripts/reproduce_dimuon_spectrum.py --input /path/to/selected-file.root --max-events 10000
 ```
 
-The scripts require an explicit file path or supported ROOT URL. Inspect the schema first and save the report. The repository has not yet confirmed a successful run against the official event file. The spectrum script pairs all opposite-charge muons and applies no extra trigger or quality cuts, so it is not a complete physics selection. The education/outreach dataset is not considered validated physics input; prefer evaluating the research-level Run-1 ntuples first.
+The scripts require an explicit file path or supported ROOT URL. The spectrum script now defaults to exactly two reconstructed muons with opposite charge, 30,000 bins over 0.25–300 GeV, and logarithmic x/y axes to align with the public example. Inspect the schema first and save the report. The repository has not yet confirmed a successful run against the official event file. The spectrum script pairs all opposite-charge muons and applies no extra trigger or quality cuts, so it is not a complete physics selection. The education/outreach dataset is not considered validated physics input; prefer evaluating the research-level Run-1 ntuples first.
 
 After the smoke test, inspect the output, verify event-level masses against an independent four-vector calculation, then increase the sample size only after resolving any discrepancies.
 
