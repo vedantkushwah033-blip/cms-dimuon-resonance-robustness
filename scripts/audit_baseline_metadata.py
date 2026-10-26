@@ -29,11 +29,24 @@ def _finite_json_number(value: Any) -> bool:
     return isinstance(value, float) and math.isfinite(value)
 
 
+def _unique_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    """Build a JSON object while rejecting ambiguous duplicate keys."""
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError(f"duplicate JSON object key: {key!r}")
+        result[key] = value
+    return result
+
+
 def _read_json(path: Path) -> dict[str, Any]:
     try:
-        value = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
-        raise ValueError(f"Cannot read valid JSON from {path}: {exc}") from exc
+        value = json.loads(
+            path.read_text(encoding="utf-8"),
+            object_pairs_hook=_unique_object,
+        )
+    except (OSError, ValueError) as exc:
+        raise ValueError(f"Cannot read unambiguous valid JSON from {path}: {exc}") from exc
     if not isinstance(value, dict):
         raise ValueError(f"{path}: top-level JSON value must be an object")
     return value
