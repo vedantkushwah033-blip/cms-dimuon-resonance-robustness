@@ -217,3 +217,10 @@ A planned task is not a result. A passing CI run validates the current automated
 - Both implementations now reject malformed muon charge values and finite negative transverse momenta or masses before filling histograms. Non-finite candidate kinematics remain separately accounted for rather than being silently converted to a physical mass.
 - Regression tests cover invalid charges and negative finite kinematics. The full Python test/compile/Ruff matrix and ROOT synthetic integration passed on commit `23c17d919a02a452a391741b38434c867e95b21a` (runs 40283709403 and 40283709344).
 - Full official CMS input processing, checksum/schema capture, and exact 30,000-bin reference comparison are still outstanding.
+
+
+## Selection-aligned reference preflight — 2026-10-26
+
+- The ROOT reference exporter validates collection lengths for all events, while charge and finite-negative kinematic validation is limited to the selected `nMuon == 2` events. A regression test verifies that an unselected one-muon event with an invalid charge is not rejected.
+- Commit `206678e4fcb444de7c7e89bca4d2f3c157ca79b9` passed the Python 3.10–3.12 matrix and ROOT integration (runs 40283968358 and 40283968367; 8 ROOT integration tests passed).
+- The remaining scientific blocker is still the actual CMS file: no real-data reference export, candidate export, or exact 30,000-bin parity comparison has been performed.
