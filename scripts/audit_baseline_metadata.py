@@ -151,11 +151,14 @@ def audit(reference_path: Path, candidate_path: Path, histogram_report_path: Pat
         ("reference_underflow", ref.get("histogram_underflow")),
         ("reference_overflow", ref.get("histogram_overflow")),
         ("candidate_tree_entries", cand.get("tree_entries_available")),
+        ("candidate_events_read", cand.get("events_read")),
+        ("candidate_events_processed", cand.get("events_processed")),
         ("candidate_events_selected", cand.get("events_selected")),
         ("candidate_opposite_charge_pairs_total", cand.get("opposite_charge_pairs_total")),
         ("candidate_pairs_in_range", cand.get("pairs_in_histogram_range")),
         ("candidate_underflow", cand.get("pairs_below_mass_range")),
         ("candidate_overflow", cand.get("pairs_at_or_above_mass_max")),
+        ("candidate_nonfinite_mass_pairs", cand.get("pairs_nonfinite_mass")),
         ("histogram_report_reference_total", hist.get("reference_total_count")),
         ("histogram_report_candidate_total", hist.get("candidate_total_count")),
     ):
@@ -199,6 +202,21 @@ def audit(reference_path: Path, candidate_path: Path, histogram_report_path: Pat
         if reference_range_valid else "invalid reference mass-range schema or ordering",
     })
     check("available_tree_entries", ref.get("events_total"), cand.get("tree_entries_available"))
+    check("full_dataset_events_read", ref.get("events_total"), cand.get("events_read"))
+    check("events_read_processed_consistency", cand.get("events_read"), cand.get("events_processed"))
+    max_events = cand.get("max_events")
+    full_run_limit_valid = max_events is None or (
+        isinstance(max_events, int)
+        and not isinstance(max_events, bool)
+        and max_events >= ref.get("events_total", 0)
+    )
+    checks.append({
+        "name": "full_dataset_event_limit",
+        "passed": full_run_limit_valid,
+        "value": max_events,
+        "detail": "no event cap or cap at least as large as full reference dataset"
+        if full_run_limit_valid else "partial-run event cap is not acceptable for full-data parity",
+    })
 
     # The candidate must use the reference-aligned selection, not merely
     # happen to produce a similar selected-event count under another mode.
@@ -224,6 +242,34 @@ def audit(reference_path: Path, candidate_path: Path, histogram_report_path: Pat
     check("regular_bin_total", ref.get("histogram_regular_bin_total"), cand.get("pairs_in_histogram_range"))
     check("underflow_count", ref.get("histogram_underflow"), cand.get("pairs_below_mass_range"))
     check("overflow_count", ref.get("histogram_overflow"), cand.get("pairs_at_or_above_mass_max"))
+    candidate_pair_accounting = (
+        cand.get("pairs_in_histogram_range", 0)
+        + cand.get("pairs_below_mass_range", 0)
+        + cand.get("pairs_at_or_above_mass_max", 0)
+        + cand.get("pairs_nonfinite_mass", 0)
+    )
+    accounting_fields_valid = all(
+        isinstance(cand.get(key), int) and not isinstance(cand.get(key), bool) and cand.get(key) >= 0
+        for key in (
+            "pairs_in_histogram_range", "pairs_below_mass_range",
+            "pairs_at_or_above_mass_max", "pairs_nonfinite_mass",
+            "opposite_charge_pairs_total",
+        )
+    )
+    accounting_passed = (
+        accounting_fields_valid
+        and candidate_pair_accounting == cand.get("opposite_charge_pairs_total")
+    )
+    checks.append({
+        "name": "candidate_pair_accounting_conservation",
+        "passed": accounting_passed,
+        "candidate": {
+            "opposite_charge_pairs_total": cand.get("opposite_charge_pairs_total"),
+            "accounted_pairs_total": candidate_pair_accounting,
+        },
+        "detail": "in-range, underflow, overflow, and non-finite pairs sum to total pairs"
+        if accounting_passed else "pair categories are invalid or do not sum to the total",
+    })
 
     check_boolean("histogram_bin_edges_exactly_equal", True, hist.get("bin_edges_exactly_equal"))
     check_boolean("histogram_exact_bin_by_bin_parity", True, hist.get("exact_bin_by_bin_parity"))
