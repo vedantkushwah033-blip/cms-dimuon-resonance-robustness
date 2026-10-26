@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Compare candidate and ROOT-reference run metadata for a bounded baseline.
 
-This checks selection cut flow and common histogram configuration. It does not
-validate trigger semantics, physics quality, or non-finite ROOT flow-bin behavior.
+This checks event cut flow, histogram configuration, and mass-range accounting.
+It does not validate trigger semantics, physics quality, or how ROOT handles
+non-finite values in histogram flow bins.
 """
 from __future__ import annotations
 
@@ -33,7 +34,7 @@ def exact_nonnegative_int(metadata: dict[str, Any], key: str, source: str) -> in
 
 
 def compare(candidate: dict[str, Any], reference: dict[str, Any]) -> dict[str, Any]:
-    """Return explicit checks for common event cut flow and histogram settings."""
+    """Return explicit checks for cut flow, configuration, and mass accounting."""
     checks: list[dict[str, Any]] = []
 
     def check_equal(name: str, candidate_value: Any, reference_value: Any) -> None:
@@ -54,15 +55,44 @@ def compare(candidate: dict[str, Any], reference: dict[str, Any]) -> dict[str, A
         ),
         ("candidate_pair_total_vs_reference_opposite_sign_events",
          "opposite_charge_pairs_total", "events_opposite_sign"),
+        ("candidate_pair_total_vs_reference_histogram_entries",
+         "opposite_charge_pairs_total", "histogram_entries_including_flow"),
+        ("candidate_pairs_below_range_vs_reference_underflow",
+         "pairs_below_mass_range", "histogram_underflow"),
+        ("candidate_pairs_in_range_vs_reference_regular_bins",
+         "pairs_in_histogram_range", "histogram_regular_bin_total"),
+        ("candidate_pairs_at_or_above_max_vs_reference_overflow",
+         "pairs_at_or_above_mass_max", "histogram_overflow"),
         ("bin_count", "bins", "bins"),
         ("event_limit", "max_events", "max_events"),
     ]
     for name, candidate_key, reference_key in mappings:
-        candidate_value = candidate.get(candidate_key)
-        reference_value = reference.get(reference_key)
         candidate_value = exact_nonnegative_int(candidate, candidate_key, "candidate")
         reference_value = exact_nonnegative_int(reference, reference_key, "reference")
         check_equal(name, candidate_value, reference_value)
+
+    candidate_total = exact_nonnegative_int(candidate, "opposite_charge_pairs_total", "candidate")
+    below = exact_nonnegative_int(candidate, "pairs_below_mass_range", "candidate")
+    in_range = exact_nonnegative_int(candidate, "pairs_in_histogram_range", "candidate")
+    above = exact_nonnegative_int(candidate, "pairs_at_or_above_mass_max", "candidate")
+    nonfinite = exact_nonnegative_int(candidate, "pairs_nonfinite_mass", "candidate")
+    checks.append({
+        "check": "candidate_pair_accounting_reconciles",
+        "candidate": below + in_range + above + nonfinite,
+        "reference": candidate_total,
+        "passed": below + in_range + above + nonfinite == candidate_total,
+    })
+    checks.append({
+        "check": "candidate_nonfinite_mass_count_is_zero_for_flow_parity",
+        "candidate": nonfinite,
+        "reference": 0,
+        "passed": nonfinite == 0,
+        "note": (
+            "Non-finite masses are counted separately by the candidate but ROOT "
+            "flow-bin treatment is not validated; flow-bin parity is interpretable "
+            "only when this count is zero."
+        ),
+    })
 
     selection = candidate.get("selection_mode")
     expected_reference_selection = ["nMuon == 2", "Muon_charge[0] != Muon_charge[1]"]
@@ -111,7 +141,8 @@ def compare(candidate: dict[str, Any], reference: dict[str, Any]) -> dict[str, A
         "cutflow_and_configuration_agree": passed,
         "checks": checks,
         "interpretation": (
-            "Common event cut flow and histogram configuration agree."
+            "Event cut flow, histogram configuration, regular-bin totals, and flow-bin "
+            "accounting agree; candidate non-finite mass count is zero."
             if passed else
             "Metadata comparison failed; inspect every failed check before interpreting histogram parity."
         ),
