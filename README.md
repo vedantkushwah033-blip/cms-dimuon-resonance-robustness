@@ -33,6 +33,7 @@ The education/outreach sample remains useful for pipeline development only. The 
 - `docs/reference_baseline_comparison.md` — maps the implementation to the official public example's event selection, binning, mass range, and axes.
 - `docs/official_reference_code_audit_2026-10-26.md` — source-level comparison with the official v1.4 reference implementation; confirms configuration alignment but explicitly does not claim numerical reproduction.
 - `docs/official_outreach_smoke_test_2026-10-26.md` — records the successful 10,000-entry official-data smoke test, branch-schema limitations, event/pair counts, earlier failed attempts, and next acceptance gate.
+- `docs/research_level_schema_feasibility_audit_2026-10-26.md` — reviews official Run2012B/C variable documentation, separating record-level facts from file-level checks and rejecting trigger-efficiency claims until path decisions/prescales are verified.
 - The baseline records file size, optional SHA-256, tree entries/types, software versions, and in-range/out-of-range/non-finite pair accounting. The latest CI run also verifies non-finite mass handling end-to-end on a synthetic ROOT event.
 - `docs/novelty_comparison.md` — documents overlap with closest prior work and explicit novelty no-go criteria.
 - `docs/literature_search_update_2026-10-26.md` — records a focused follow-up search, additional CMS context, and why novelty remains unproven; this is not a systematic review.
