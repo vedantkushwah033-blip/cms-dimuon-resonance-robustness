@@ -61,12 +61,23 @@ def repository_commit() -> str | None:
     return commit if result.returncode == 0 and commit else None
 
 
+def parse_step_size(value: str) -> int | str:
+    """Parse a positive integer entry count or preserve an Uproot memory-size string."""
+    try:
+        entry_count = int(value)
+    except ValueError:
+        return value
+    if entry_count <= 0:
+        raise argparse.ArgumentTypeError("numeric step size must be a positive entry count")
+    return entry_count
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", required=True, help="Explicit local ROOT file or supported ROOT URL; choose and document the dataset before running")
     parser.add_argument("--tree", default="Events", help="ROOT tree name (default: Events)")
     parser.add_argument("--output-dir", type=Path, default=Path("outputs/baseline"))
-    parser.add_argument("--step-size", default="100 MB", help="Uproot chunk size, e.g. '100 MB'")
+    parser.add_argument("--step-size", type=parse_step_size, default="100 MB", help="Uproot chunk size: positive entry count (e.g. 1000) or memory size (e.g. 100 MB); entry counts are recommended for remote XRootD inputs")
     parser.add_argument("--max-events", type=int, default=None, help="Optional event limit for a smoke test")
     parser.add_argument("--sha256-input", action="store_true", help="Compute SHA-256 for a local input file (adds one full file read)")
     parser.add_argument("--bins", type=int, default=30000)
