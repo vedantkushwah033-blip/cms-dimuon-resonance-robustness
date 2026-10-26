@@ -137,5 +137,5 @@ def test_reference_exporter_on_tiny_synthetic_root_file(tmp_path):
     )
     assert comparison.returncode == 0, comparison.stderr
     report = json.loads(comparison_path.read_text(encoding="utf-8"))
-    assert report["exact_parity"] is True
-    assert report["differing_bins"] == 0
+    assert report["exact_bin_by_bin_parity"] is True
+    assert report["differing_bin_count"] == 0
