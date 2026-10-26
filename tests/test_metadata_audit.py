@@ -327,3 +327,31 @@ def test_metadata_audit_rejects_nonstandard_json_constants(
     )
     with pytest.raises(ValueError, match="non-standard JSON numeric constant"):
         audit(*paths)
+
+
+@pytest.mark.parametrize("input_index", [0, 1, 2])
+def test_audit_cli_refuses_to_overwrite_any_input(tmp_path: Path, monkeypatch, input_index):
+    paths = _fixtures(tmp_path)
+    protected = paths[input_index]
+    original_bytes = protected.read_bytes()
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "audit_baseline_metadata.py",
+            "--reference-metadata",
+            str(paths[0]),
+            "--candidate-metadata",
+            str(paths[1]),
+            "--histogram-report",
+            str(paths[2]),
+            "--output",
+            str(protected.parent / "unused" / ".." / protected.name),
+        ],
+    )
+
+    with pytest.raises(SystemExit) as exc_info:
+        main()
+
+    assert exc_info.value.code == 2
+    assert protected.read_bytes() == original_bytes
