@@ -47,3 +47,15 @@ def test_highly_boosted_collinear_pair_retains_physical_rest_mass():
         1e8, 0.0, 0.0, mass,
     )
     assert float(result) == pytest.approx(2.0 * mass, rel=1e-12, abs=1e-12)
+
+
+def test_highly_boosted_pair_resolves_tiny_azimuthal_separation():
+    pt = 1e8
+    mass = 0.105658
+    delta_phi = 1e-8
+    result = pair_invariant_mass(
+        pt, 0.0, 0.0, mass,
+        pt, 0.0, delta_phi, mass,
+    )
+    expected = np.sqrt(4.0 * mass**2 + 4.0 * pt**2 * np.sin(delta_phi / 2.0) ** 2)
+    assert float(result) == pytest.approx(expected, rel=1e-12, abs=1e-12)
