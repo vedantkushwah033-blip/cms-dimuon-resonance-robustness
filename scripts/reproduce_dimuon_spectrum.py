@@ -26,14 +26,20 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output-dir", type=Path, default=Path("outputs/baseline"))
     parser.add_argument("--step-size", default="100 MB", help="Uproot chunk size, e.g. '100 MB'")
     parser.add_argument("--max-events", type=int, default=None, help="Optional event limit for a smoke test")
-    parser.add_argument("--bins", type=int, default=1200)
-    parser.add_argument("--mass-min", type=float, default=0.0)
-    parser.add_argument("--mass-max", type=float, default=120.0)
+    parser.add_argument("--bins", type=int, default=30000)
+    parser.add_argument("--mass-min", type=float, default=0.25)
+    parser.add_argument("--mass-max", type=float, default=300.0)
+    parser.add_argument(
+        "--selection",
+        choices=["exactly-two-opposite-charge", "all-opposite-charge-pairs"],
+        default="exactly-two-opposite-charge",
+        help="Event/pair selection; default matches the public example's exactly-two-muon selection",
+    )
     args = parser.parse_args()
     if args.max_events is not None and args.max_events <= 0:
         parser.error("--max-events must be positive")
-    if args.bins <= 0 or not args.mass_min < args.mass_max:
-        parser.error("bins must be positive and mass-min must be below mass-max")
+    if args.bins <= 0 or not 0 < args.mass_min < args.mass_max:
+        parser.error("bins must be positive and 0 < mass-min < mass-max (logarithmic x axis)")
     return args
 
 
@@ -42,7 +48,8 @@ def main() -> None:
     args.output_dir.mkdir(parents=True, exist_ok=True)
     counts = np.zeros(args.bins, dtype=np.int64)
     edges = np.linspace(args.mass_min, args.mass_max, args.bins + 1)
-    events_processed = 0
+    events_read = 0
+    events_selected = 0
     opposite_charge_pairs = 0
 
     with uproot.open(args.input) as root_file:
@@ -60,13 +67,17 @@ def main() -> None:
                     break
                 chunk = chunk[:remaining]
 
-            masses = opposite_charge_pair_masses(chunk)
+            events_read += len(chunk[BRANCHES[0]])
+            if args.selection == "exactly-two-opposite-charge":
+                selected = chunk[ak.num(chunk["Muon_pt"], axis=1) == 2]
+            else:
+                selected = chunk
+            events_selected += len(selected[BRANCHES[0]])
+            masses = opposite_charge_pair_masses(selected)
             flat = ak.to_numpy(ak.flatten(masses, axis=None))
             opposite_charge_pairs += int(len(flat))
             counts += np.histogram(flat, bins=edges)[0]
-            events_processed += len(chunk[BRANCHES[0]])
-
-            if args.max_events is not None and events_processed >= args.max_events:
+            if args.max_events is not None and events_read >= args.max_events:
                 break
 
     csv_path = args.output_dir / "dimuon_mass_histogram.csv"
@@ -85,14 +96,21 @@ def main() -> None:
         "input": args.input,
         "tree": args.tree,
         "branches": BRANCHES,
-        "events_processed": events_processed,
+        "events_read": events_read,
+        "events_selected": events_selected,
+        "events_processed": events_read,
         "opposite_charge_pairs_total": opposite_charge_pairs,
         "pairs_in_histogram_range": int(counts.sum()),
         "bins": args.bins,
         "mass_range_GeV": [args.mass_min, args.mass_max],
+        "selection_mode": args.selection,
         "step_size": args.step_size,
         "max_events": args.max_events,
-        "selection": "all opposite-charge muon pairs; no extra quality or trigger selection applied",
+        "selection": (
+            "exactly two reconstructed muons per event, then opposite-charge pair"
+            if args.selection == "exactly-two-opposite-charge"
+            else "all opposite-charge muon pairs per event; events may contain more than two muons"
+        ),
         "status": "baseline reconstruction only; must be compared with official reference before interpretation",
     }
     metadata_path.write_text(json.dumps(metadata, indent=2) + "\n", encoding="utf-8")
@@ -100,10 +118,11 @@ def main() -> None:
     centers = (edges[:-1] + edges[1:]) / 2
     fig, ax = plt.subplots(figsize=(10, 6))
     ax.step(centers, counts, where="mid")
+    ax.set_xscale("log")
     ax.set_yscale("log")
     ax.set_xlabel("Dimuon invariant mass [GeV]")
     ax.set_ylabel("Opposite-charge pair count per bin")
-    ax.set_title("CMS 2012 dimuon spectrum — unselected opposite-charge baseline")
+    ax.set_title("CMS 2012 dimuon spectrum — baseline reconstruction")
     ax.grid(True, which="both", alpha=0.25)
     fig.tight_layout()
     fig.savefig(plot_path, dpi=160)
