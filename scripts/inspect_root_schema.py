@@ -68,6 +68,10 @@ def main() -> None:
     parser.add_argument("--input", required=True, help="Local ROOT file or supported ROOT URL")
     parser.add_argument("--output", type=Path, default=None, help="Optional JSON output path")
     args = parser.parse_args()
+    if "://" not in args.input:
+        input_path = Path(args.input).expanduser().resolve()
+        if args.output is not None and args.output.resolve() == input_path:
+            parser.error("--output resolves to the input ROOT file; refusing to overwrite it")
 
     report = inspect_file(args.input)
     rendered = json.dumps(report, indent=2)
