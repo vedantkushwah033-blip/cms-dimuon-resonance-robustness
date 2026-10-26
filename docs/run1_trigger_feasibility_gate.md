@@ -73,3 +73,14 @@ CERN also publishes Run1 NanoAOD-like research-level SingleMu ntuples:
 - Run2012C SingleMu: 85,731,835 events, 157 files, 206.0 MiB — https://opendata.cern.ch/record/cms-31133
 
 These are **candidate inputs for a denominator-feasibility study**, not a ready-made unbiased denominator. Their single-muon-trigger selection may enable a tag-and-probe-style design for some questions, but the target trigger, trigger-object matching, sample overlap, run-dependent path menu, prescales, and probe definition would need to be justified. Do not simply combine SingleMu and DoubleMuParked records or interpret their rates as efficiencies. First inspect both schemas and the official trigger paths, then decide whether a defensible estimand is possible.
+
+
+## SingleMu schema limitation found in published variable lists — 2026-10-26
+
+The Run2012B and Run2012C SingleMu variable-list pages document `HLT_Mu13_Mu8` and `HLT_Mu17_Mu8`, as well as `TrigObj_pt/eta/phi/id/filterBits`. Crucially, both describe `nTrigObj` as “only partially filled so far,” and describe `GoodLumisection` as not present in all datasets. These are concrete limitations for any tag-and-probe proposal: trigger-object matching coverage and event-quality certification must be verified in the actual chosen files rather than assumed complete.
+
+Source pages:
+- Run2012B SingleMu schema: https://opendata.cern.ch/eos/opendata/cms/dataset-semantics/derived-data/NanoAODRun1/31127/Run2012B_SingleMu_doc.html
+- Run2012C SingleMu schema: https://opendata.cern.ch/eos/opendata/cms/dataset-semantics/derived-data/NanoAODRun1/31133/Run2012C_SingleMu_doc.html
+
+Current decision remains **candidate only**. These schema listings do not establish that trigger-object coverage is sufficient for a valid efficiency estimate.
