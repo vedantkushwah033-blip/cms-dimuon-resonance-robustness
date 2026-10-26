@@ -31,6 +31,7 @@ jobs:
           set -euo pipefail
           mkdir -p outputs/research_level_schema
           printf "record_id\tfilename\tbytes\tsha256\n" > outputs/research_level_schema/manifest.tsv
+          overall_status=0
           for record_id in 31123 31129; do
             cernopendata-client download-files \
               --recid "$record_id" \
@@ -74,9 +75,10 @@ jobs:
             printf "%s\n" "$compare_status" > "outputs/research_level_schema/comparison_exit_status_$record_id.txt"
             if (( compare_status != 0 )); then
               echo "Reference parity failed for record $record_id; discrepancy report preserved in artifacts." >&2
-              exit "$compare_status"
+              overall_status=1
             fi
           done
+          exit "$overall_status"
       - name: Upload schema reports and file manifest
         if: always()
         uses: actions/upload-artifact@v4
