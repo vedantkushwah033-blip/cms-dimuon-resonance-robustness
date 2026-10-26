@@ -83,6 +83,7 @@ def test_reference_exporter_on_tiny_synthetic_root_file(tmp_path):
     assert metadata["reference_source_commit"] == (
         "19a4a64fd58ef66a6ee3cf4f2a469fba61c60a09"
     )
+    assert metadata["project_git_commit"]
 
     rows = (output_dir / "dimuon_mass_histogram.csv").read_text(
         encoding="utf-8"
