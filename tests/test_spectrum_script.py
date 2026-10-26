@@ -26,7 +26,7 @@ def test_spectrum_script_writes_reproducible_smoke_outputs(tmp_path):
         )
         tree.extend(
             {
-                "Muon_pt": ak.Array([[10.0, 10.0], [12.0, 12.0], [20.0, 20.0]]),
+                "Muon_pt": ak.Array([[10.0, 10.0], [float("nan"), 12.0], [20.0, 20.0]]),
                 "Muon_eta": ak.Array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]),
                 "Muon_phi": ak.Array([[0.0, np.pi], [0.0, np.pi], [0.0, np.pi]]),
                 "Muon_mass": ak.Array([[0.105658, 0.105658]] * 3),
@@ -65,7 +65,8 @@ def test_spectrum_script_writes_reproducible_smoke_outputs(tmp_path):
     assert metadata["events_processed"] == 2
     assert metadata["opposite_charge_pairs_total"] == 2
     assert metadata["pairs_below_mass_range"] + metadata["pairs_in_histogram_range"] + metadata["pairs_above_mass_range"] + metadata["pairs_nonfinite_mass"] == metadata["opposite_charge_pairs_total"]
-    assert metadata["pairs_in_histogram_range"] == 2
+    assert metadata["pairs_in_histogram_range"] == 1
+    assert metadata["pairs_nonfinite_mass"] == 1
     assert metadata["input_is_local_file"] is True
     assert metadata["input_bytes"] > 0
     assert metadata["input_sha256"] == hashlib.sha256(input_path.read_bytes()).hexdigest()
