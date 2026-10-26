@@ -55,3 +55,12 @@ This document does not claim that any research-level ROOT file has been download
 ## Exact-path caveat — 2026-10-26
 
 The published derived variable lists document many HLT decision branches, with examples including `HLT_Mu13_Mu8` and `HLT_Mu17_Mu8`. Direct searches did not find `HLT_Dimuon0_Jpsi`, `HLT_DoubleMu11_Acoplanarity03`, or `HLT_DoubleMu5_IsoMu5` on those derived-schema pages. The original AOD record's list of possible paths must not be treated as evidence that the same-named branch exists in the derived files. Select a target path only after checking its exact branch in each file and validating its run-dependent meaning.
+
+
+## Concrete trigger documentation leads — 2026-10-26
+
+The CERN record for the `HLT_Mu13_Mu8` path in the DoubleMuParked dataset documents version/run intervals and L1 seeds: [CERN HLT_Mu13_Mu8 path record](https://opendata.cern.ch/record/cms-6651). The published intervals include V17 for runs 193834–196027, V18 for 196046–196531, V19 for 198022–199608, and V21 for 199698–205238. These intervals overlap the Run2012B and Run2012C data-taking periods, so a single constant path definition must not be assumed across the combined sample. The actual event-level branch and its meaning still need to be confirmed in each chosen file.
+
+The CERN [2012 detailed-luminosity record](https://opendata.cern.ch/record/cms-1054) provides luminosity information and notes that trigger-specific active run ranges and prescale factors must be accounted for when calculating integrated luminosity for prescaled triggers. This is a documentation lead, not evidence that the repository has calculated the applicable prescales or luminosity.
+
+This improves the next-step plan: first validate `HLT_Mu13_Mu8` as an actual branch in each file, map every event's run to the documented path version, and then determine whether the sample design supports the intended estimand. The DoubleMuParked dataset is already selected by trigger requirements; an efficiency measurement for the same trigger needs a defensible denominator, not just the path decision bit.
