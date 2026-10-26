@@ -94,3 +94,17 @@ def test_float_count_is_rejected_not_silently_coerced(tmp_path):
     assert result.returncode == 2
     assert report["cutflow_and_configuration_agree"] is False
     assert "must be a nonnegative integer" in report["comparison_error"]
+
+
+def test_reference_selection_mismatch_fails(tmp_path):
+    reference = reference_metadata()
+    reference["selection"] = ["nMuon >= 2", "Muon_charge[0] != Muon_charge[1]"]
+    result, report_path = run_comparison(
+        tmp_path, candidate_metadata(), reference
+    )
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+
+    assert result.returncode == 2
+    assert report["cutflow_and_configuration_agree"] is False
+    failed = {item["check"] for item in report["checks"] if not item["passed"]}
+    assert "reference_uses_expected_selection" in failed
