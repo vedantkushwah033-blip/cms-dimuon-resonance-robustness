@@ -111,3 +111,11 @@ Commit: `e277b4cac0dc88418a9b086857501f78109a09c0`
 - The first regression-test run, [40256955302](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40256955302), failed because the test fixture wrote literal backslash-n sequences instead of actual newline characters. This malformed the *reference fixture itself*, so the failures did not establish a defect in the comparator. The fixture escaping was corrected in commit `e1c756eaf4fea25a9e59087b1f2470b6003fbeb8`.
 - Corrected CI run [40257190269](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40257190269) completed successfully: Python 3.10, 3.11, and 3.12 each passed pytest and Ruff.
 - The comparator now has automated coverage for malformed CSV structure, duplicate column names, strict integer count syntax, exact integer comparison beyond (2^{53}), and independent bin-edge validation. These are software-contract checks only; they do not demonstrate that the official CMS histogram has been reproduced.
+
+
+## ROOT reference exporter software checks — 2026-10-26
+
+- The exporter was added in commit `57a561815084d30f561370cc12ecc45e11aa6cc6`; the later provenance update adds file size and optional SHA-256 metadata in commit `dfbd60c4a6a3034653cc7089ec43219507793d9b`.
+- GitHub Actions run [40257810613](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40257810613) completed successfully on Python 3.10, 3.11, and 3.12. The workflow passed pytest, compiled Python files under `scripts`, `src`, and `tests`, and ran Ruff against the new ROOT exporter.
+- The exporter pins the official analysis source to commit `19a4a64fd58ef66a6ee3cf4f2a469fba61c60a09`; CI for that final source-pin update was still running at the time of this entry.
+- PyROOT is intentionally not installed in the regular CI environment. CI therefore validates Python syntax and linting, not ROOT runtime behavior. The exporter has not yet been run on the CMS ROOT input, and no real-data histogram parity is claimed.
