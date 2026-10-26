@@ -90,3 +90,52 @@ def test_reference_exporter_on_tiny_synthetic_root_file(tmp_path):
     assert rows[0] == "mass_low_GeV,mass_high_GeV,pair_count"
     assert len(rows) == 41
     assert sum(int(row.rsplit(",", 1)[1]) for row in rows[1:]) == 1
+
+    # Run the separate Uproot/NumPy candidate on the exact same file and
+    # require strict bin-by-bin parity on this synthetic fixture.
+    candidate_dir = tmp_path / "candidate"
+    candidate = subprocess.run(
+        [
+            sys.executable,
+            str(REPO_ROOT / "scripts" / "reproduce_dimuon_spectrum.py"),
+            "--input",
+            str(root_path),
+            "--output-dir",
+            str(candidate_dir),
+            "--max-events",
+            "3",
+            "--bins",
+            "40",
+            "--mass-min",
+            "0.25",
+            "--mass-max",
+            "40",
+        ],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert candidate.returncode == 0, candidate.stderr
+
+    comparison_path = tmp_path / "comparison.json"
+    comparison = subprocess.run(
+        [
+            sys.executable,
+            str(REPO_ROOT / "scripts" / "compare_histograms.py"),
+            "--reference",
+            str(output_dir / "dimuon_mass_histogram.csv"),
+            "--candidate",
+            str(candidate_dir / "dimuon_mass_histogram.csv"),
+            "--output",
+            str(comparison_path),
+        ],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert comparison.returncode == 0, comparison.stderr
+    report = json.loads(comparison_path.read_text(encoding="utf-8"))
+    assert report["exact_parity"] is True
+    assert report["differing_bins"] == 0
