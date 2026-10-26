@@ -45,6 +45,15 @@ def audit(reference_path: Path, candidate_path: Path, histogram_report_path: Pat
             "detail": detail,
         })
 
+    def nonnegative_integer(name: str, value: Any) -> None:
+        valid = isinstance(value, int) and not isinstance(value, bool) and value >= 0
+        checks.append({
+            "name": f"{name}_valid_nonnegative_integer",
+            "passed": valid,
+            "value": value,
+            "detail": "nonnegative integer" if valid else "missing or non-integer count",
+        })
+
     # Matching strings are not sufficient: provenance fields must also be well-formed.
     ref_digest = ref.get("input_sha256")
     cand_digest = cand.get("input_sha256")
@@ -77,6 +86,26 @@ def audit(reference_path: Path, candidate_path: Path, histogram_report_path: Pat
     })
     check("input_bytes", ref_bytes, cand_bytes)
     check("tree_name", ref.get("tree"), cand.get("tree"))
+    # Counts in JSON must be integer counts, not booleans or floats that happen
+    # to compare equal to integers (for example, 40.0 == 40 in Python).
+    for name, value in (
+        ("reference_events_total", ref.get("events_total")),
+        ("reference_events_exactly_two_muons", ref.get("events_exactly_two_muons")),
+        ("reference_events_opposite_sign", ref.get("events_opposite_sign")),
+        ("reference_histogram_regular_total", ref.get("histogram_regular_bin_total")),
+        ("reference_underflow", ref.get("histogram_underflow")),
+        ("reference_overflow", ref.get("histogram_overflow")),
+        ("candidate_tree_entries", cand.get("tree_entries_available")),
+        ("candidate_events_selected", cand.get("events_selected")),
+        ("candidate_opposite_charge_pairs_total", cand.get("opposite_charge_pairs_total")),
+        ("candidate_pairs_in_range", cand.get("pairs_in_histogram_range")),
+        ("candidate_underflow", cand.get("pairs_below_mass_range")),
+        ("candidate_overflow", cand.get("pairs_at_or_above_mass_max")),
+        ("histogram_report_bin_count", hist.get("bin_count")),
+        ("histogram_report_reference_total", hist.get("reference_total_count")),
+        ("histogram_report_candidate_total", hist.get("candidate_total_count")),
+    ):
+        nonnegative_integer(name, value)
     check("available_tree_entries", ref.get("events_total"), cand.get("tree_entries_available"))
 
     # The candidate must use the reference-aligned selection, not merely
