@@ -81,7 +81,7 @@ def main() -> None:
     events_selected = 0
     opposite_charge_pairs = 0
     pairs_below_range = 0
-    pairs_above_range = 0
+    pairs_at_or_above_upper_edge = 0
     pairs_nonfinite = 0
     tree_entries = None
     branch_types = None
@@ -121,7 +121,7 @@ def main() -> None:
             counts += chunk_counts
             pairs_nonfinite += accounting["pairs_nonfinite"]
             pairs_below_range += accounting["pairs_below_range"]
-            pairs_above_range += accounting["pairs_above_range"]
+            pairs_at_or_above_upper_edge += accounting["pairs_above_range"]
             if args.max_events is not None and events_read >= args.max_events:
                 break
 
@@ -160,12 +160,12 @@ def main() -> None:
         "opposite_charge_pairs_total": opposite_charge_pairs,
         "pairs_below_mass_range": pairs_below_range,
         "pairs_in_histogram_range": int(counts.sum()),
-        "pairs_above_mass_range": pairs_above_range,
+        "pairs_at_or_above_mass_max": pairs_at_or_above_upper_edge,
         "pairs_nonfinite_mass": pairs_nonfinite,
         "bins": args.bins,
         "mass_range_GeV": [args.mass_min, args.mass_max],
         "histogram_interval": "[mass_min, mass_max); values exactly at mass_max are overflow",
-        "pairs_at_or_above_mass_max": pairs_above_range,
+        "pairs_at_or_above_mass_max": pairs_at_or_above_upper_edge,
         "selection_mode": args.selection,
         "step_size": args.step_size,
         "max_events": args.max_events,
