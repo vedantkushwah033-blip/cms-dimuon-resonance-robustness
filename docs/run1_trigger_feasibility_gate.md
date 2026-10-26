@@ -1,6 +1,6 @@
 # Run-1 dimuon trigger-feasibility gate
 
-**Status:** Documentation-level feasibility only; no ROOT file-level trigger audit has been completed by this repository as of 2026-10-26.
+**Status (2026-10-27):** Exact-file schema inventory completed for one checksum-verified Run2012B DoubleMuParked file and one Run2012C DoubleMuParked file. Event-level trigger-value, path-version, denominator, prescale, and efficiency validation remain incomplete. See `docs/exact_file_schema_audit_run2012b_c_2026-10-27.md`.
 
 ## Purpose
 
@@ -41,10 +41,10 @@ For each Run2012B and Run2012C input, record one of **PASS**, **FAIL**, or **UNK
 
 ## Recommended next execution
 
-1. Download or access one small, representative file from each chosen derived record.
-2. Run `scripts/inspect_root_schema.py` and preserve the JSON output plus file checksum and official source.
-3. Fill this table with evidence, marking unsupported requirements UNKNOWN rather than guessing.
-4. Inspect the actual event values and run ranges for all candidate HLT fields.
+1. **Completed for DoubleMuParked schema only:** one file each from Run2012B and Run2012C was downloaded with portal checksum verification; the exact file hashes, branch types, and entry counts are recorded in `docs/exact_file_schema_audit_run2012b_c_2026-10-27.md`.
+2. Inspect event-level values and run ranges for candidate HLT fields; schema presence alone is not semantic validation.
+3. Inspect SingleMu schemas only if a specific denominator design is justified; those files have not been audited by the completed workflow.
+4. Fill the audit table with evidence, marking unsupported requirements UNKNOWN rather than guessing.
 5. Decide whether to continue with a trigger-efficiency estimand or limit the work to reproducible spectrum reconstruction and clearly labelled simulation studies.
 
 ## Non-claims
@@ -84,3 +84,8 @@ Source pages:
 - Run2012C SingleMu schema: https://opendata.cern.ch/eos/opendata/cms/dataset-semantics/derived-data/NanoAODRun1/31133/Run2012C_SingleMu_doc.html
 
 Current decision remains **candidate only**. These schema listings do not establish that trigger-object coverage is sufficient for a valid efficiency estimate.
+
+
+## Exact-file schema audit update — 2026-10-27
+
+The successful workflow downloaded and checksum-verified one file from each DoubleMuParked record. Both sampled `Events` trees contain the expected muon kinematics/charge, event identity, candidate quality/isolation, `GoodLumisection`, and multiple HLT/L1-named fields. `HLT_Mu13_Mu8` and `HLT_Mu17_Mu8` are Boolean branches in both samples, but branch presence does not establish path-version semantics, whether the event was recorded under the relevant trigger, or a valid efficiency denominator. See the exact-file audit report for file hashes, types, and explicit limitations. The next step is event-level and documentation validation, not an efficiency estimate.
