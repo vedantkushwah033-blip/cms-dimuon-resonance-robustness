@@ -142,3 +142,16 @@ Confirmed GitHub Actions test run: https://github.com/vedantkushwah033-blip/cms-
 - The separate ROOT-reference integration workflow for this commit was still running when this entry was written; no result is claimed for that workflow here.
 
 These are metadata-audit software checks only. The actual CMS ROOT input, official reference export, and candidate/reference full-data parity remain outstanding.
+## Full-data acceptance and conservation audit hardening — 2026-10-26
+
+The metadata audit now rejects partial processing for a full-data parity claim: `events_read` must equal the reference event count, `events_processed` must equal `events_read`, and `max_events` must be absent or at least the full dataset size. It also requires candidate pair categories (in-range, below-range, overflow, and non-finite) to sum exactly to the opposite-charge pair total, with all counts represented as nonnegative JSON integers. Relational guards reject impossible cut-flow counts, including opposite-sign events exceeding exactly-two-muon events and opposite-charge pairs exceeding selected events.
+
+The audit additionally compares the ROOT reference's `histogram_entries_including_flow` to its opposite-sign event count. Regression tests cover partial runs, broken pair accounting, malformed count types, impossible count relationships, and reference histogram/cut-flow disagreement.
+
+An intermediate CI attempt failed because pre-existing audit fixtures did not yet contain the newly required full-run and pair-accounting metadata, and because one fixture's in-range total did not conserve the documented underflow/overflow counts. These fixture issues were corrected. Commit `ebb12d36` then passed the Python 3.10, 3.11, and 3.12 test/compile/lint workflow and the dedicated synthetic ROOT integration workflow:
+- Tests: https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40275417831
+- ROOT integration: https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40275417824
+
+Subsequent changes adding the reference histogram-entry invariant and its regression test are committed through `475c0eb8dc5d7354442a515436a16c749ed90b54`. Their ordinary and ROOT integration workflows were still running at the time of this entry; no passing result is claimed for those latest changes yet.
+
+All of these checks are software/audit validation. The full official CMS ROOT dataset, numerical reference export, and candidate/reference 30,000-bin parity comparison remain outstanding.
