@@ -178,3 +178,23 @@ def test_highly_boosted_float32_pair_resolves_tiny_azimuthal_separation():
     expected = np.sqrt(4.0 * float(mass) ** 2 + 4.0 * float(pt) ** 2 * np.sin(float(delta_phi) / 2.0) ** 2)
     assert actual.shape == (1,)
     assert actual[0] == pytest.approx(expected, rel=2e-6, abs=1e-8)
+
+
+@pytest.mark.parametrize(
+    ("field", "bad_values", "message"),
+    [
+        ("Muon_pt", [[-10.0, 10.0]], "Muon_pt must be non-negative"),
+        ("Muon_mass", [[0.105658, -0.1]], "Muon_mass must be non-negative"),
+    ],
+)
+def test_finite_negative_kinematics_are_rejected(field, bad_values, message):
+    values = {
+        "Muon_pt": [[10.0, 10.0]],
+        "Muon_eta": [[0.0, 0.0]],
+        "Muon_phi": [[0.0, np.pi]],
+        "Muon_mass": [[0.105658, 0.105658]],
+        "Muon_charge": [[1, -1]],
+    }
+    values[field] = bad_values
+    with pytest.raises(ValueError, match=message):
+        opposite_charge_pair_masses(ak.Array(values))
