@@ -220,3 +220,12 @@ The metadata audit now also requires the comparator report's `differing_bins` fi
 
 
 - Validation completed for code/test commit `33f703fcad9f4609b730f928277ba19c0a5a8dee`: [Python test matrix](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40279918313) passed on Python 3.10, 3.11, and 3.12; [ROOT integration](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40279918335) passed, including the synthetic reference-versus-candidate histogram parity test. The earlier test attempt exposed an argparse test-fixture issue for negative infinity; the fixture now supplies values using `--mass-max=<value>`, and the corrected workflows pass.
+
+
+## Cancellation-resistant invariant-mass calculation — 2026-10-26
+
+- Replaced the direct subtraction `(E_1+E_2)^2-|\vec p_1+\vec p_2|^2` in both the vectorized helper and Awkward/NanoAOD path with an algebraically equivalent expression in transverse masses and rapidities.
+- The new expression evaluates `cosh(Δy)-1` and `1-cos(Δφ)` with half-angle identities and rationalizes `mT_1*mT_2 - pT_1*pT_2`. This avoids catastrophic cancellation for highly boosted, nearly collinear pairs. A local numerical probe showed the old direct expression returned zero at pT=1e8 GeV for two collinear muons of mass 0.105658 GeV, while the stable expression retained 0.211316 GeV.
+- Added regression tests for both the independent vectorized helper and float32 NanoAOD branches at this adversarial scale, while retaining the existing randomized four-vector cross-check.
+- Confirmed GitHub Actions on commit `5afd6cd44b3e41bf0342af2ef45fc0465ff6ee64`: [Python 3.10–3.12 test/compile/Ruff matrix](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40282993593) and [ROOT synthetic integration](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40282993559) passed. The ROOT integration checks parity on its small synthetic fixture only.
+- Scientific limitation: this numerical improvement is not evidence of exact parity with the official C++-float reference on the real CMS sample. Full-data comparison must still be performed and any bin discrepancies reported.
