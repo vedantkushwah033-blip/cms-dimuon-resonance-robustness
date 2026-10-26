@@ -136,3 +136,10 @@ The workflow `research-level CMS ROOT schema audit` completed successfully for r
 The manual workflow `.github/workflows/research-level-schema-audit.yml` has since been extended beyond the successful schema-only run described above. When manually dispatched, it will download one checksum-verified file from each record (31123 and 31129), run both the candidate Uproot/NumPy implementation and the independent ROOT/RDataFrame implementation on the same first 100,000 entries, and compare all 30,000 histogram bins using `scripts/compare_histograms.py`. The workflow retains per-period comparison reports and uploads artifacts even if a parity check fails.
 
 **This revised workflow has not been executed as of this entry.** Run 40403830670 is evidence for the earlier schema audit only; it is not evidence for the new baseline or parity steps. Do not state that numerical parity passed until the revised workflow has run and its output CSVs, metadata, comparison JSON, and logs have been inspected. The workflow is available under the repository's GitHub Actions page and requires manual dispatch.
+
+
+## Important dispatch prerequisite (2026-10-27)
+
+The revised workflow is currently present on the research branch, while PR #1 remains a draft and unmerged. GitHub's official documentation states that a `workflow_dispatch` workflow must exist on the default branch before it can be manually triggered from the Actions UI. Therefore, do not assume that opening Actions while viewing this branch will expose a working “Run workflow” button. The workflow must first be deliberately made available on the default branch, then dispatched against the reviewed research branch, or the bounded commands must be run in a separate environment with CERN Open Data access. See [GitHub's manual workflow guidance](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/manually-run-a-workflow).
+
+No research-level spectrum or parity output is available yet. The successful run 40403830670 covers the earlier schema-only workflow and must not be presented as evidence that this revised workflow executed.
