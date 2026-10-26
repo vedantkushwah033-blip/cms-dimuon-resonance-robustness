@@ -102,7 +102,7 @@ def main() -> int:
             return (m1 + m2).mass();
         }
 
-        bool hasInvalidMuonCharge(ROOT::VecOps::RVec<int>& charge) {
+        bool hasInvalidMuonCharge(const ROOT::VecOps::RVec<int>& charge) {
             for (int value : charge) {
                 if (value != -1 && value != 1) return true;
             }
