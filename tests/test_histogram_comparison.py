@@ -93,7 +93,10 @@ def test_invalid_counts_are_rejected(tmp_path, bad_count):
     result, _ = run_comparison(tmp_path, reference, candidate)
 
     assert result.returncode != 0
-    assert "pair_count values must be exact base-10 integers" in result.stderr or "counts must be nonnegative integers" in result.stderr
+    assert (
+        "pair_count values must be exact base-10 integers" in result.stderr
+        or "counts must be nonnegative integers" in result.stderr
+    )
 
 
 def test_counts_above_float_exactness_limit_are_compared_without_precision_loss(tmp_path):
