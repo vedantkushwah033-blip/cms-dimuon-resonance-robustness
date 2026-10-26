@@ -187,3 +187,6 @@ A planned task is not a result. A passing CI run validates the current automated
 
 
 - The audit CLI now writes a structured `FAIL` JSON artifact and exits with status 2 when any input metadata file is malformed or contains duplicate keys. A regression test verifies this behavior; Python 3.10/3.11/3.12 automated checks and the synthetic ROOT integration workflow passed. This is defensive tooling work, not evidence of a successful CMS-data reproduction.
+
+
+- Strict JSON parsing now rejects non-standard `NaN`/infinity tokens in all three audit inputs, with regression coverage for each token and input position. The updated test suite passed across Python 3.10–3.12 and the synthetic ROOT integration workflow passed. See `docs/validation_log.md`; this is metadata validation, not a real-data result.
