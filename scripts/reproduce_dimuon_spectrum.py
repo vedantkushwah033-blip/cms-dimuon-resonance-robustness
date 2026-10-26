@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Reproduce the opposite-charge dimuon mass spectrum from the reduced CMS NanoAOD sample.
+"""Build a baseline opposite-charge dimuon spectrum from a selected CMS ROOT sample.
 
 This is a baseline reconstruction, not a trigger-efficiency analysis or a resonance search.
 """
@@ -107,7 +107,7 @@ def main() -> None:
     ax.set_yscale("log")
     ax.set_xlabel("Dimuon invariant mass [GeV]")
     ax.set_ylabel("Opposite-charge pair count per bin")
-    ax.set_title("CMS 2012 reduced NanoAOD dimuon spectrum — baseline reconstruction")
+    ax.set_title("CMS 2012 dimuon spectrum — unselected opposite-charge baseline")
     ax.grid(True, which="both", alpha=0.25)
     fig.tight_layout()
     fig.savefig(plot_path, dpi=160)
