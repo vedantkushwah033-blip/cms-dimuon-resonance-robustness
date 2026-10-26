@@ -1,6 +1,6 @@
 # Real-Data Baseline Run Card
 
-**Status:** Operational checklist; no real-data reproduction is claimed by this document.
+**Status (2026-10-27):** Operational checklist; no real-data spectrum reproduction is claimed. The schema-only audit of one official Run2012B and one Run2012C DoubleMuParked ROOT file is complete; the event-limited mass-spectrum analysis and quantitative reference comparison remain pending.
 
 ## Purpose
 
@@ -124,3 +124,8 @@ done
 Record mapping: 31123 = Run2012B DoubleMuParked; 31129 = Run2012C DoubleMuParked; 31127 = Run2012B SingleMu; 31133 = Run2012C SingleMu. The SingleMu records are optional candidates for denominator feasibility, not automatically unbiased samples. Keep the reports and manifest with the exact Git commit and environment version.
 
 If download or checksum verification fails, preserve the complete error output and mark the audit **inconclusive**; do not silently switch records or use a different file.
+
+
+## Audit status update — 2026-10-27
+
+The workflow `research-level CMS ROOT schema audit` completed successfully for record 31123 (Run2012B DoubleMuParked) and record 31129 (Run2012C DoubleMuParked). Exact filenames, byte sizes, SHA-256 hashes, `Events` tree entry counts, relevant branch types, and limitations are recorded in `docs/exact_file_schema_audit_run2012b_c_2026-10-27.md`; the machine-readable JSON reports and manifest are attached to [workflow run 40403830670](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40403830670). This audit did **not** run the dimuon spectrum script on these research-level files. The optional SingleMu records 31127 and 31133 have not been downloaded by this workflow.
