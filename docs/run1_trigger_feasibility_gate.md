@@ -64,3 +64,12 @@ The CERN record for the `HLT_Mu13_Mu8` path in the DoubleMuParked dataset docume
 The CERN [2012 detailed-luminosity record](https://opendata.cern.ch/record/cms-1054) provides luminosity information and notes that trigger-specific active run ranges and prescale factors must be accounted for when calculating integrated luminosity for prescaled triggers. This is a documentation lead, not evidence that the repository has calculated the applicable prescales or luminosity.
 
 This improves the next-step plan: first validate `HLT_Mu13_Mu8` as an actual branch in each file, map every event's run to the documented path version, and then determine whether the sample design supports the intended estimand. The DoubleMuParked dataset is already selected by trigger requirements; an efficiency measurement for the same trigger needs a defensible denominator, not just the path decision bit.
+
+
+## Alternative denominator candidate: SingleMu data — 2026-10-26
+
+CERN also publishes Run1 NanoAOD-like research-level SingleMu ntuples:
+- Run2012B SingleMu: 53,446,198 events, 107 files, 127.2 MiB — https://opendata.cern.ch/record/cms-31127
+- Run2012C SingleMu: 85,731,835 events, 157 files, 206.0 MiB — https://opendata.cern.ch/record/cms-31133
+
+These are **candidate inputs for a denominator-feasibility study**, not a ready-made unbiased denominator. Their single-muon-trigger selection may enable a tag-and-probe-style design for some questions, but the target trigger, trigger-object matching, sample overlap, run-dependent path menu, prescales, and probe definition would need to be justified. Do not simply combine SingleMu and DoubleMuParked records or interpret their rates as efficiencies. First inspect both schemas and the official trigger paths, then decide whether a defensible estimand is possible.
