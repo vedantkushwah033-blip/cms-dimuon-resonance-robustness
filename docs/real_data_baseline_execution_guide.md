@@ -85,7 +85,18 @@ The official reference currently documents a plotted histogram and a cut-flow re
 mass_low_GeV,mass_high_GeV,pair_count
 ```
 
-The repository now includes `scripts/export_reference_dimuon_histogram.py`, which uses PyROOT/RDataFrame, ROOT's `PtEtaPhiMVector`, and `TH1D` to independently export regular-bin counts plus reference metadata. It is deliberately separate from the Uproot/NumPy candidate implementation. The source is pinned to official commit `19a4a64fd58ef66a6ee3cf4f2a469fba61c60a09` (the `dimuonSpectrum.py` revision), and that commit is written into the reference metadata. Run it in a ROOT-enabled environment on the *same local input file*:
+The repository now includes `scripts/export_reference_dimuon_histogram.py`, which uses PyROOT/RDataFrame, ROOT's `PtEtaPhiMVector`, and `TH1D` to independently export regular-bin counts plus reference metadata. It is deliberately separate from the Uproot/NumPy candidate implementation. The source is pinned to official commit `19a4a64fd58ef66a6ee3cf4f2a469fba61c60a09` (the `dimuonSpectrum.py` revision), and that commit is written into the reference metadata. Run it in a ROOT-enabled environment on the *same local input file*. For a quick bounded smoke test, first use `--max-events 10000` and omit `--sha256-input`:
+
+```bash
+python scripts/export_reference_dimuon_histogram.py \
+  --input ./Run2012BC_DoubleMuParked_Muons.root \
+  --max-events 10000 \
+  --output-dir outputs/reference-smoke
+```
+
+The bounded mode uses ROOT's single-threaded `RDataFrame.Range` to stop after the requested number of entries, rather than scanning the whole file. The metadata records `max_events` and the number of events processed; a capped run is a smoke test, not a full-data baseline and must not be compared with a candidate run that processed a different event range. Do not use `--sha256-input` for a quick I/O smoke test: hashing reads the entire local file even when event processing is capped.
+
+After the smoke test passes, run the full reference export with a checksum:
 
 ```bash
 python scripts/export_reference_dimuon_histogram.py \
@@ -94,7 +105,7 @@ python scripts/export_reference_dimuon_histogram.py \
   --output-dir outputs/reference
 ```
 
-The exporter writes `dimuon_mass_histogram.csv` and `reference_metadata.json`; with `--sha256-input`, the metadata includes the input's byte size and SHA-256. Hashing adds one full input-file read. Before indexing muon vectors, it performs a preflight pass to reject any event where `nMuon` disagrees with the `Muon_pt` collection or the muon branches have inconsistent collection lengths; this adds a full event scan but avoids unsafe indexing on malformed data. It records the ROOT version, cut-flow counts, and histogram underflow/overflow. Do not digitize the reference PNG or infer counts from its pixels. The script has been added to the repository but has **not yet been executed** against the CMS file, and the generated CSV must still be independently inspected before it is accepted as the reference artifact.
+The exporter writes `dimuon_mass_histogram.csv` and `reference_metadata.json`; with `--sha256-input`, the metadata includes the input's byte size and SHA-256. Hashing adds one full input-file read. Before indexing muon vectors, it performs a preflight pass to reject any event where `nMuon` disagrees with the `Muon_pt` collection or the muon branches have inconsistent collection lengths; this adds an event scan but avoids unsafe indexing on malformed data. It records the ROOT version, cut-flow counts, and histogram underflow/overflow. Do not digitize the reference PNG or infer counts from its pixels. Neither the bounded nor full exporter has yet been executed against the CMS file, and the generated CSV must still be independently inspected before it is accepted as the reference artifact.
 
 Once both numerical CSVs exist, run:
 
