@@ -441,6 +441,17 @@ def main() -> int:
     parser.add_argument("--histogram-report", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
+    output_path = args.output.resolve()
+    protected_inputs = {
+        args.reference_metadata.resolve(): "--reference-metadata",
+        args.candidate_metadata.resolve(): "--candidate-metadata",
+        args.histogram_report.resolve(): "--histogram-report",
+    }
+    if output_path in protected_inputs:
+        parser.error(
+            f"--output resolves to the same path as {protected_inputs[output_path]}; "
+            "refusing to overwrite an audit input"
+        )
     try:
         report = audit(args.reference_metadata, args.candidate_metadata, args.histogram_report)
     except ValueError as exc:
