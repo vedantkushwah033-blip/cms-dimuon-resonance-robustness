@@ -52,6 +52,9 @@ def test_schema_inspector_lists_trees_branches_and_trigger_candidates(tmp_path):
     assert events["branch_count"] >= 4
     assert "HLT_DoubleMu4" in events["trigger_related_name_candidates"]
     assert "Muon_pt" in events["branches"]
+    assert set(events["branch_types"]) == set(events["branches"])
+    assert events["branch_types"]["Muon_pt"]
+    assert events["branch_types"]["HLT_DoubleMu4"]
     assert events["branch_group_presence"]["muon_kinematics"]["missing"] == [
         "Muon_eta",
         "Muon_phi",
