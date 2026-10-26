@@ -271,3 +271,10 @@ The metadata audit now also requires the comparator report's `differing_bins` fi
 - Added a bounded GitHub Actions workflow intended to download one ROOT file each from official records 31123, 31129, 31127, and 31133, then preserve schema JSON plus input size and SHA-256. The workflow's initial runs were marked failed with zero jobs, so it has **not** produced any real-data reports. The workflow definition must be debugged or enabled before relying on it.
 - The synthetic ROOT integration workflow passed on commit `9931de407e6d5e53d3f9c0f1136cbd8eb8f7c8f2`. Latest Python matrix results for the branch-type and compatibility-test changes are not yet conclusively green; do not infer success from older commits.
 - Official-source audit refined the feasibility decision: derived DoubleMuParked schemas list some HLT decisions, while SingleMu schemas also list trigger objects but explicitly say their collection is only partially filled and that GoodLumisection is not available in every dataset. These are documentation-level findings only; no actual file-level audit has completed.
+
+
+## Correction: real-data workflow removed pending validated execution — 2026-10-26
+
+The attempted automatic GitHub Actions schema-audit workflow failed before creating jobs on multiple commits. I removed that unvalidated workflow rather than leaving a broken CI check and added a documented manual procedure to `docs/real_data_baseline_run_card.md`. The procedure uses the official CERN client to fetch one file from each of records 31123, 31129, 31127, and 31133, verifies downloads, writes schema reports, and records file sizes and SHA-256 values.
+
+This is still an unexecuted procedure. No actual ROOT file schema report exists yet. The latest Python/ROOT integration runs are queued; wait for them before claiming the branch-type reporting change and compatibility test are CI-green.
