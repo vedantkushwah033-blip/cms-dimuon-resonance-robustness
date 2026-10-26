@@ -47,10 +47,15 @@ def inspect_file(input_path: str) -> dict:
                     re.IGNORECASE,
                 )
             ]
+            branch_types = {
+                str(name): str(type_name)
+                for name, type_name in sorted(obj.typenames().items())
+            }
             result["trees"][key] = {
                 "entries": int(obj.num_entries),
                 "branch_count": len(branches),
                 "branches": branches,
+                "branch_types": branch_types,
                 "trigger_related_name_candidates": trigger_candidates,
                 "branch_group_presence": {
                     group: {
