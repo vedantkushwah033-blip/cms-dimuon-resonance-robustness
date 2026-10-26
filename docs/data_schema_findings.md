@@ -55,7 +55,7 @@ I inspected the CERN-published variable-list documentation linked from both rese
 - Run2012B: https://opendata.cern.ch/eos/opendata/cms/dataset-semantics/derived-data/NanoAODRun1/31123/Run2012B_DoubleMuParked_doc.html
 - Run2012C: https://opendata.cern.ch/eos/opendata/cms/dataset-semantics/derived-data/NanoAODRun1/31129/Run2012C_DoubleMuParked_doc.html
 
-Both published variable lists document event-level HLT decision branches, including dimuon-related paths such as `HLT_Dimuon0_Jpsi`, `HLT_DoubleMu11_Acoplanarity03`, `HLT_DoubleMu5_IsoMu5`, `HLT_Mu13_Mu8`, and `HLT_Mu17_Mu8`. They also document muon kinematics, charge, and several quality/isolation fields. This strengthens the feasibility case for a trigger-aware *schema investigation* on the research-level records.
+Both published variable lists document many event-level HLT decision branches, including examples such as `HLT_Mu13_Mu8` and `HLT_Mu17_Mu8`, alongside muon kinematics, charge, and several quality/isolation fields. Direct searches did not find `HLT_Dimuon0_Jpsi`, `HLT_DoubleMu11_Acoplanarity03`, or `HLT_DoubleMu5_IsoMu5` on those derived-schema pages. This supports a trigger-aware *schema investigation*, but not a claim that any specific desired path is available.
 
 This is documentation-level evidence only: it does not replace opening the exact downloadable ROOT file and checking its tree, branch types, event-level values, run coverage, and missingness. The published variable lists do not document prescale values. An HLT boolean records a path decision; by itself it does not provide trigger efficiency, prescale correction, the full run-dependent trigger menu, or an unbiased denominator for an efficiency measurement.
 
@@ -64,3 +64,10 @@ Next file-level checks:
 2. Confirm the exact dimuon HLT branches and any `GoodLumisection`/run/luminosity-block fields in those files.
 3. Establish the path versions and run ranges from CMS trigger documentation; do not pool periods or path versions without a justified mapping.
 4. Treat prescale availability as unresolved until a documented source is identified.
+
+
+## Precision correction to the trigger-branch inventory — 2026-10-26
+
+The published Run2012B and Run2012C variable-list pages were checked directly for the specific names previously listed above. They do document many HLT boolean branches, including `HLT_Mu13_Mu8` and `HLT_Mu17_Mu8`, and L1 double-muon decisions. However, searches of those variable-list pages did **not** find `HLT_Dimuon0_Jpsi`, `HLT_DoubleMu11_Acoplanarity03`, or `HLT_DoubleMu5_IsoMu5`. Those names must not be described as documented branches in these derived ntuples on the evidence currently checked. Some of these names appear in the original AOD record's list of possible HLT paths; that is not proof they are present in the derived ntuple.
+
+This corrects the overly specific branch examples in the preceding subsection. The defensible conclusion is narrower: the published derived schemas contain many named HLT decisions, including some dimuon-related paths, but the exact target path needed for the proposed estimand must be checked in each actual file and against the run-dependent configuration. Trigger-efficiency feasibility remains unresolved.
