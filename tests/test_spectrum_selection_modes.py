@@ -77,6 +77,7 @@ def test_default_selection_matches_exactly_two_muon_reference_contract(tmp_path)
 
     assert metadata["events_read"] == 3
     assert metadata["events_selected"] == 2
+    assert metadata["events_with_opposite_charge_pair"] == 1
     assert metadata["opposite_charge_pairs_total"] == 1
     assert metadata["selection_mode"] == "exactly-two-opposite-charge"
 
@@ -93,6 +94,7 @@ def test_all_pair_mode_keeps_three_muon_event_and_counts_each_os_pair(tmp_path):
 
     assert metadata["events_read"] == 3
     assert metadata["events_selected"] == 3
+    assert metadata["events_with_opposite_charge_pair"] == 2
     # One pair from the 2-muon opposite-sign event, two from the 3-muon event.
     assert metadata["opposite_charge_pairs_total"] == 3
     assert metadata["selection_mode"] == "all-opposite-charge-pairs"
