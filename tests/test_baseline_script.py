@@ -1,4 +1,5 @@
 import json
+import os
 import pathlib
 import subprocess
 import sys
@@ -41,7 +42,7 @@ def test_baseline_script_on_tiny_synthetic_root_file(tmp_path):
         sys.executable,
         str(REPO_ROOT / "scripts" / "reproduce_dimuon_spectrum.py"),
         "--input",
-        str(root_path),
+        "~/synthetic.root",
         "--output-dir",
         str(output_dir),
         "--max-events",
@@ -59,6 +60,7 @@ def test_baseline_script_on_tiny_synthetic_root_file(tmp_path):
         check=True,
         capture_output=True,
         text=True,
+        env={**os.environ, "HOME": str(tmp_path)},
     )
 
     metadata = json.loads((output_dir / "run_metadata.json").read_text(encoding="utf-8"))
@@ -67,6 +69,7 @@ def test_baseline_script_on_tiny_synthetic_root_file(tmp_path):
         delimiter=",",
         names=True,
     )
+    assert metadata["input"] == str(root_path.resolve())
     assert metadata["events_processed"] == 2
     assert metadata["opposite_charge_pairs_total"] == 1
     assert metadata["pairs_in_histogram_range"] == 1
