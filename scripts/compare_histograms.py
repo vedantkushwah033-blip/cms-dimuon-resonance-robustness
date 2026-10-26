@@ -57,8 +57,15 @@ def load_histogram(path: Path) -> tuple[np.ndarray, np.ndarray, list[int]]:
         raise ValueError(f"{path}: bin edges must be finite")
     if np.any(highs <= lows):
         raise ValueError(f"{path}: every bin must have high edge greater than low edge")
-    if len(lows) > 1 and not np.array_equal(highs[:-1], lows[1:]):
-        raise ValueError(f"{path}: bins must be contiguous and ordered")
+    if len(lows) > 1 and not np.allclose(
+        highs[:-1], lows[1:], rtol=0.0, atol=BIN_EDGE_ATOL_GEV
+    ):
+        max_gap = float(np.max(np.abs(highs[:-1] - lows[1:])))
+        raise ValueError(
+            f"{path}: bins must be contiguous and ordered within "
+            f"{BIN_EDGE_ATOL_GEV:g} GeV; maximum adjacent-edge mismatch="
+            f"{max_gap:.17g} GeV"
+        )
     if any(count < 0 for count in counts):
         raise ValueError(f"{path}: counts must be nonnegative integers")
     return lows, highs, counts
