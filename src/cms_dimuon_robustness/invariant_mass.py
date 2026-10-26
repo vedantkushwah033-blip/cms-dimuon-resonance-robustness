@@ -56,9 +56,15 @@ def pair_invariant_mass(
     # remain visibly invalid rather than being silently converted to zero.
     scale = energy_sum**2 + px_sum**2 + py_sum**2 + pz_sum**2
     tolerance = 64 * np.finfo(float).eps * scale
+    roundoff_negative = (
+        np.isfinite(mass_squared)
+        & np.isfinite(scale)
+        & (mass_squared < 0)
+        & (mass_squared >= -tolerance)
+    )
     stable_mass_squared = np.where(
         mass_squared >= 0,
         mass_squared,
-        np.where(mass_squared >= -tolerance, 0.0, np.nan),
+        np.where(roundoff_negative, 0.0, np.nan),
     )
     return np.sqrt(stable_mass_squared)
