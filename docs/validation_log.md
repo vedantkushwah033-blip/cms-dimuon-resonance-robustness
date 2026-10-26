@@ -229,3 +229,11 @@ The metadata audit now also requires the comparator report's `differing_bins` fi
 - Added regression tests for both the independent vectorized helper and float32 NanoAOD branches at this adversarial scale, while retaining the existing randomized four-vector cross-check.
 - Confirmed GitHub Actions on commit `5afd6cd44b3e41bf0342af2ef45fc0465ff6ee64`: [Python 3.10–3.12 test/compile/Ruff matrix](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40282993593) and [ROOT synthetic integration](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40282993559) passed. The ROOT integration checks parity on its small synthetic fixture only.
 - Scientific limitation: this numerical improvement is not evidence of exact parity with the official C++-float reference on the real CMS sample. Full-data comparison must still be performed and any bin discrepancies reported.
+
+
+## Bounded ROOT reference smoke-test mode — 2026-10-26
+
+- Added `--max-events N` to the independent PyROOT reference exporter. With a limit, the exporter disables implicit multithreading and uses `RDataFrame.Range(N)` so a smoke test stops after the requested entries rather than scanning the complete tree. Full runs retain the existing implicit-multithreading path.
+- The reference metadata records the requested `max_events` limit; `events_total` and cut-flow values describe the bounded sample when a limit is used. A bounded reference must only be compared with a candidate processed over the same event range. `--sha256-input` still reads the entire local file and should be omitted when the goal is only a fast I/O smoke test.
+- The ROOT-enabled synthetic integration test now exercises both full-fixture reference/candidate parity and a one-event bounded reference run. Confirmed CI on commit `cde7b263ee404bdbebe0659518c837dbef080858`: [Python 3.10–3.12 test/compile/Ruff matrix](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40283199640) and [ROOT synthetic integration](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40283199631) passed.
+- This feature enables safer staged validation, but neither the bounded nor full reference exporter has yet been run on the official CMS input. Full-data histogram parity remains outstanding.
