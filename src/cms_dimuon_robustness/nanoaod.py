@@ -24,11 +24,16 @@ def opposite_charge_pair_masses(arrays: ak.Array) -> ak.Array:
         field: ak.num(arrays[field], axis=1)
         for field in required_fields
     }
-    reference_counts = multiplicities["Muon_pt"]
+    reference_counts = ak.to_numpy(multiplicities["Muon_pt"])
     for field, counts in multiplicities.items():
-        if not bool(ak.all(counts == reference_counts)):
+        field_counts = ak.to_numpy(counts)
+        mismatches = np.flatnonzero(field_counts != reference_counts)
+        if mismatches.size:
+            event_index = int(mismatches[0])
             raise ValueError(
-                f"Per-event muon multiplicities differ between Muon_pt and {field}"
+                "Per-event muon multiplicities differ: "
+                f"event {event_index} has Muon_pt={int(reference_counts[event_index])} "
+                f"and {field}={int(field_counts[event_index])}"
             )
 
     # The official reference uses charge inequality (charge[0] != charge[1]).
