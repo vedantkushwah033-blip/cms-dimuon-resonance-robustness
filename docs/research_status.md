@@ -3,6 +3,9 @@
 **Last updated:** 2026-10-26
 
 ## Confirmed completed in this repository
+- Added a runtime invariant to the baseline spectrum script that raises an error if below-range, in-range, upper-edge/overflow, and non-finite pair counts do not sum to the total opposite-charge pair count.
+- Removed a duplicate JSON metadata key for `pairs_at_or_above_mass_max`.
+- Updated the standalone vectorized invariant-mass helper to clamp only round-off-scale negative mass-squared values; substantially negative results now remain invalid (`NaN`) rather than silently becoming zero.
 - Refined the spectrum metadata field to `pairs_at_or_above_mass_max`, accurately describing the upper-edge overflow convention.
 - Expanded the end-to-end spectrum smoke test so a synthetic two-muon event has a mass exactly at the configured upper edge; the test checks that it is excluded from the in-range histogram and included in the overflow accounting.
 - Corrected the schema/run guide's shell line continuations and retained the actual schema inventory invocation.
@@ -43,6 +46,9 @@
 - GitHub Actions run for commit `1a40e06` (Monte Carlo precision planning): was still in progress at the last check; do not report it as passing until completed.
 
 ## Latest workflow status for histogram changes
+- The end-to-end upper-edge fixture commit `0921ce3` and status-ledger commit `60d8237` both completed successfully in GitHub Actions.
+- The pair-accounting invariant/metadata cleanup commit `5d3ac5a` was still running on Python 3.10 and 3.12, with Python 3.11 queued, at the last check.
+- The direct invariant-mass stability change `462e2af` has just been committed; its CI result has not yet been verified.
 - Run `f0916b1` failed because the spectrum integration test still expected the old metadata field name after the rename. The test was updated in `68fa674`, whose workflow completed successfully.
 - Run `fdc98d6` added the first end-to-end upper-edge fixture; its workflow status was still in progress at the last check. Commit `0921ce3` corrected the fixture's eta values so the generated pair is exactly at the mass upper edge; its workflow is also still in progress at the last check.
 - Follow-up commits `f0916b1`, `68fa674`, and `3b149d1` update overflow metadata, its integration test, and shell line continuations in the baseline guide. Their CI results have not yet been checked here.
