@@ -62,7 +62,7 @@ def main() -> None:
 
         for chunk in tree.iterate(expressions=BRANCHES, step_size=args.step_size, library="ak"):
             if args.max_events is not None:
-                remaining = args.max_events - events_processed
+                remaining = args.max_events - events_read
                 if remaining <= 0:
                     break
                 chunk = chunk[:remaining]
