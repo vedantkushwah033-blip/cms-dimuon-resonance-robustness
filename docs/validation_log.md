@@ -246,3 +246,11 @@ The metadata audit now also requires the comparator report's `differing_bins` fi
 - Added regression tests for candidate negative kinematics, reference invalid charge, and reference negative finite kinematics. The reference exporter also retains the bounded `--max-events` smoke-test path.
 - Confirmed on commit `23c17d919a02a452a391741b38434c867e95b21a`: [Python 3.10–3.12 test/compile/Ruff matrix](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40283709403) and [ROOT synthetic integration](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40283709344) both passed. The ROOT workflow covers synthetic reference/candidate parity, bounded processing, malformed collection lengths, invalid charge, and negative finite kinematics.
 - These checks improve input integrity and test coverage. The official CMS ROOT file still has not been processed by this repository, so full-data parity remains unestablished.
+
+
+## Selection-scoped reference input validation — 2026-10-26
+
+- Refined the ROOT preflight so collection-length and declared-multiplicity integrity is checked across every event, but charge and finite-negative kinematic checks apply only to events with `nMuon == 2`. This matches the reference selection and avoids rejecting malformed pair fields in events that would never enter the histogram.
+- Added a synthetic test proving an unselected one-muon event with a nonphysical charge does not fail the exactly-two-muon reference export; selected invalid-charge and negative-finite-kinematics cases remain rejected.
+- Final code/test commit: `206678e4fcb444de7c7e89bca4d2f3c157ca79b9`. The [Python 3.10–3.12 matrix](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40283968358) and [ROOT integration suite](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40283968367) both passed; the ROOT suite reports 8 tests passed.
+- These are synthetic/software checks only. No claim is made about actual CMS input processing or full-data histogram parity.
