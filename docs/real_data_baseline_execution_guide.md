@@ -32,8 +32,10 @@ From the repository root, after installing the project and its declared dependen
 
 ```bash
 python -m pip install -e '.[dev]'
-python scripts/inspect_root_schema.py --help
-python scripts/reproduce_dimuon_spectrum.py \
+python scripts/inspect_root_schema.py \\
+  --input ./Run2012BC_DoubleMuParked_Muons.root \\
+  --output outputs/outreach-smoke/schema.json
+python scripts/reproduce_dimuon_spectrum.py \\
   --input ./Run2012BC_DoubleMuParked_Muons.root \
   --max-events 10000 \
   --sha256-input \
@@ -44,6 +46,7 @@ The schema inventory is heuristic: branch-name matches are leads, not proof of v
 
 Inspect the metadata JSON, histogram CSV, and PNG. Confirm that:
 - The input checksum and byte size are present.
+- The schema JSON lists the `Events` tree and the required muon branches.
 - The event count equals the requested limit, unless a documented input issue prevented it.
 - The selected event count matches the selection definition.
 - The pair accounting identity holds.
