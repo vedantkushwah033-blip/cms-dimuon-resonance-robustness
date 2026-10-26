@@ -159,3 +159,22 @@ def test_highly_boosted_float32_pair_retains_physical_mass():
     expected = 2.0 * float(np.float32(0.105658))
     assert actual.shape == (1,)
     assert actual[0] == pytest.approx(expected, rel=2e-5, abs=1e-8)
+
+
+def test_highly_boosted_float32_pair_resolves_tiny_azimuthal_separation():
+    pt = np.float32(1e8)
+    mass = np.float32(0.105658)
+    delta_phi = np.float32(1e-8)
+    events = ak.Array(
+        {
+            "Muon_pt": np.array([[pt, pt]], dtype=np.float32),
+            "Muon_eta": np.array([[0.0, 0.0]], dtype=np.float32),
+            "Muon_phi": np.array([[0.0, delta_phi]], dtype=np.float32),
+            "Muon_mass": np.array([[mass, mass]], dtype=np.float32),
+            "Muon_charge": np.array([[1, -1]], dtype=np.int32),
+        }
+    )
+    actual = ak.to_numpy(ak.flatten(opposite_charge_pair_masses(events), axis=None))
+    expected = np.sqrt(4.0 * float(mass) ** 2 + 4.0 * float(pt) ** 2 * np.sin(float(delta_phi) / 2.0) ** 2)
+    assert actual.shape == (1,)
+    assert actual[0] == pytest.approx(expected, rel=2e-6, abs=1e-8)
