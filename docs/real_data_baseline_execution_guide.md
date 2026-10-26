@@ -32,10 +32,10 @@ From the repository root, after installing the project and its declared dependen
 
 ```bash
 python -m pip install -e '.[dev]'
-python scripts/inspect_root_schema.py \\
-  --input ./Run2012BC_DoubleMuParked_Muons.root \\
+python scripts/inspect_root_schema.py \
+  --input ./Run2012BC_DoubleMuParked_Muons.root \
   --output outputs/outreach-smoke/schema.json
-python scripts/reproduce_dimuon_spectrum.py \\
+python scripts/reproduce_dimuon_spectrum.py \
   --input ./Run2012BC_DoubleMuParked_Muons.root \
   --max-events 10000 \
   --sha256-input \
