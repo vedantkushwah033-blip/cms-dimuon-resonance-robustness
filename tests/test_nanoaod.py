@@ -123,3 +123,23 @@ def test_multiplicity_error_identifies_first_mismatching_event():
     with pytest.raises(ValueError, match=r"event 1 has Muon_pt=2 and Muon_eta=1"):
         opposite_charge_pair_masses(events)
 
+
+
+
+def test_float32_nanoaod_kinematics_are_promoted_before_mass_arithmetic():
+    # For nearly collinear high-pT muons, float32 intermediate arithmetic can
+    # round each energy to pT and erase the small but physical invariant mass.
+    events = ak.Array(
+        {
+            "Muon_pt": np.array([[1000.0, 1000.0]], dtype=np.float32),
+            "Muon_eta": np.array([[0.0, 0.0]], dtype=np.float32),
+            "Muon_phi": np.array([[0.0, 0.0]], dtype=np.float32),
+            "Muon_mass": np.array([[0.105658, 0.105658]], dtype=np.float32),
+            "Muon_charge": np.array([[1, -1]], dtype=np.int32),
+        }
+    )
+    actual = ak.to_numpy(ak.flatten(opposite_charge_pair_masses(events), axis=None))
+    expected = 2.0 * float(np.float32(0.105658))
+    assert actual.shape == (1,)
+    assert actual[0] > 0.0
+    assert actual[0] == pytest.approx(expected, rel=2e-5, abs=1e-8)
