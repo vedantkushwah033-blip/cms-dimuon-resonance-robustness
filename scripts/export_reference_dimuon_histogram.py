@@ -11,6 +11,7 @@ import argparse
 import csv
 import hashlib
 import json
+import math
 import platform
 from pathlib import Path
 
@@ -28,8 +29,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--mass-min", type=float, default=0.25)
     parser.add_argument("--mass-max", type=float, default=300.0)
     args = parser.parse_args()
-    if args.bins <= 0 or not 0 < args.mass_min < args.mass_max:
-        parser.error("bins must be positive and 0 < mass-min < mass-max")
+    if (
+        args.bins <= 0
+        or not math.isfinite(args.mass_min)
+        or not math.isfinite(args.mass_max)
+        or not 0 < args.mass_min < args.mass_max
+    ):
+        parser.error("bins must be positive and mass bounds must be finite with 0 < mass-min < mass-max")
     if not Path(args.input).is_file():
         parser.error("--input must point to an existing local ROOT file")
     return args
