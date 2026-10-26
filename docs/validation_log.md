@@ -161,3 +161,10 @@ All of these checks are software/audit validation. The full official CMS ROOT da
 A further metadata-integrity check now requires the reference ROOT histogram's regular-bin total, underflow, and overflow counts to sum exactly to `histogram_entries_including_flow`. This is distinct from checking that ROOT's fill-entry count matches the opposite-sign cut-flow: a corrupted or inconsistently recorded flow-bin field could otherwise evade the latter check. The new invariant rejects malformed counts, including booleans masquerading as integers, and has regression tests for both an inconsistent sum and a boolean count.
 
 The code and regression tests are committed; the latest CI result must be checked before this change is described as validated. This check still does not replace an actual CMS-data run or independent review of generated reference artifacts.
+
+
+## Comparator-report internal consistency — 2026-10-26
+
+The metadata audit now checks the comparator's discrepancy summary as well as its exact-parity boolean. A passing audit requires zero differing bins, zero total absolute count difference, and zero maximum absolute count difference; these fields must also be nonnegative JSON integers. This guards against a stale, manually edited, or internally inconsistent comparison report whose boolean claims parity despite nonzero discrepancy metrics.
+
+A regression test intentionally supplies that contradictory report and verifies that the audit fails. CI for the newest code/test commits must be checked before calling this change validated. Real-data processing and exact parity on the official CMS input remain outstanding.
