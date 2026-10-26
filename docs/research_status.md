@@ -312,3 +312,11 @@ The revised bounded baseline/parity workflow has not run. A dispatch-path audit 
 - The calculations are illustrative planning guidance only. They do not select the final replicate count, freeze the protocol, or report any simulation outcome. The existing confirmatory protocol remains a draft and explicitly blocks the confirmatory campaign until the scenario grid, diagnostic, comparators, data feasibility, and precision target are resolved.
 - Commit `19840992939299d419a3e59e2c73d9ada4a222e7` adds the document. The GitHub combined-status lookup returned no status entries for the commit; treat latest-head CI as **unverified**, not passed.
 - The bounded 100,000-entry research-level ROOT workflow still requires manual dispatch and artifact review. No candidate/reference parity result or confirmatory physics result is claimed.
+
+
+## Methods-level literature comparison — 2026-10-27
+
+- Added `docs/literature_comparison_and_claim_boundaries_2026-10-27.md`, a focused comparison of Williams (2017), Cesarotti et al. (2019), Algeri (2020), Volkovich et al. (2022), and background-sculpting-resistant anomaly methods. The memo clarifies that generic background mismatch, fixed-versus-selected model comparison, and diagnostic development are not sufficient novelty claims.
+- The only candidate question retained is the global calibration and diagnostic false-alarm behavior of a fully specified model-selection-plus-scan pipeline on independently held-out null scenarios, compared with a credible existing method. This remains a hypothesis for literature comparison, not a demonstrated gap.
+- Decision remains **NO-GO for confirmatory simulations** until methods-level comparison, baseline validation, estimand, comparator, held-out scenario families, and Monte Carlo precision are frozen.
+- New memo commit: `a57c1a05f8f91346d134726325661b3ab327328a`. CI status for this commit has not yet been verified; no status entries should be interpreted as a pass.
