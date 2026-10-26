@@ -132,3 +132,10 @@ A planned task is not a result. A passing CI run validates the current automated
 - The corrective test commit `4e8fd45c14e865713790e8f9ad47d3f81033dac1` passed all three configured Python jobs in GitHub Actions run [40256388844](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40256388844). The following ledger/documentation commit `ee2265993c9236f4b286874883e378f336f4ae82` passed run [40256407530](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40256407530).
 - The earlier failed comparator workflow remains documented in `docs/validation_log.md`; its cause was stale invalid-count error-message assertions after exact-integer parsing was introduced. Those assertions were updated and the corrected workflow is green.
 - Current validated scope: synthetic histogram fixtures and automated tests/lint across Python 3.10, 3.11, and 3.12. Still not validated: the official ROOT input, its checksum/schema, the candidate full-data spectrum, the official reference export, and numerical histogram parity. Do not describe the analysis as reproduced until those steps are executed and archived.
+
+
+## Comparator robustness update — 2026-10-26
+- Added strict histogram CSV structural validation: duplicate column names and rows with extra/missing fields are rejected rather than silently interpreted.
+- Histogram counts are parsed as decimal integer strings, not through floating-point conversion; malformed forms are rejected and large counts remain exact.
+- Regression tests cover malformed files and exact integer behavior. The initial malformed-fixture test run failed due to incorrect newline escaping in the test data; the fixture was corrected, and CI run [40257190269](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40257190269) passed pytest and Ruff on Python 3.10, 3.11, and 3.12.
+- Evidence boundary unchanged: automated CI validates the tested software paths, not real-data correctness. Official ROOT-file execution, provenance capture from the actual input, reference histogram export, and bin-by-bin parity remain uncompleted.
