@@ -168,3 +168,10 @@ A planned task is not a result. A passing CI run validates the current automated
 - Added regression tests for a non-conserving flow-count sum and a boolean masquerading as an integer count.
 - Code, tests, and validation-log updates are committed. Check CI on the current head before treating this latest addition as validated.
 - Empirical boundary unchanged: no full official CMS input processing, reference export, or 30,000-bin parity claim has been completed.
+
+
+## Comparator-report internal consistency — 2026-10-26
+- The metadata audit now requires the comparator's discrepancy summary to agree with exact parity: zero differing bins, zero total absolute count difference, and zero maximum absolute count difference, all strict nonnegative integer fields.
+- Added a regression test for a contradictory report claiming parity while reporting nonzero discrepancies.
+- Latest code and test commits are committed; check their GitHub Actions results before describing this addition as validated.
+- The actual official CMS dataset has not been processed, and no full-data 30,000-bin parity result is claimed.
