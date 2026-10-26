@@ -89,6 +89,21 @@ def audit(reference_path: Path, candidate_path: Path, histogram_report_path: Pat
             "detail": "nonnegative integer" if valid else "missing or non-integer count",
         })
 
+    def count_not_exceed(name: str, smaller: Any, larger: Any) -> None:
+        valid_types = all(
+            isinstance(value, int) and not isinstance(value, bool) and value >= 0
+            for value in (smaller, larger)
+        )
+        passed = valid_types and smaller <= larger
+        checks.append({
+            "name": name,
+            "passed": passed,
+            "smaller_count": smaller,
+            "larger_count": larger,
+            "detail": "count ordering is valid"
+            if passed else "counts must be nonnegative integers and smaller_count <= larger_count",
+        })
+
     def finite_number(name: str, value: Any) -> None:
         valid = _finite_json_number(value)
         checks.append({
@@ -201,6 +216,22 @@ def audit(reference_path: Path, candidate_path: Path, histogram_report_path: Pat
         "detail": "finite numeric bounds with 0 < minimum < maximum"
         if reference_range_valid else "invalid reference mass-range schema or ordering",
     })
+    count_not_exceed(
+        "reference_exactly_two_events_within_total",
+        ref.get("events_exactly_two_muons"), ref.get("events_total"),
+    )
+    count_not_exceed(
+        "reference_opposite_sign_events_within_exactly_two",
+        ref.get("events_opposite_sign"), ref.get("events_exactly_two_muons"),
+    )
+    count_not_exceed(
+        "candidate_selected_events_within_read_events",
+        cand.get("events_selected"), cand.get("events_read"),
+    )
+    count_not_exceed(
+        "candidate_pairs_within_selected_events",
+        cand.get("opposite_charge_pairs_total"), cand.get("events_selected"),
+    )
     check("available_tree_entries", ref.get("events_total"), cand.get("tree_entries_available"))
     check("full_dataset_events_read", ref.get("events_total"), cand.get("events_read"))
     check("events_read_processed_consistency", cand.get("events_read"), cand.get("events_processed"))
