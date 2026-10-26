@@ -150,7 +150,7 @@ def test_reference_exporter_on_tiny_synthetic_root_file(tmp_path):
             sys.executable,
             str(REPO_ROOT / "scripts" / "export_reference_dimuon_histogram.py"),
             "--input",
-            "~/reference-smoke.root",
+            "~/synthetic.root",
             "--output-dir",
             str(limited_dir),
             "--max-events",
