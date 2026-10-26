@@ -58,3 +58,16 @@ The Run2012B sample contains 438 branch names beginning `HLT_` and 128 beginning
 ## Provenance
 
 The machine-readable schema reports and manifest are attached to workflow run [40403830670](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40403830670). The workflow's successful status means download, checksum verification, inspection, and artifact upload completed; it is not a scientific validation result.
+
+
+## Cross-file branch-set comparison
+
+A reproducible comparison of the two schema JSON artifacts gives the following counts:
+
+| Branch group | Run2012B | Run2012C | Present in both | B-only | C-only |
+|---|---:|---:|---:|---:|---:|
+| All branch names | 907 | 894 | 833 | 74 | 61 |
+| Names beginning `HLT_` | 438 | 427 | 370 | 68 | 57 |
+| Names beginning `L1_` | 128 | 126 | 122 | 6 | 4 |
+
+**Interpretation:** the sampled files share most branch names but the HLT menus are not identical. In particular, the absence of a branch in one file must not be treated as a zero-valued trigger decision. The analysis should explicitly define a common-path set or period-specific mapping, validate path versions against run ranges, and report period-specific results before any combination. This comparison is between two files only and cannot establish the full menu evolution across all runs or files.
