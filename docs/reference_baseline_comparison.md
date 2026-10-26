@@ -69,3 +69,8 @@ The candidate pair-accounting audit also verifies conservation across in-range, 
 Additional physical-count invariants are checked: exactly-two-muon events cannot exceed all events; opposite-sign events cannot exceed exactly-two-muon events; selected events cannot exceed events read; and, under the exactly-two selection, opposite-charge pairs cannot exceed selected events. These guards catch internally impossible but mutually matching metadata before a parity report is accepted.
 
 The reference-side audit also checks that ROOT's recorded histogram entry count (including flow entries) matches the opposite-sign event cut-flow count. Under the exactly-two-muon selection, each opposite-sign event contributes one histogram fill; disagreement therefore flags a cut-flow or metadata inconsistency before candidate parity is accepted.
+
+
+## Independent reference implementation precision
+
+The optional ROOT-based exporter now returns the reference four-vector invariant mass as a C++ `double`, rather than narrowing it to `float` after the calculation. Input NanoAOD branches may be stored as float32, but retaining double precision for the computed mass avoids an unnecessary second quantization before narrow-bin histogramming. This is a numerical hygiene improvement, not evidence of parity; the PyROOT reference and Uproot candidate still need to be run on the same actual input file and compared.
