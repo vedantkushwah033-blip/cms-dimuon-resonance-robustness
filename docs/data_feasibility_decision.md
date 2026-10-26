@@ -13,6 +13,10 @@ Three similarly named public resources must not be conflated:
 
 The official CMS trigger guide explains that trigger decisions, trigger-object information, and prescales are separate pieces of information; availability depends on the data format and era. A stored HLT decision bit is not a measurement of trigger efficiency and does not automatically supply prescale weights. See [CERN's CMS trigger guide](https://opendata.web.cern.ch/docs/cms-guide-trigger-system).
 
+## Trigger-documentation interpretation
+
+The [official CMS trigger guide](https://opendata.cern.ch/docs/cms-guide-trigger-system) explains that Run-1 AOD stores trigger decisions through `TriggerResults`, while later NanoAOD formats store HLT bits and do not store prescales in the NanoAOD file itself; prescale information may need to be retrieved separately. These statements are format- and era-specific. We must identify the exact Run-1 NanoAOD-like producer output before assuming it follows later NanoAOD conventions.
+
 ## Required file-level audit
 
 For one exact file from each candidate we seriously consider:
