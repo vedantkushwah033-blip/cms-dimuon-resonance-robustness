@@ -2,7 +2,7 @@
 
 A reproducible statistical-calibration study of dimuon resonance-search procedures using CMS Open Data where feasible, alongside explicitly labelled model-generated pseudoexperiments and controlled stress tests.
 
-> **Status (2026-10-26): early research design and baseline-code scaffold.** A bounded 10,000-entry smoke test has now passed against the official CMS outreach ROOT file, including schema inspection and spectrum-output generation. The full 61.5-million-entry file has not been processed, the official reference spectrum has not been reproduced quantitatively, and no novel finding or publication is claimed. The outreach schema contains no trigger-related branch candidates or listed muon quality/isolation candidates, so it is not sufficient for the proposed trigger-aware scientific analysis.
+> **Status (2026-10-26): early research design and baseline-code scaffold.** A bounded 10,000-entry smoke test has passed against the official CMS outreach ROOT file, including schema inspection and spectrum-output generation. The full 61.5-million-entry file has not been processed, and the official reference spectrum has not been reproduced quantitatively. No novel finding or publication is claimed. The outreach schema contains no trigger-related branch candidates or listed muon quality/isolation candidates, so it is not sufficient for the proposed trigger-aware scientific analysis.
 
 ## Research objective
 The candidate objective is to evaluate the false-positive calibration of a clearly specified local dimuon bump-hunt procedure under prespecified background-generating scenarios, including any model-selection step only if the literature audit identifies a defensible gap. The question is provisional. Williams (2017) already studies background-model selection, bias/variance and coverage in bump hunting, so the exact method must be compared before claiming novelty.
@@ -23,7 +23,7 @@ The education/outreach sample remains useful for pipeline development only. The 
 - `src/cms_dimuon_robustness/invariant_mass.py` — vectorized kinematic calculation.
 - `src/cms_dimuon_robustness/nanoaod.py` — Awkward-array opposite-charge pair-mass calculation.
 - `scripts/reproduce_dimuon_spectrum.py` — chunked ROOT/NanoAOD baseline reconstruction; requires an explicit input path to prevent accidental use of the unvalidated outreach dataset.
-- `scripts/inspect_root_schema.py` — inventories trees, entries, branch names, trigger-related candidates, and presence/absence of candidate branch groups; semantics still require review.
+- `scripts/inspect_root_schema.py` — inventories trees, entries, branch names, trigger-related candidates, branch types, and presence/absence of candidate branch groups; semantics still require review.
 - `tests/test_independent_four_vector.py` — compares vectorized mass calculations with an independently implemented four-vector reference on 250 fixed-seed random cases.
 - `tests/test_spectrum_script.py` — runs the baseline command-line script on a synthetic ROOT file and checks event limits, counts, metadata, CSV and plot outputs.
 - `tests/test_spectrum_selection_modes.py` — verifies that exactly-two-muon event selection and all-opposite-charge-pairs selection produce distinct, expected event/pair counts on a mixed-multiplicity sample.
@@ -31,16 +31,15 @@ The education/outreach sample remains useful for pipeline development only. The 
 - `docs/selection_semantics.md` — defines event-level versus pair-level selection and explains the statistical consequences of multiple pairs per event.
 - `docs/data_schema_findings.md`, `docs/data_feasibility_decision.md` — separate record-level facts from file-level checks and define trigger-aware, limited-scope, and reproducibility-only routes.
 - `docs/reference_baseline_comparison.md` — maps the implementation to the official public example's event selection, binning, mass range, and axes.
-- `docs/official_reference_code_audit_2026-10-26.md` — source-level comparison with the official v1.4 reference implementation; confirms configuration alignment but explicitly does not claim numerical reproduction.
+- `docs/official_reference_code_audit_2026-10-26.md` — compares the official CMS Open Data v1.4 source code with this implementation; source-level selection and histogram configuration align, but no numerical reproduction is claimed.
 - `docs/official_outreach_smoke_test_2026-10-26.md` — records the successful 10,000-entry official-data smoke test, branch-schema limitations, event/pair counts, earlier failed attempts, and next acceptance gate.
 - `docs/research_level_schema_feasibility_audit_2026-10-26.md` — reviews official Run2012B/C variable documentation, separating record-level facts from file-level checks and rejecting trigger-efficiency claims until path decisions/prescales are verified.
-- The baseline records file size, optional SHA-256, tree entries/types, software versions, and in-range/out-of-range/non-finite pair accounting. The latest CI run also verifies non-finite mass handling end-to-end on a synthetic ROOT event.
-- `docs/novelty_comparison.md` — documents overlap with closest prior work and explicit novelty no-go criteria.
-- `docs/literature_search_update_2026-10-26.md` — records a focused follow-up search, additional CMS context, and why novelty remains unproven; this is not a systematic review.
-- `docs/first_official_file_runbook_2026-10-26.md` — gives staged commands and explicit acceptance gates for inspecting the public outreach ROOT file first, then separately auditing research-level Run2012B/C files. It is a runbook, not evidence that these commands have been executed.
-- `.github/workflows/official-data-smoke-test.yml` — hard-capped 10,000-event remote access/pipeline smoke test with a 30-minute limit and uploaded diagnostics; it runs on scoped changes to the workflow or analysis code on this branch and supports manual dispatch once on the default branch. No real-data result is claimed until a run and its artifacts are inspected.
+- `docs/real_data_baseline_run_card.md` — documents provenance and bounded schema-audit commands for one file each from research-level DoubleMuParked and SingleMu records; the documented downloads have not yet been completed by this repository.
+- `docs/run1_trigger_feasibility_gate.md` — records the requirements for a valid trigger estimand and why HLT bits alone are insufficient.
+- `docs/literature_search_update_2026-10-26.md` — records a focused follow-up search; this is not a systematic review and novelty remains unproven.
+- `docs/first_official_file_runbook_2026-10-26.md` — gives staged commands and acceptance gates for the outreach file and research-level Run2012B/C files.
+- `.github/workflows/official-data-smoke-test.yml` — hard-capped 10,000-event remote access/pipeline smoke test with a 30-minute limit and artifact upload; the successful run is linked in the smoke-test report.
 - `src/cms_dimuon_robustness/monte_carlo.py` — exact binomial confidence intervals and a sample-size planning approximation.
-- `tests/` — unit and synthetic-ROOT integration tests. GitHub Actions passed 20 tests plus Ruff checks on Python 3.10, 3.11 and 3.12 for commit `a9c3bf1dc56f911893d7bad928d060e41be6a519`. The suite includes an independent four-vector cross-check, a synthetic-ROOT schema-inspector test, and end-to-end synthetic-ROOT spectrum CLI tests.
 
 ## Setup
 Python 3.10 or newer:
@@ -50,23 +49,23 @@ python -m venv .venv
 # Windows PowerShell: .venv\\Scripts\\Activate.ps1
 # macOS/Linux: source .venv/bin/activate
 python -m pip install -e ".[dev]"  # local tests/development
-# For the optional CERN root:// remote-file workflow, also install the XRootD client and fsspec adapter:
+# For optional CERN root:// remote-file access:
 python -m pip install -e ".[dev,remote]"
 pytest
 ruff check src tests
 ```
 
 ## First baseline run
-Start with a limited event smoke test, not a full 61-million-event run:
+The official outreach-file smoke test has already succeeded for the first 10,000 entries. Do not treat that bounded pipeline check as a full reference reproduction or a physics validation. To inspect another specific file, first verify its exact source and schema:
 
 ```bash
 python scripts/inspect_root_schema.py --input /path/to/official-file.root --output outputs/schema_report.json
 python scripts/reproduce_dimuon_spectrum.py --input /path/to/selected-file.root --max-events 10000
 ```
 
-The scripts require an explicit file path or supported ROOT URL. The spectrum script now defaults to exactly two reconstructed muons with opposite charge, 30,000 bins over 0.25–300 GeV, and logarithmic x/y axes to align with the public example. Inspect the schema first and save the report. The repository has not yet confirmed a successful run against the official event file. The default spectrum mode selects events with exactly two muons and then requires opposite charge; an optional all-pairs mode includes multi-muon events and is not reference-parity compatible. Neither mode applies trigger or object-quality cuts, so neither is a complete physics selection. The education/outreach dataset is not considered validated physics input; prefer evaluating the research-level Run-1 ntuples first.
+The scripts require an explicit file path or supported ROOT URL. The spectrum script defaults to exactly two reconstructed muons with opposite charge, 30,000 bins over 0.25–300 GeV, and logarithmic x/y axes to align with the public example. The default mode selects events with exactly two muons and then requires opposite charge; an optional all-pairs mode includes multi-muon events and is not reference-parity compatible. Neither mode applies trigger or object-quality cuts, so neither is a complete physics selection. The education/outreach dataset is not considered validated physics input; evaluate the research-level Run-1 ntuples only after exact file provenance and schema have been verified.
 
-After the smoke test, inspect the output, verify event-level masses against an independent four-vector calculation, then increase the sample size only after resolving any discrepancies.
+After any new-file smoke test, inspect the output, verify event-level masses against an independent four-vector calculation, and compare with a reference before increasing sample size.
 
 ## Statistical precision and scientific guardrails
 - Smoke tests, pilot runs and main simulations have different purposes; planning counts are not evidence.
