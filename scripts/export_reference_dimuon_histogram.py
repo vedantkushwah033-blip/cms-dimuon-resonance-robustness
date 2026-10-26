@@ -101,6 +101,13 @@ def main() -> int:
             ROOT::Math::PtEtaPhiMVector m2(pt[1], eta[1], phi[1], mass[1]);
             return (m1 + m2).mass();
         }
+
+        bool hasInvalidMuonCharge(ROOT::VecOps::RVec<int>& charge) {
+            for (int value : charge) {
+                if (value != -1 && value != 1) return true;
+            }
+            return false;
+        }
         """
     )
 
@@ -130,15 +137,16 @@ def main() -> int:
         "Muon_pt.size() != Muon_eta.size() || "
         "Muon_pt.size() != Muon_phi.size() || "
         "Muon_pt.size() != Muon_mass.size() || "
-        "Muon_pt.size() != Muon_charge.size()",
-        "Events with inconsistent muon collection lengths",
+        "Muon_pt.size() != Muon_charge.size() || "
+        "hasInvalidMuonCharge(Muon_charge)",
+        "Events with invalid muon collection lengths or charge values",
     )
     invalid_collection_count = int(invalid_collections.Count().GetValue())
     if invalid_collection_count:
         raise ValueError(
             "Input ROOT tree contains "
             f"{invalid_collection_count} events with inconsistent nMuon or muon "
-            "collection lengths; refusing to index muon vectors"
+            "collection lengths or invalid charge values; refusing to index muon vectors"
         )
 
     exactly_two = dataframe.Filter("nMuon == 2", "Events with exactly two muons")
