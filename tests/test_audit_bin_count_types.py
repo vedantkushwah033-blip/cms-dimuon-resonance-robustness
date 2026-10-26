@@ -94,3 +94,18 @@ def test_string_encoded_mass_range_cannot_pass_by_matching(tmp_path: Path) -> No
     assert "reference_mass_max_GeV_valid_finite_number" in failed_names
     assert "reference_mass_range_valid" in failed_names
     assert "candidate_mass_range_valid" in failed_names
+
+
+def test_matching_non_string_tree_names_cannot_pass(tmp_path: Path) -> None:
+    reference, candidate, histogram = _valid_metadata()
+    reference["tree"] = 1
+    candidate["tree"] = 1
+    report = audit(
+        _write_json(tmp_path / "reference.json", reference),
+        _write_json(tmp_path / "candidate.json", candidate),
+        _write_json(tmp_path / "histogram.json", histogram),
+    )
+    assert report["status"] == "FAIL"
+    failed_names = {item["name"] for item in report["checks"] if not item["passed"]}
+    assert "reference_tree_name_valid_nonempty_string" in failed_names
+    assert "candidate_tree_name_valid_nonempty_string" in failed_names
