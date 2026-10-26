@@ -8,6 +8,7 @@ on:
       - .github/workflows/research-level-schema-audit.yml
       - scripts/inspect_root_schema.py
       - pyproject.toml
+  workflow_dispatch:
 
 permissions:
   contents: read
