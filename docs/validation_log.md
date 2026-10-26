@@ -62,3 +62,18 @@ Confirmed CI run: https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-
 - Commit: `a9c3bf1dc56f911893d7bad928d060e41be6a519`
 - Python 3.10, 3.11, 3.12: 20 tests passed and Ruff passed.
 - The tests use synthetic ROOT files. No CMS file has yet been processed by this repository.
+
+
+## Provenance and non-finite kinematic validation
+
+The baseline CLI now records, when available, the local input size, ROOT tree entry count, required branch types, Python and key package versions, and optional SHA-256 checksum. Enable the checksum for a local file with `--sha256-input`; this reads the file once before the analysis, so it adds I/O overhead. For remote URLs the checksum is intentionally unavailable in this version.
+
+Histogram accounting now separately records pairs below the requested mass range, inside the histogram range, above the range, and with non-finite calculated masses. This makes the counts auditable rather than silently dropping invalid values.
+
+The Awkward-array invariant-mass helper now clamps only negative mass-squared values within a floating-point tolerance. Non-finite kinematic inputs are preserved as non-finite instead of being silently converted to zero mass. A new test covers this failure mode, and the integration test independently verifies the input SHA-256 and full pair-count accounting.
+
+Confirmed CI run: https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40248889405
+
+- Commit: `098606d9cc00546c192f23b0f60a1830ec87de0d`
+- Python 3.10, 3.11, 3.12: 21 tests passed; Ruff passed.
+- Tests use synthetic ROOT files. This remains software validation, not validation against CMS collision data.
