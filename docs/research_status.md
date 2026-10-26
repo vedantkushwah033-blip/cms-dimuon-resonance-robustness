@@ -46,6 +46,8 @@
 - Added a dataset feasibility memo distinguishing the 2019 muon-only outreach file, the separate 2021 Run2012C reduced outreach file, and the research-level derived records.
 - The schema inspector now reports presence/absence for muon kinematics, charge, event identifiers, and candidate quality/isolation fields, while retaining a heuristic list of trigger-related names.
 
+- Follow-up numerical audit: both invariant-mass implementations now require the mass-squared value and its scale to be finite before treating a negative result as round-off. This prevents an infinite tolerance from making a non-finite negative result eligible for clamping. Commits: `b0472a4` (Awkward/NanoAOD path) and `05de35b` (standalone vectorized path). These source changes have been committed; their new CI status has not yet been verified.
+
 ## Workflow status checked 2026-10-26
 - GitHub Actions run for commit `3ed0f9e` (decision gates): completed successfully.
 - GitHub Actions run for commit `40b819d` (scenario matrix): completed successfully.
