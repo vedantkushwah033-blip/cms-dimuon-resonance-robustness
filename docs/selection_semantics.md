@@ -47,7 +47,8 @@ The expected outcomes are:
 | Quantity | Exactly-two mode | All-pairs mode |
 | --- | ---: | ---: |
 | Events read | 3 | 3 |
-| Events selected | 2 | 3 |
+| Events selected before charge requirement | 2 | 3 |
+| Events containing at least one opposite-charge pair | 1 | 2 |
 | Opposite-charge pairs | 1 | 3 |
 
 The run metadata records both `events_selected` (the event-multiplicity selection) and `events_with_opposite_charge_pair` (an event-level count after pair construction). These are intentionally distinct from `opposite_charge_pairs_total`, which counts pair-level entries. These are software-contract tests, not measurements from CMS data.
