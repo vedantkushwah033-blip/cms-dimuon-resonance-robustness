@@ -11,6 +11,7 @@ import importlib.metadata
 import json
 import os
 import platform
+import subprocess
 from pathlib import Path
 
 import awkward as ak
@@ -39,6 +40,25 @@ def package_version(name: str) -> str | None:
         return importlib.metadata.version(name)
     except importlib.metadata.PackageNotFoundError:
         return None
+
+
+def repository_commit() -> str | None:
+    """Return the checked-out project commit in CI and local executions."""
+    ci_commit = os.environ.get("GITHUB_SHA")
+    if ci_commit:
+        return ci_commit
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "--verify", "HEAD"],
+            cwd=Path(__file__).resolve().parents[1],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except OSError:
+        return None
+    commit = result.stdout.strip()
+    return commit if result.returncode == 0 and commit else None
 
 
 def parse_args() -> argparse.Namespace:
@@ -201,7 +221,7 @@ def main() -> None:
             "uproot": package_version("uproot"),
             "matplotlib": package_version("matplotlib"),
         },
-        "git_commit": os.environ.get("GITHUB_SHA"),
+        "git_commit": repository_commit(),
         "branches": BRANCHES,
         "events_read": events_read,
         "events_selected": events_selected,
