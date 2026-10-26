@@ -2,7 +2,7 @@
 
 A reproducible statistical-calibration study of dimuon resonance-search procedures using CMS Open Data where feasible, alongside explicitly labelled model-generated pseudoexperiments and controlled stress tests.
 
-> **Status (2026-10-25): early research design and baseline-code scaffold.** The repository now contains an initial ROOT/NanoAOD spectrum-reconstruction script and tested mathematical utilities, but the script has not yet been run against the official event file, the reference spectrum has not been reproduced, and no novel finding or publication is claimed.
+> **Status (2026-10-26): early research design and baseline-code scaffold.** The repository now contains an initial ROOT/NanoAOD spectrum-reconstruction script and tested mathematical utilities, but the script has not yet been run against the official event file, the reference spectrum has not been reproduced, and no novel finding or publication is claimed.
 
 ## Research objective
 The candidate objective is to evaluate the false-positive calibration of a clearly specified local dimuon bump-hunt procedure under prespecified background-generating scenarios, including any model-selection step only if the literature audit identifies a defensible gap. The question is provisional. Williams (2017) already studies background-model selection, bias/variance and coverage in bump hunting, so the exact method must be compared before claiming novelty.
@@ -23,10 +23,10 @@ The education/outreach sample remains useful for pipeline development only. The 
 - `src/cms_dimuon_robustness/invariant_mass.py` — vectorized kinematic calculation.
 - `src/cms_dimuon_robustness/nanoaod.py` — Awkward-array opposite-charge pair-mass calculation.
 - `scripts/reproduce_dimuon_spectrum.py` — chunked ROOT/NanoAOD baseline reconstruction; requires an explicit input path to prevent accidental use of the unvalidated outreach dataset.
-- `scripts/inspect_root_schema.py` — inventories tree names, entries, branch names, and possible trigger-related fields without asserting that they are sufficient.
+- `scripts/inspect_root_schema.py` — inventories trees, entries, branch names, trigger-related candidates, and presence/absence of candidate branch groups; semantics still require review.
 - `docs/data_schema_findings.md` — separates what CERN's record-level documentation establishes from what still requires file-level checks.
 - `src/cms_dimuon_robustness/monte_carlo.py` — exact binomial confidence intervals and a sample-size planning approximation.
-- `tests/` — unit and synthetic-ROOT integration tests. GitHub Actions passed 17 tests plus Ruff checks on Python 3.10, 3.11 and 3.12 for commit `e6259abaaae0b9799b00ad125b20b521c00e40a3`; the newer schema-inspection test has been added but its workflow result is pending.
+- `tests/` — unit and synthetic-ROOT integration tests. GitHub Actions passed 17 tests plus Ruff checks on Python 3.10, 3.11 and 3.12 for commit `e6259abaaae0b9799b00ad125b20b521c00e40a3`. A new schema-inspector integration test has since been added; its workflow result is pending.
 
 ## Setup
 Python 3.10 or newer:
