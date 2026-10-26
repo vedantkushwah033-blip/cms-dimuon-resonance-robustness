@@ -284,3 +284,10 @@ A planned task is not a result. A passing CI run validates the current automated
 - Focused literature screening now covers close work on dimuon bump hunts, model selection, data-directed searches, background sculpting, and Bayesian marginal-likelihood methods. The review is not systematic and no novelty claim is justified yet.
 - CI for the code/tests and ROOT exporter on commit `88efc10e2c48a8662c2d17aa2669b4f36f3daad5` passed on Python 3.10, 3.11, and 3.12, and the ROOT exporter integration passed. CI for later documentation commits is being checked; do not generalize earlier passes to every latest commit.
 - **Next acceptance gate:** run the baseline spectrum pipeline on a bounded event subset from the research-level files and compare against a suitable public reference, then inspect event-level run/trigger values. Do not launch the main simulation campaign until baseline validity and the exact research gap are established.
+
+
+## CI confirmation after workflow/documentation updates — 2026-10-27
+
+- The project test workflow and ROOT reference-exporter integration both completed successfully for commit `54cdcc1629e9ecf628d8068376a05b0c8dbb068a`: [tests run 40411406132](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40411406132) and [ROOT integration run 40411405993](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40411405993).
+- These checks validate the repository's automated test suite and reference-exporter integration at that commit. They do **not** execute the manually dispatched research-level download/baseline workflow, validate the workflow's external data downloads, or constitute real-data spectrum reproduction.
+- The current research-level workflow includes a bounded 100,000-entry spectrum smoke test per sampled DoubleMuParked file. It still requires manual dispatch in GitHub Actions. Until its artifact exists and is inspected, the spectrum results remain pending.
