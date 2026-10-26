@@ -60,3 +60,9 @@ The audit also requires the reference, candidate, and histogram-report bin count
 Mass-range metadata is schema-checked as well: bounds must be finite JSON numbers, and both reference and candidate ranges must satisfy `0 < minimum < maximum`. Matching string-encoded bounds are rejected. This prevents equality alone from treating malformed metadata as a valid reproducibility record.
 
 The audit also validates that both metadata tree identifiers are non-empty strings; identical malformed values such as numeric tree identifiers cannot pass solely because they compare equal. The integration tests cover this case alongside the count and mass-range schema checks.
+
+## Full-data and pair-accounting acceptance gates
+
+The metadata audit now refuses to accept a partial event scan as a full-data reproduction: `events_read` must equal the reference tree's total entry count, `events_processed` must equal `events_read`, and `max_events` must be absent or at least the full reference event count. This prevents a smoke-test run from being accidentally presented as a full-data parity run.
+
+The candidate pair-accounting audit also verifies conservation across in-range, below-range, overflow, and non-finite mass categories. Their sum must equal `opposite_charge_pairs_total`, and all inputs must be nonnegative JSON integers. Malformed values are reported as failed checks instead of causing arithmetic exceptions. Regression tests cover a partial run, a deliberately inconsistent accounting total, and a malformed string count.
