@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 from cms_dimuon_robustness.invariant_mass import pair_invariant_mass
 
@@ -36,3 +37,20 @@ def test_vectorized_mass_matches_independent_four_vector_reference():
         for row in zip(pt1, eta1, phi1, mass1, pt2, eta2, phi2, mass2)
     ])
     np.testing.assert_allclose(actual, expected, rtol=2e-12, atol=2e-10)
+
+
+
+def test_two_muons_at_zero_momentum_have_sum_of_rest_masses():
+    mass = 0.105658
+    actual = pair_invariant_mass(0.0, 0.0, 0.0, mass, 0.0, 0.0, 1.0, mass)
+    assert actual == pytest.approx(2 * mass, rel=1e-14, abs=1e-14)
+
+
+def test_nonfinite_kinematic_input_is_rejected():
+    with pytest.raises(ValueError, match="all kinematic inputs must be finite"):
+        pair_invariant_mass(10.0, 0.0, 0.0, 0.105658, np.nan, 0.0, 1.0, 0.105658)
+
+
+def test_negative_muon_mass_is_rejected():
+    with pytest.raises(ValueError, match="particle mass must be non-negative"):
+        pair_invariant_mass(10.0, 0.0, 0.0, -0.1, 10.0, 0.0, 1.0, 0.105658)
