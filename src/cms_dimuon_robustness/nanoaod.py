@@ -20,10 +20,7 @@ def opposite_charge_pair_masses(arrays: ak.Array) -> ak.Array:
     # Detect inconsistent per-event collection lengths explicitly before zipping.
     # A mismatched branch can otherwise cause opaque broadcasting errors or,
     # worse, make selection and kinematics refer to different muon objects.
-    multiplicities = {
-        field: ak.num(arrays[field], axis=1)
-        for field in required_fields
-    }
+    multiplicities = {field: ak.num(arrays[field], axis=1) for field in required_fields}
     reference_counts = ak.to_numpy(multiplicities["Muon_pt"])
     for field, counts in multiplicities.items():
         field_counts = ak.to_numpy(counts)
@@ -44,12 +41,10 @@ def opposite_charge_pair_masses(arrays: ak.Array) -> ak.Array:
     if not np.all(np.isin(charges, (-1, 1))):
         raise ValueError("Muon_charge must contain only -1 or +1 values")
 
-    # ROOT NanoAOD kinematic branches are commonly float32. Promote the
-    # kinematic inputs before transcendental functions and invariant-mass
-    # arithmetic: otherwise Awkward/NumPy may perform intermediate operations
-    # in float32, increasing cancellation error in E^2 - |p|^2 and creating
-    # avoidable negative mass-squared values. Keep charge values in their
-    # original integer representation for exact selection semantics.
+    # ROOT NanoAOD kinematic branches are commonly float32. Promote before
+    # arithmetic, then use a cancellation-resistant expression for the mass.
+    # The direct E**2-|p|**2 form can lose the physical mass for highly boosted,
+    # nearly collinear pairs because it subtracts large, nearly equal values.
     muons = ak.zip(
         {
             "pt": ak.values_astype(arrays["Muon_pt"], np.float64),
@@ -62,28 +57,37 @@ def opposite_charge_pair_masses(arrays: ak.Array) -> ak.Array:
     pairs = ak.combinations(muons, 2, fields=["mu1", "mu2"])
     keep = pairs.mu1.charge * pairs.mu2.charge < 0
 
-    def energy(mu):
-        return np.sqrt((mu.pt * np.cosh(mu.eta)) ** 2 + mu.mass**2)
+    pt1, eta1, phi1, mass1 = (
+        pairs.mu1.pt, pairs.mu1.eta, pairs.mu1.phi, pairs.mu1.mass
+    )
+    pt2, eta2, phi2, mass2 = (
+        pairs.mu2.pt, pairs.mu2.eta, pairs.mu2.phi, pairs.mu2.mass
+    )
+    mt1 = np.hypot(pt1, mass1)
+    mt2 = np.hypot(pt2, mass2)
+    ratio1 = ak.where(mt1 > 0, pt1 / mt1, 0.0)
+    ratio2 = ak.where(mt2 > 0, pt2 / mt2, 0.0)
+    y1 = np.arcsinh(ratio1 * np.sinh(eta1))
+    y2 = np.arcsinh(ratio2 * np.sinh(eta2))
+    delta_y = y1 - y2
+    delta_phi = phi1 - phi2
 
-    e = energy(pairs.mu1) + energy(pairs.mu2)
-    px = pairs.mu1.pt * np.cos(pairs.mu1.phi) + pairs.mu2.pt * np.cos(pairs.mu2.phi)
-    py = pairs.mu1.pt * np.sin(pairs.mu1.phi) + pairs.mu2.pt * np.sin(pairs.mu2.phi)
-    pz = pairs.mu1.pt * np.sinh(pairs.mu1.eta) + pairs.mu2.pt * np.sinh(pairs.mu2.eta)
-    mass_squared = e**2 - px**2 - py**2 - pz**2
-    scale = e**2 + px**2 + py**2 + pz**2
-    tolerance = 64 * np.finfo(float).eps * scale
-    # Clamp only small negative round-off. Preserve non-finite inputs as non-finite
-    # so data-quality problems cannot silently become zero-mass pairs.
-    roundoff_negative = (
-        np.isfinite(mass_squared)
-        & np.isfinite(scale)
-        & (mass_squared < 0)
-        & (mass_squared >= -tolerance)
+    # Rationalized mT1*mT2 - pt1*pt2 avoids cancellation of the mass-dependent
+    # term at high pT. Half-angle identities avoid cancellation near delta=0.
+    denominator = mt1 * mt2 + pt1 * pt2
+    numerator = mass1**2 * pt2**2 + mass2**2 * pt1**2 + mass1**2 * mass2**2
+    transverse_mass_difference = ak.where(
+        denominator > 0, numerator / denominator, 0.0
     )
-    stable_mass_squared = ak.where(
-        mass_squared >= 0,
-        mass_squared,
-        ak.where(roundoff_negative, 0.0, np.nan),
+    mass_squared = (
+        mass1**2
+        + mass2**2
+        + 2.0
+        * (
+            transverse_mass_difference
+            + 2.0 * mt1 * mt2 * np.sinh(delta_y / 2.0) ** 2
+            + 2.0 * pt1 * pt2 * np.sin(delta_phi / 2.0) ** 2
+        )
     )
-    masses = np.sqrt(stable_mass_squared)
+    masses = np.sqrt(np.maximum(mass_squared, 0.0))
     return masses[keep]
