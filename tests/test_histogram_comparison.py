@@ -110,3 +110,49 @@ def test_counts_above_float_exactness_limit_are_compared_without_precision_loss(
     assert report["candidate_total_count"] == 9007199254740994
     assert report["total_absolute_bin_count_difference"] == 1
     assert report["maximum_absolute_bin_count_difference"] == 1
+
+
+@pytest.mark.parametrize(
+    ("csv_text", "error_fragment"),
+    [
+        (
+            "mass_low_GeV,mass_high_GeV,pair_count\\n0.25,1.0,3,unexpected\\n",
+            "field count does not match header",
+        ),
+        (
+            "mass_low_GeV,mass_high_GeV,pair_count\\n0.25,1.0\\n",
+            "field count does not match header",
+        ),
+        (
+            "mass_low_GeV,mass_low_GeV,mass_high_GeV,pair_count\\n0.25,0.25,1.0,3\\n",
+            "duplicate CSV column names",
+        ),
+    ],
+)
+def test_malformed_csv_structure_is_rejected(tmp_path, csv_text, error_fragment):
+    reference = tmp_path / "reference.csv"
+    candidate = tmp_path / "candidate.csv"
+    report = tmp_path / "comparison.json"
+    reference.write_text(
+        "mass_low_GeV,mass_high_GeV,pair_count\\n0.25,1.0,3\\n",
+        encoding="utf-8",
+    )
+    candidate.write_text(csv_text, encoding="utf-8")
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(COMPARATOR),
+            "--reference",
+            str(reference),
+            "--candidate",
+            str(candidate),
+            "--output",
+            str(report),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode != 0
+    assert error_fragment in result.stderr
