@@ -176,7 +176,7 @@ def main() -> None:
         delimiter=",",
         header="mass_low_GeV,mass_high_GeV,pair_count",
         comments="",
-        fmt=["%.8g", "%.8g", "%d"],
+        fmt=["%.17g", "%.17g", "%d"],
     )
     metadata = {
         "input": args.input,
