@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 
-from scripts.audit_baseline_metadata import audit
+# The CLI scripts are repository-local, not installed package modules.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from scripts.audit_baseline_metadata import audit  # noqa: E402
 
 
 def _write(path: Path, data: dict) -> Path:
