@@ -1,4 +1,4 @@
-name: research-level CMS ROOT schema audit
+name: research-level CMS schema and bounded baseline audit
 
 # This is a deliberately manual, data-download workflow. Each selected ROOT file
 # can be >1 GiB; do not redownload it on every documentation or code push.
@@ -47,6 +47,13 @@ jobs:
             sha256="$(sha256sum "$input_file" | awk '{print $1}')"
             printf "%s\t%s\t%s\t%s\n" "$record_id" "$input_file" "$bytes" "$sha256" \
               >> outputs/research_level_schema/manifest.tsv
+            # A bounded reconstruction smoke test, not a trigger-aware analysis.
+            python scripts/reproduce_dimuon_spectrum.py \
+              --input "$input_file" \
+              --max-events 100000 \
+              --bins 30000 \
+              --output-dir "outputs/research_level_schema/baseline_$record_id" \
+              > "outputs/research_level_schema/baseline_stdout_$record_id.json"
           done
       - name: Upload schema reports and file manifest
         if: always()
