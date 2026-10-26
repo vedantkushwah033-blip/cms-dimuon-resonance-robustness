@@ -58,10 +58,13 @@ def test_spectrum_script_writes_reproducible_smoke_outputs(tmp_path):
     )
 
     metadata = json.loads((output_dir / "run_metadata.json").read_text(encoding="utf-8"))
+    assert metadata["events_read"] == 2
+    assert metadata["events_selected"] == 2
     assert metadata["events_processed"] == 2
     assert metadata["opposite_charge_pairs_total"] == 2
     assert metadata["pairs_in_histogram_range"] == 2
     assert metadata["max_events"] == 2
-    assert metadata["selection"].startswith("all opposite-charge muon pairs")
+    assert metadata["selection_mode"] == "exactly-two-opposite-charge"
+    assert metadata["selection"].startswith("exactly two reconstructed muons")
     assert (output_dir / "dimuon_mass_histogram.csv").is_file()
     assert (output_dir / "dimuon_mass_spectrum.png").is_file()
