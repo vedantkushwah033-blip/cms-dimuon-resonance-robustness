@@ -57,3 +57,17 @@ The two research-level records are now preferred over the education/outreach muo
 The official Run2012C variable-list page documents HLT decision bits and muon quality/isolation fields. This supports further feasibility checking, not a claim that the merged file definitely contains all needed branches. Run2012B, actual file branch lists, trigger-menu interpretation, prescale availability, and event-selection provenance remain open checks.
 
 Next action: run `scripts/inspect_root_schema.py` on a small representative file from each period, save JSON reports, then compare branch coverage against the original analysis requirements. Do not claim trigger-efficiency calibration from HLT booleans alone.
+
+
+## Official branch-schema documentation check — 2026-10-26
+
+The CERN variable-list documents linked from the two research-level records were inspected directly:
+
+- Run2012B variable list: https://opendata.cern.ch/eos/opendata/cms/dataset-semantics/derived-data/NanoAODRun1/31123/Run2012B_DoubleMuParked_doc.html
+- Run2012C variable list: https://opendata.cern.ch/eos/opendata/cms/dataset-semantics/derived-data/NanoAODRun1/31129/Run2012C_DoubleMuParked_doc.html
+
+Both documents list named HLT decision branches for dimuon and single-muon paths, plus muon quality/isolation fields. This is stronger evidence that a trigger-aware file-level feasibility audit is worth pursuing than the outreach muon-only sample alone. It is not yet evidence that the downloaded merged files have been inspected by this project.
+
+Neither published variable list documents prescale values. Trigger efficiency or unbiased trigger calibration therefore remains **no-go pending further evidence**: HLT path decisions alone are insufficient, and run-dependent trigger versions, path semantics, prescales, good-lumisection coverage, and the denominator/sample definition must be established.
+
+The immediate next step remains a small file-level schema audit for each period, followed by a documented pass/fail/unknown table for every input required by the intended analysis. Do not begin the main Monte Carlo campaign or claim trigger calibration until that gate is passed.
