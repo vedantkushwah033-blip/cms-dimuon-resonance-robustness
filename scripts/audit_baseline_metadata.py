@@ -60,6 +60,15 @@ def audit(reference_path: Path, candidate_path: Path, histogram_report_path: Pat
             "detail": detail,
         })
 
+    def check_nonempty_string(name: str, value: Any) -> None:
+        valid = isinstance(value, str) and bool(value.strip())
+        checks.append({
+            "name": f"{name}_valid_nonempty_string",
+            "passed": valid,
+            "value": value,
+            "detail": "non-empty string" if valid else "missing or invalid string value",
+        })
+
     def check_boolean(name: str, expected: bool, actual: Any) -> None:
         passed = _boolean_matches(actual, expected)
         checks.append({
@@ -129,6 +138,8 @@ def audit(reference_path: Path, candidate_path: Path, histogram_report_path: Pat
         if sizes_valid else "missing or invalid file size",
     })
     check("input_bytes", ref_bytes, cand_bytes)
+    check_nonempty_string("reference_tree_name", ref.get("tree"))
+    check_nonempty_string("candidate_tree_name", cand.get("tree"))
     check("tree_name", ref.get("tree"), cand.get("tree"))
     # Counts in JSON must be integer counts, not booleans or floats that happen
     # to compare equal to integers (for example, 40.0 == 40 in Python).
