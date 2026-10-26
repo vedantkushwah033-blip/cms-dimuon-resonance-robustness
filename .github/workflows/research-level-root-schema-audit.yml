@@ -1,0 +1,77 @@
+name: research-level-root-schema-audit
+
+on:
+  push:
+    branches:
+      - research-plan/initial-protocol
+    paths:
+      - .github/workflows/research-level-root-schema-audit.yml
+      - scripts/inspect_root_schema.py
+      - pyproject.toml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect-first-research-level-files:
+    name: Inspect one official ROOT file from Run2012B and Run2012C
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out selected branch
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install schema inspection dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e .
+          python -m pip install cernopendata-client
+
+      - name: Download and verify one ROOT file per research-level record
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p outputs/research_level_schema
+          printf "record_id\tfilename\tbytes\tsha256\n" > outputs/research_level_schema/manifest.tsv
+
+          for record_id in 31123 31129; do
+            cernopendata-client download-files \
+              --recid "$record_id" \
+              --filter-regexp '\\.root$' \
+              --filter-range 1-1 \
+              --server https://opendata.cern.ch \
+              --verify
+
+            input_file="$(find "$record_id" -type f -name '*.root' -print -quit)"
+            if [[ -z "$input_file" ]]; then
+              echo "No ROOT file downloaded for CERN record $record_id" >&2
+              exit 3
+            fi
+
+            python scripts/inspect_root_schema.py \
+              --input "$input_file" \
+              --output "outputs/research_level_schema/schema_${record_id}.json"
+
+            bytes="$(stat -c '%s' "$input_file")"
+            sha256="$(sha256sum "$input_file" | awk '{print $1}')"
+            printf "%s\t%s\t%s\t%s\n" "$record_id" "$input_file" "$bytes" "$sha256" \
+              >> outputs/research_level_schema/manifest.tsv
+          done
+
+          cat outputs/research_level_schema/manifest.tsv
+
+      - name: Upload schema reports and provenance manifest
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: research-level-root-schema-audit
+          path: outputs/research_level_schema/
+          if-no-files-found: warn
+          retention-days: 14
