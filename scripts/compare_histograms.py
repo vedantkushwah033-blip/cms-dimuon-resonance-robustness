@@ -10,6 +10,7 @@ import argparse
 import csv
 import json
 import re
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -154,7 +155,7 @@ def main() -> int:
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
         print(json.dumps(report, indent=2))
-        print(f"comparison failed: {exc}", file=__import__("sys").stderr)
+        print(f"comparison failed: {exc}", file=sys.stderr)
         return 2
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
