@@ -48,7 +48,7 @@ python -m venv .venv
 # Windows PowerShell: .venv\\Scripts\\Activate.ps1
 # macOS/Linux: source .venv/bin/activate
 python -m pip install -e ".[dev]"  # local tests/development
-# For the optional CERN root:// remote-file workflow, also install XRootD support:
+# For the optional CERN root:// remote-file workflow, also install the XRootD client and fsspec adapter:
 python -m pip install -e ".[dev,remote]"
 pytest
 ruff check src tests
