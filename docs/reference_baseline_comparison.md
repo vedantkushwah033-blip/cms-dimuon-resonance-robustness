@@ -56,3 +56,5 @@ Regression tests cover the wrong selection mode, opposite-sign cut-flow disagree
 The histogram-report flags `bin_edges_exactly_equal` and `exact_bin_by_bin_parity` are now validated as actual JSON booleans. This avoids Python's permissive equality (`1 == True`) allowing malformed numeric values to pass a parity gate. Regression tests cover integer, float, string, null, list, and mismatched boolean values.
 
 The audit also requires the reference, candidate, and histogram-report bin counts to be positive JSON integers. Matching string values such as `"30000"` are rejected instead of passing equality checks without satisfying the metadata schema. An integration test checks both a valid minimal audit and the malformed matching-string case.
+
+Mass-range metadata is schema-checked as well: bounds must be finite JSON numbers, and both reference and candidate ranges must satisfy `0 < minimum < maximum`. Matching string-encoded bounds are rejected. This prevents equality alone from treating malformed metadata as a valid reproducibility record.
