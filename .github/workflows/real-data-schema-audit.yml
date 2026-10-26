@@ -9,7 +9,6 @@ on:
       - 'scripts/inspect_root_schema.py'
       - 'tests/test_schema_inspection.py'
       - 'tests/test_schema_inspector.py'
-  workflow_dispatch: {}
 
 permissions:
   contents: read
