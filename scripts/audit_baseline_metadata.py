@@ -14,6 +14,11 @@ from pathlib import Path
 from typing import Any
 
 
+def _boolean_matches(value: Any, expected: bool) -> bool:
+    """Require a JSON boolean, not an integer that compares equal to it in Python."""
+    return type(value) is bool and value is expected
+
+
 def _read_json(path: Path) -> dict[str, Any]:
     try:
         value = json.loads(path.read_text(encoding="utf-8"))
@@ -43,6 +48,17 @@ def audit(reference_path: Path, candidate_path: Path, histogram_report_path: Pat
             "reference": reference,
             "candidate": candidate,
             "detail": detail,
+        })
+
+    def check_boolean(name: str, expected: bool, actual: Any) -> None:
+        passed = _boolean_matches(actual, expected)
+        checks.append({
+            "name": name,
+            "passed": passed,
+            "reference": expected,
+            "candidate": actual,
+            "detail": "strict JSON boolean matches expectation"
+            if passed else "value must be a JSON boolean matching the expected value",
         })
 
     def nonnegative_integer(name: str, value: Any) -> None:
@@ -133,8 +149,8 @@ def audit(reference_path: Path, candidate_path: Path, histogram_report_path: Pat
     check("underflow_count", ref.get("histogram_underflow"), cand.get("pairs_below_mass_range"))
     check("overflow_count", ref.get("histogram_overflow"), cand.get("pairs_at_or_above_mass_max"))
 
-    check("histogram_bin_edges_exactly_equal", True, hist.get("bin_edges_exactly_equal"))
-    check("histogram_exact_bin_by_bin_parity", True, hist.get("exact_bin_by_bin_parity"))
+    check_boolean("histogram_bin_edges_exactly_equal", True, hist.get("bin_edges_exactly_equal"))
+    check_boolean("histogram_exact_bin_by_bin_parity", True, hist.get("exact_bin_by_bin_parity"))
     check("histogram_bin_count", ref.get("bins"), hist.get("bin_count"))
     check("histogram_regular_total", ref.get("histogram_regular_bin_total"), hist.get("reference_total_count"))
     check("candidate_regular_total", cand.get("pairs_in_histogram_range"), hist.get("candidate_total_count"))
