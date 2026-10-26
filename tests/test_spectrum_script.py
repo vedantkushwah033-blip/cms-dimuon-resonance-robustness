@@ -17,6 +17,7 @@ def test_spectrum_script_writes_reproducible_smoke_outputs(tmp_path):
         tree = root_file.mktree(
             "Events",
             {
+                "nMuon": "int32",
                 "Muon_pt": "var * float64",
                 "Muon_eta": "var * float64",
                 "Muon_phi": "var * float64",
@@ -26,6 +27,7 @@ def test_spectrum_script_writes_reproducible_smoke_outputs(tmp_path):
         )
         tree.extend(
             {
+                "nMuon": np.array([2, 2, 2], dtype=np.int32),
                 "Muon_pt": ak.Array([[10.0, 10.0], [float("nan"), 12.0], [50.0, 50.0]]),
                 "Muon_eta": ak.Array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]),
                 "Muon_phi": ak.Array([[0.0, np.pi], [0.0, np.pi], [0.0, np.pi]]),
