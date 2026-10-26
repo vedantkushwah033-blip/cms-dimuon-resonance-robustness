@@ -85,7 +85,7 @@ The official reference currently documents a plotted histogram and a cut-flow re
 mass_low_GeV,mass_high_GeV,pair_count
 ```
 
-The repository now includes `scripts/export_reference_dimuon_histogram.py`, which uses PyROOT/RDataFrame, ROOT's `PtEtaPhiMVector`, and `TH1D` to independently export regular-bin counts plus reference metadata. It is deliberately separate from the Uproot/NumPy candidate implementation. Run it in a ROOT-enabled environment on the *same local input file*:
+The repository now includes `scripts/export_reference_dimuon_histogram.py`, which uses PyROOT/RDataFrame, ROOT's `PtEtaPhiMVector`, and `TH1D` to independently export regular-bin counts plus reference metadata. It is deliberately separate from the Uproot/NumPy candidate implementation. The source is pinned to official commit `19a4a64fd58ef66a6ee3cf4f2a469fba61c60a09` (the `dimuonSpectrum.py` revision), and that commit is written into the reference metadata. Run it in a ROOT-enabled environment on the *same local input file*:
 
 ```bash
 python scripts/export_reference_dimuon_histogram.py \
