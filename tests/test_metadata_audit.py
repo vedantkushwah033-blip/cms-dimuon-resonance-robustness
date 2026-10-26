@@ -57,6 +57,7 @@ def _fixtures(tmp_path: Path):
         "differing_bin_count": 0,
         "total_absolute_bin_count_difference": 0,
         "maximum_absolute_bin_count_difference": 0,
+        "differing_bins": [],
     }
     return (
         _write(tmp_path / "reference.json", reference),
