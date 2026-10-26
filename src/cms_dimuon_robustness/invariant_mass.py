@@ -24,9 +24,16 @@ def pair_invariant_mass(
     Inputs are broadcast using NumPy rules. pt and masses must be non-negative;
     all values must be finite. The output has the broadcast shape and is in the
     same momentum units as the input.
+
+    The calculation uses transverse masses and rapidities, and evaluates
+    cosh(delta_y)-1 and 1-cos(delta_phi) with half-angle identities. This avoids
+    subtracting nearly equal O(E**2) terms for highly boosted, nearly collinear
+    pairs, where the direct E**2-|p|**2 expression can erase the physical mass.
     """
-    values = [np.asarray(v, dtype=float) for v in
-              (pt1, eta1, phi1, mass1, pt2, eta2, phi2, mass2)]
+    values = [
+        np.asarray(v, dtype=float)
+        for v in (pt1, eta1, phi1, mass1, pt2, eta2, phi2, mass2)
+    ]
     if any(not np.all(np.isfinite(v)) for v in values):
         raise ValueError("all kinematic inputs must be finite")
 
@@ -36,35 +43,36 @@ def pair_invariant_mass(
     if np.any(ma < 0) or np.any(mb < 0):
         raise ValueError("particle mass must be non-negative")
 
-    px1 = pta * np.cos(phia)
-    py1 = pta * np.sin(phia)
-    pz1 = pta * np.sinh(etaa)
-    e1 = np.sqrt((pta * np.cosh(etaa)) ** 2 + ma**2)
+    mt1 = np.hypot(pta, ma)
+    mt2 = np.hypot(ptb, mb)
+    # y = asinh(pz / mT), rewritten to avoid forming large pz values directly.
+    ratio1 = np.divide(pta, mt1, out=np.zeros_like(pta), where=mt1 > 0)
+    ratio2 = np.divide(ptb, mt2, out=np.zeros_like(ptb), where=mt2 > 0)
+    y1 = np.arcsinh(ratio1 * np.sinh(etaa))
+    y2 = np.arcsinh(ratio2 * np.sinh(etab))
+    delta_y = y1 - y2
+    delta_phi = phia - phib
 
-    px2 = ptb * np.cos(phib)
-    py2 = ptb * np.sin(phib)
-    pz2 = ptb * np.sinh(etab)
-    e2 = np.sqrt((ptb * np.cosh(etab)) ** 2 + mb**2)
-
-    energy_sum = e1 + e2
-    px_sum = px1 + px2
-    py_sum = py1 + py2
-    pz_sum = pz1 + pz2
-    mass_squared = energy_sum**2 - px_sum**2 - py_sum**2 - pz_sum**2
-    # Clamp only negative values consistent with floating-point round-off.
-    # A substantially negative value is not a physical invariant mass and must
-    # remain visibly invalid rather than being silently converted to zero.
-    scale = energy_sum**2 + px_sum**2 + py_sum**2 + pz_sum**2
-    tolerance = 64 * np.finfo(float).eps * scale
-    roundoff_negative = (
-        np.isfinite(mass_squared)
-        & np.isfinite(scale)
-        & (mass_squared < 0)
-        & (mass_squared >= -tolerance)
+    # Rationalize mT1*mT2 - pt1*pt2; direct subtraction loses the small
+    # mass-dependent term when both transverse momenta are very large.
+    denominator = mt1 * mt2 + pta * ptb
+    numerator = ma**2 * ptb**2 + mb**2 * pta**2 + ma**2 * mb**2
+    transverse_mass_difference = np.divide(
+        numerator,
+        denominator,
+        out=np.zeros_like(denominator),
+        where=denominator > 0,
     )
-    stable_mass_squared = np.where(
-        mass_squared >= 0,
-        mass_squared,
-        np.where(roundoff_negative, 0.0, np.nan),
+    mass_squared = (
+        ma**2
+        + mb**2
+        + 2.0
+        * (
+            transverse_mass_difference
+            + 2.0 * mt1 * mt2 * np.sinh(delta_y / 2.0) ** 2
+            + 2.0 * pta * ptb * np.sin(delta_phi / 2.0) ** 2
+        )
     )
-    return np.sqrt(stable_mass_squared)
+    # The terms above are non-negative for valid inputs, so a negative result
+    # would indicate an arithmetic or input problem rather than a physical mass.
+    return np.sqrt(np.maximum(mass_squared, 0.0))
