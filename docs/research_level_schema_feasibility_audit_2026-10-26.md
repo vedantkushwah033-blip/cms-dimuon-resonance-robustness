@@ -38,3 +38,27 @@ Before changing the analysis plan, run `scripts/inspect_root_schema.py` on one a
 
 If the files do not contain the needed path-specific trigger decisions and prescale inputs, narrow the project to a transparently selected-spectrum/background-modelling robustness study with a documented trigger limitation—or choose a data source whose trigger metadata can be validated. Do not label it a trigger-efficiency analysis.
 
+
+
+## Follow-up: what the published schema actually says about triggers
+
+The linked Run2012B variable documentation exposes a more specific distinction than broad field-family names alone suggest:
+
+- The documented HLT collection is described as HLT_Activity_Ecal_SC7/O, not a documented family of DoubleMuParked path decisions.
+- The documented L1 collection is L1_AlwaysTrue/O.
+- HLTriggerFirstPath and HLTriggerFinalPath are documented as Boolean fields, but the published semantics page does not define them as per-path decisions for the DoubleMuParked muon triggers.
+- Trig is explicitly a generic flag for triggers suitable for Minimum Bias analysis.
+- TrigObj is described as only partially filled.
+- The documentation includes Dataset_DoubleMu as a dataset-membership flag. Membership in a primary dataset is not equivalent to a per-event decision for a particular HLT path, and it does not provide prescale information.
+
+These details strengthen the current no-go decision for a trigger-efficiency or trigger-emulation claim based solely on the documented fields. They do not prove that every possible trigger-related input is absent from every file; the exact ROOT schema and relevant trigger-condition metadata still require file-level inspection.
+
+## Exact-file access status
+
+The official records identify the merged filenames Run2012B_DoubleMuParked_merged.root and Run2012C_DoubleMuParked_merged.root, and state that the collections can be accessed through XRootD or direct download. In this session, the record pages expose the descriptive metadata and semantics links but not a directly verifiable file URL in the parsed page. Therefore no guessed EOS path is recorded and no file-level schema result is claimed.
+
+Official references:
+- https://opendata.cern.ch/record/31123
+- https://opendata.cern.ch/record/cms-31129
+- https://opendata.cern.ch/eos/opendata/cms/dataset-semantics/derived-data/NanoAODRun1/31123/Run2012B_DoubleMuParked_doc.html
+- https://opendata.cern.ch/eos/opendata/cms/dataset-semantics/derived-data/NanoAODRun1/31129/Run2012C_DoubleMuParked_doc.html
