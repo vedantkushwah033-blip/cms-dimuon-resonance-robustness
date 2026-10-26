@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import re
 from pathlib import Path
 from typing import Any
@@ -68,6 +69,15 @@ def audit(reference_path: Path, candidate_path: Path, histogram_report_path: Pat
             "passed": valid,
             "value": value,
             "detail": "nonnegative integer" if valid else "missing or non-integer count",
+        })
+
+    def finite_number(name: str, value: Any) -> None:
+        valid = isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
+        checks.append({
+            "name": f"{name}_valid_finite_number",
+            "passed": valid,
+            "value": value,
+            "detail": "finite numeric value" if valid else "missing or non-finite numeric value",
         })
 
     def positive_integer(name: str, value: Any) -> None:
@@ -133,6 +143,47 @@ def audit(reference_path: Path, candidate_path: Path, histogram_report_path: Pat
     positive_integer("reference_bins", ref.get("bins"))
     positive_integer("candidate_bins", cand.get("bins"))
     positive_integer("histogram_report_bin_count", hist.get("bin_count"))
+    for name, value in (("reference_mass_min_GeV", ref.get("mass_min_GeV")),
+                        ("reference_mass_max_GeV", ref.get("mass_max_GeV"))):
+        finite_number(name, value)
+    candidate_mass_range = cand.get("mass_range_GeV")
+    candidate_range_valid = (
+        isinstance(candidate_mass_range, list)
+        and len(candidate_mass_range) == 2
+        and all(
+            isinstance(value, (int, float))
+            and not isinstance(value, bool)
+            and math.isfinite(value)
+            for value in candidate_mass_range
+        )
+        and candidate_mass_range[0] > 0
+        and candidate_mass_range[1] > candidate_mass_range[0]
+    )
+    checks.append({
+        "name": "candidate_mass_range_valid",
+        "passed": candidate_range_valid,
+        "value": candidate_mass_range,
+        "detail": "two finite numeric bounds with 0 < minimum < maximum"
+        if candidate_range_valid else "invalid candidate mass-range schema or ordering",
+    })
+    reference_min = ref.get("mass_min_GeV")
+    reference_max = ref.get("mass_max_GeV")
+    reference_range_valid = (
+        isinstance(reference_min, (int, float))
+        and not isinstance(reference_min, bool)
+        and math.isfinite(reference_min)
+        and isinstance(reference_max, (int, float))
+        and not isinstance(reference_max, bool)
+        and math.isfinite(reference_max)
+        and 0 < reference_min < reference_max
+    )
+    checks.append({
+        "name": "reference_mass_range_valid",
+        "passed": reference_range_valid,
+        "value": [reference_min, reference_max],
+        "detail": "finite numeric bounds with 0 < minimum < maximum"
+        if reference_range_valid else "invalid reference mass-range schema or ordering",
+    })
     check("available_tree_entries", ref.get("events_total"), cand.get("tree_entries_available"))
 
     # The candidate must use the reference-aligned selection, not merely
