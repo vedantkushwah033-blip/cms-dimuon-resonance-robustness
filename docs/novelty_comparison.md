@@ -63,3 +63,44 @@ This is **not yet a novel contribution**. The question must pass all of these ch
 - [ ] Freeze a reviewed protocol before main simulations.
 
 **Bottom line:** scientific quality can be high even if the result is a careful replication or a negative finding. Novelty cannot be guaranteed by effort or by a publication label; it has to be demonstrated against prior work.
+
+
+## Additional methods-level reading — 2026-10-27
+
+This extension records specific method details checked in the accessible primary texts. It is still a focused review, not an exhaustive systematic review.
+
+### Volkovich, De Vito Halevy & Bressler (2022): data-directed bump hunting
+
+Primary source: https://link.springer.com/article/10.1140/epjc/s10052-022-10215-1
+
+The paper trains a neural network on synthetic 100-bin histograms made from smoothly falling backgrounds, Poisson fluctuations, and localized Gaussian signals. Its target is a profile-likelihood-based distribution of bump significances. The authors evaluate training-set size/convergence and report performance close to the profile-likelihood benchmark in their stated setup.
+
+**Overlap implication:** a generic learned diagnostic that scans smooth spectra for localized excesses, or a claim that it can approximate a likelihood-based bump score, would need direct comparison to this family of methods. A different implementation or new toy seeds are not a contribution by themselves.
+
+### Hallin et al. (2023): background sculpting in enhanced bump hunts
+
+Primary source: https://doi.org/10.1103/PhysRevD.107.114012
+
+LaCATHODE uses a conditional normalizing flow trained on sidebands to map data into a latent space, then learns an anomaly score in that space. The paper studies how correlations between auxiliary features and the resonant variable can sculpt a background mass spectrum after a selection, and tests the proposed mitigation with an analytic toy and the LHC Olympics R&D data.
+
+**Overlap implication:** if the proposed work introduces a selection-dependent diagnostic, classifier, or anomaly score and measures mass-spectrum sculpting, LaCATHODE and its predecessors are direct comparators. A one-dimensional smooth acceptance distortion is not the same setup as auxiliary-feature correlation, but that difference must be defined explicitly and its practical consequence justified.
+
+### Yallup & Handley (2023): Bayesian model uncertainty and bump hunting
+
+Primary source: https://arxiv.org/abs/2211.10391; journal DOI: https://doi.org/10.1088/1748-0221/18/05/P05014
+
+The paper defines a binned Poisson likelihood and models a falling background as a sum of basis functions, considering exponential, power-law, and log-polynomial families. It compares maximum-likelihood/AIC-based model composition with Bayesian marginalisation over the number and family of basis functions using nested sampling, then extends the marginal-likelihood framework to a generic Gaussian signal search with amplitude, mean, and width marginalised.
+
+**Overlap implication:** adding Bayesian marginalisation over background families or comparing it with a penalised likelihood is already a published methodological direction. Any new study must isolate a distinct target—such as a prespecified null-calibration decision under a clearly bounded, held-out distortion family—and compare it to these methods rather than presenting Bayesian model averaging as new.
+
+### Revised candidate design and current decision
+
+The most testable candidate is **not** to invent a diagnostic before the gap is established. First compare a small set of already-published procedures on the same controlled null-generating scenarios:
+
+1. A fixed background family with a prespecified local test.
+2. A data-selected/penalised background fit, with the selection rule frozen.
+3. A Bayesian marginalised background procedure only if a stable, reproducible implementation is feasible for a first-semester student project.
+
+Then define one primary outcome in advance: empirical type-I error at a prespecified nominal level, with exact binomial confidence intervals, under (a) matched-model nulls and (b) held-out smooth acceptance-like misspecification. If a mass scan is used, the scan-wide rejection event—not a selected local p-value—must be the primary endpoint. Refit nuisance parameters in every pseudoexperiment and count failed fits under a predeclared rule.
+
+This design is only a **candidate benchmark**, not a novelty claim. It should not proceed to confirmatory simulations until a broader literature search establishes that the exact comparison and estimand are not already answered. The real CMS files can serve as motivation or a validated control spectrum; they do not turn synthetic acceptance functions into measured trigger efficiencies.
