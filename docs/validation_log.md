@@ -283,3 +283,19 @@ This is still an unexecuted procedure. No actual ROOT file schema report exists 
 ## Research-level schema execution status — 2026-10-27
 
 The attempted automated research-level ROOT schema-audit workflows were removed in commits `67482e77c6896b800eabf48c5863a8b80145ef84` and `1d2c28ff368edfa6e88b2631691ca41bc4b8bd87` because workflow execution could not be verified and prior attempts had failed before job creation. The GitHub connector available in this session does not expose a workflow-dispatch operation, and its commit-run lookup is limited to pull-request-triggered runs; an empty result is inconclusive. The manual, bounded procedure remains documented in `docs/real_data_baseline_run_card.md`. No research-level CMS ROOT file was processed and no schema artifact was produced in this session.
+
+
+## Cross-chat repository audit and independently rechecked workflow evidence — 2026-10-27
+
+I rechecked the shared GitHub state after reviewing the existing pull-request discussion and the latest branch head. This is the authoritative shared project record; separate ChatGPT conversations themselves are not directly readable from this session.
+
+Verified workflow evidence retrieved from GitHub:
+- Run [40372505488](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40372505488) completed successfully on commit `8ead6521c726442f8766433554e709186ed2426a`. I inspected its job logs, not just its green status. The job opened the official outreach ROOT file, inspected the `Events` tree with 61,540,413 entries and six branches, processed the first 10,000 entries, and wrote metadata/CSV/PNG outputs. It reported 5,750 exactly-two-muon events, 4,504 opposite-charge pairs, and conserved mass accounting (24 below range + 4,478 in range + 2 at/above the upper bound + 0 non-finite = 4,504). The schema report showed no event identity, quality/isolation, or trigger-name candidates. Artifact ID 12672933460 exists. This remains a bounded outreach-file software smoke test, not research-level data validation or quantitative reference-spectrum reproduction.
+- Runs [40299649309](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40299649309) and [40299643187](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40299643187) each have completed successful Python 3.10/3.11/3.12 matrix jobs in the GitHub job records. Their PR discussion associates them with commits `0e58ab2ea8a13b5e6fda9cc0608aee365bdd4eab` and `672eff30c529d4ba985bb8141e9aa85874b1aab8`, respectively.
+- Run [40272107761](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40272107761) completed successfully for its ROOT-enabled integration job, including importing ROOT and running `tests/test_reference_exporter.py` on synthetic input. This is not a ROOT exporter run against CMS collision data.
+- These runs predate the current branch head `88d1152da194f289a2cde22e9284260819378fcc`. The combined-status endpoint currently returns no status entries for that latest documentation commit, so latest-head CI is still **unverified**; do not infer pass/fail from an empty status list.
+
+Cross-chat consistency notes:
+- The shared PR discussion already records the same key boundary: the research-level Run2012B/C files have not been inspected by this repository, and path-specific HLT semantics, denominator validity, prescale/luminosity handling, and trigger-efficiency feasibility remain open.
+- The workflow attempts for the research-level schema audit were removed because they were not executing verifiably; the existing outreach smoke-test workflow is a separate, confirmed-successful workflow and must not be conflated with the removed research-level workflow.
+- No change in this audit establishes a discovery, a validated trigger-efficiency result, a complete full-file reference reproduction, or novelty.
