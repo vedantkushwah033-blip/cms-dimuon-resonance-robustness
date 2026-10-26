@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Inspect ROOT file tree names, branches, entry counts, and trigger-related branch names.
+"""Inspect ROOT trees and report candidate branch coverage for a dimuon analysis.
 
-This tool audits the available schema only. A branch name is not proof that a trigger
-selection is correctly understood or that the dataset is suitable for a physics claim.
+This is a schema inventory, not a physics validation. A branch-name match does not
+prove the branch's semantics, trigger efficiency, prescale treatment, or suitability.
 """
 from __future__ import annotations
 
@@ -13,8 +13,24 @@ from pathlib import Path
 
 import uproot
 
+BRANCH_GROUPS = {
+    "muon_kinematics": ["Muon_pt", "Muon_eta", "Muon_phi", "Muon_mass"],
+    "muon_charge": ["Muon_charge"],
+    "event_identity": ["run", "luminosityBlock", "event"],
+    "muon_quality_or_isolation_candidates": [
+        "Muon_tightId",
+        "Muon_mediumId",
+        "Muon_softId",
+        "Muon_pfRelIso03_all",
+        "Muon_pfRelIso04_all",
+        "Muon_dxy",
+        "Muon_dz",
+    ],
+}
+
 
 def inspect_file(input_path: str) -> dict:
+    """Return tree metadata and explicitly heuristic branch-presence checks."""
     result = {"input": input_path, "trees": {}}
     with uproot.open(input_path) as root_file:
         for key in root_file.keys(cycle=False):
@@ -22,15 +38,27 @@ def inspect_file(input_path: str) -> dict:
             if not hasattr(obj, "keys") or not hasattr(obj, "num_entries"):
                 continue
             branches = sorted(str(name).split(";")[0] for name in obj.keys())
+            branch_set = set(branches)
             trigger_candidates = [
                 name for name in branches
-                if re.search(r"(?:^HLT_|Trigger|trigger|Prescale|prescale|L1_)", name, re.IGNORECASE)
+                if re.search(
+                    r"(?:^HLT_|Trigger|trigger|Prescale|prescale|^L1_)",
+                    name,
+                    re.IGNORECASE,
+                )
             ]
             result["trees"][key] = {
                 "entries": int(obj.num_entries),
                 "branch_count": len(branches),
                 "branches": branches,
                 "trigger_related_name_candidates": trigger_candidates,
+                "branch_group_presence": {
+                    group: {
+                        "present": [name for name in candidates if name in branch_set],
+                        "missing": [name for name in candidates if name not in branch_set],
+                    }
+                    for group, candidates in BRANCH_GROUPS.items()
+                },
             }
     return result
 
