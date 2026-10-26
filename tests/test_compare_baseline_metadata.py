@@ -66,7 +66,7 @@ def test_matching_cutflow_and_configuration_pass(tmp_path):
     assert result.returncode == 0, result.stderr
     assert report["cutflow_and_configuration_agree"] is True
     assert report["failed_check_count"] == 0
-    assert report_path.read_bytes().endswith(b"\\n")
+    assert report_path.read_bytes().endswith(b"\n")
 
 
 def test_cutflow_mismatch_fails_with_machine_readable_report(tmp_path):
