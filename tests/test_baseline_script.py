@@ -47,7 +47,7 @@ def test_baseline_script_on_tiny_synthetic_root_file(tmp_path):
         "--bins",
         "40",
         "--mass-min",
-        "0",
+        "0.25",
         "--mass-max",
         "40",
     ]
