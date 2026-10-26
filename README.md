@@ -2,7 +2,7 @@
 
 A reproducible statistical-calibration study of dimuon resonance-search procedures using CMS Open Data where feasible, alongside explicitly labelled model-generated pseudoexperiments and controlled stress tests.
 
-> **Status (2026-10-26): early research design and baseline-code scaffold.** The repository now contains an initial ROOT/NanoAOD spectrum-reconstruction script and tested mathematical utilities, but the script has not yet been run against the official event file, the reference spectrum has not been reproduced, and no novel finding or publication is claimed.
+> **Status (2026-10-26): early research design and baseline-code scaffold.** A bounded 10,000-entry smoke test has now passed against the official CMS outreach ROOT file, including schema inspection and spectrum-output generation. The full 61.5-million-entry file has not been processed, the official reference spectrum has not been reproduced quantitatively, and no novel finding or publication is claimed. The outreach schema contains no trigger-related branch candidates or listed muon quality/isolation candidates, so it is not sufficient for the proposed trigger-aware scientific analysis.
 
 ## Research objective
 The candidate objective is to evaluate the false-positive calibration of a clearly specified local dimuon bump-hunt procedure under prespecified background-generating scenarios, including any model-selection step only if the literature audit identifies a defensible gap. The question is provisional. Williams (2017) already studies background-model selection, bias/variance and coverage in bump hunting, so the exact method must be compared before claiming novelty.
@@ -32,6 +32,7 @@ The education/outreach sample remains useful for pipeline development only. The 
 - `docs/data_schema_findings.md`, `docs/data_feasibility_decision.md` — separate record-level facts from file-level checks and define trigger-aware, limited-scope, and reproducibility-only routes.
 - `docs/reference_baseline_comparison.md` — maps the implementation to the official public example's event selection, binning, mass range, and axes.
 - `docs/official_reference_code_audit_2026-10-26.md` — source-level comparison with the official v1.4 reference implementation; confirms configuration alignment but explicitly does not claim numerical reproduction.
+- `docs/official_outreach_smoke_test_2026-10-26.md` — records the successful 10,000-entry official-data smoke test, branch-schema limitations, event/pair counts, earlier failed attempts, and next acceptance gate.
 - The baseline records file size, optional SHA-256, tree entries/types, software versions, and in-range/out-of-range/non-finite pair accounting. The latest CI run also verifies non-finite mass handling end-to-end on a synthetic ROOT event.
 - `docs/novelty_comparison.md` — documents overlap with closest prior work and explicit novelty no-go criteria.
 - `docs/literature_search_update_2026-10-26.md` — records a focused follow-up search, additional CMS context, and why novelty remains unproven; this is not a systematic review.
