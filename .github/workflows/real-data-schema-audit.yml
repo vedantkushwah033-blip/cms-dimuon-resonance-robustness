@@ -1,6 +1,14 @@
 name: Real CMS Open Data schema audit
 
 on:
+  push:
+    branches:
+      - research-plan/initial-protocol
+    paths:
+      - '.github/workflows/real-data-schema-audit.yml'
+      - 'scripts/inspect_root_schema.py'
+      - 'tests/test_schema_inspection.py'
+      - 'tests/test_schema_inspector.py'
   workflow_dispatch: {}
 
 permissions:
