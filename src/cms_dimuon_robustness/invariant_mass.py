@@ -46,6 +46,19 @@ def pair_invariant_mass(
     pz2 = ptb * np.sinh(etab)
     e2 = np.sqrt((ptb * np.cosh(etab)) ** 2 + mb**2)
 
-    mass_squared = (e1 + e2) ** 2 - (px1 + px2) ** 2 - (py1 + py2) ** 2 - (pz1 + pz2) ** 2
-    # Small negative values can arise from floating-point cancellation at very low mass.
-    return np.sqrt(np.maximum(mass_squared, 0.0))
+    energy_sum = e1 + e2
+    px_sum = px1 + px2
+    py_sum = py1 + py2
+    pz_sum = pz1 + pz2
+    mass_squared = energy_sum**2 - px_sum**2 - py_sum**2 - pz_sum**2
+    # Clamp only negative values consistent with floating-point round-off.
+    # A substantially negative value is not a physical invariant mass and must
+    # remain visibly invalid rather than being silently converted to zero.
+    scale = energy_sum**2 + px_sum**2 + py_sum**2 + pz_sum**2
+    tolerance = 64 * np.finfo(float).eps * scale
+    stable_mass_squared = np.where(
+        mass_squared >= 0,
+        mass_squared,
+        np.where(mass_squared >= -tolerance, 0.0, np.nan),
+    )
+    return np.sqrt(stable_mass_squared)
