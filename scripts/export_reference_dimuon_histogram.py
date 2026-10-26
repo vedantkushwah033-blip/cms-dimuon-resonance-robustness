@@ -46,6 +46,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--tree", default="Events")
     parser.add_argument("--output-dir", type=Path, default=Path("outputs/reference"))
     parser.add_argument("--sha256-input", action="store_true", help="Hash the full input file (adds one full file read)")
+    parser.add_argument("--max-events", type=int, default=None, help="Optional event limit for a quick smoke test")
     parser.add_argument("--bins", type=int, default=30000)
     parser.add_argument("--mass-min", type=float, default=0.25)
     parser.add_argument("--mass-max", type=float, default=300.0)
@@ -57,6 +58,8 @@ def parse_args() -> argparse.Namespace:
         or not 0 < args.mass_min < args.mass_max
     ):
         parser.error("bins must be positive and mass bounds must be finite with 0 < mass-min < mass-max")
+    if args.max_events is not None and args.max_events <= 0:
+        parser.error("--max-events must be positive")
     if not Path(args.input).is_file():
         parser.error("--input must point to an existing local ROOT file")
     return args
@@ -81,7 +84,11 @@ def main() -> int:
             for block in iter(lambda: stream.read(8 * 1024 * 1024), b""):
                 digest.update(block)
         input_sha256 = digest.hexdigest()
-    ROOT.ROOT.EnableImplicitMT(1)
+    # ROOT RDataFrame Range is unsupported with implicit multithreading. Keep
+    # the normal full-data run parallel-capable, but make bounded smoke tests
+    # stop after the requested entries instead of scanning the entire file.
+    if args.max_events is None:
+        ROOT.ROOT.EnableImplicitMT(1)
     ROOT.gInterpreter.Declare(
         """
         float computeInvariantMassReference(
@@ -98,6 +105,8 @@ def main() -> int:
     )
 
     dataframe = ROOT.RDataFrame(args.tree, args.input)
+    if args.max_events is not None:
+        dataframe = dataframe.Range(args.max_events)
     required_columns = {
         "nMuon",
         "Muon_pt",
@@ -173,6 +182,7 @@ def main() -> int:
         "input_bytes": input_path.stat().st_size,
         "input_sha256": input_sha256,
         "tree": args.tree,
+        "max_events": args.max_events,
         "root_version": str(ROOT.gROOT.GetVersion()),
         "python_version": platform.python_version(),
         "implementation": "official-style ROOT RDataFrame + PtEtaPhiMVector + TH1D",
