@@ -45,3 +45,10 @@ The baseline now explicitly uses the half-open interval `[mass_min, mass_max)`: 
 ## Important limitation
 
 The reference uses an educational muon-only derived file. This is suitable for reproducing that example, but the record says no further validation was performed on the reduced output. It does not establish trigger-efficiency or prescale modelling. A separate research-level data record requires a separate file-level audit.
+
+
+## Machine-readable parity audit hardening
+
+The end-to-end metadata audit (`scripts/audit_baseline_metadata.py`) supplements bin-by-bin histogram comparison with explicit checks that the candidate used the reference-aligned `exactly-two-opposite-charge` selection and that the reference opposite-sign event count equals the candidate opposite-charge-pair total. Under the exactly-two-muon selection, each opposite-sign event contributes one pair, including pairs whose mass is later classified as non-finite or outside the histogram range. The audit also validates checksum syntax, positive integer input sizes, and integer types for event/pair counts so malformed metadata cannot pass merely because Python considers values such as `40.0` equal to `40`.
+
+Regression tests cover the wrong selection mode, opposite-sign cut-flow disagreement, malformed matching checksums, nonpositive file size, and float-encoded counts. These tests validate the audit's software contract only. The audit must be run on actual reference and candidate outputs before any parity claim; synthetic fixtures are not evidence of real-data reproduction.
