@@ -119,11 +119,25 @@ def main() -> None:
                 mass_max=args.mass_max,
             )
             counts += chunk_counts
+            if accounting["pairs_total"] != len(flat):
+                raise RuntimeError("histogram helper pair total does not match the input chunk")
             pairs_nonfinite += accounting["pairs_nonfinite"]
             pairs_below_range += accounting["pairs_below_range"]
             pairs_at_or_above_upper_edge += accounting["pairs_above_range"]
             if args.max_events is not None and events_read >= args.max_events:
                 break
+
+    accounted_pairs = (
+        pairs_below_range
+        + int(counts.sum())
+        + pairs_at_or_above_upper_edge
+        + pairs_nonfinite
+    )
+    if accounted_pairs != opposite_charge_pairs:
+        raise RuntimeError(
+            "pair accounting invariant violated: "
+            f"accounted={accounted_pairs}, total={opposite_charge_pairs}"
+        )
 
     csv_path = args.output_dir / "dimuon_mass_histogram.csv"
     metadata_path = args.output_dir / "run_metadata.json"
@@ -165,7 +179,6 @@ def main() -> None:
         "bins": args.bins,
         "mass_range_GeV": [args.mass_min, args.mass_max],
         "histogram_interval": "[mass_min, mass_max); values exactly at mass_max are overflow",
-        "pairs_at_or_above_mass_max": pairs_at_or_above_upper_edge,
         "selection_mode": args.selection,
         "step_size": args.step_size,
         "max_events": args.max_events,
