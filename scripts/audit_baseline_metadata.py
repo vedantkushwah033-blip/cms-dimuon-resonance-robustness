@@ -205,10 +205,17 @@ def audit(reference_path: Path, candidate_path: Path, histogram_report_path: Pat
     check("full_dataset_events_read", ref.get("events_total"), cand.get("events_read"))
     check("events_read_processed_consistency", cand.get("events_read"), cand.get("events_processed"))
     max_events = cand.get("max_events")
+    reference_event_total = ref.get("events_total")
+    reference_total_valid = (
+        isinstance(reference_event_total, int)
+        and not isinstance(reference_event_total, bool)
+        and reference_event_total >= 0
+    )
     full_run_limit_valid = max_events is None or (
-        isinstance(max_events, int)
+        reference_total_valid
+        and isinstance(max_events, int)
         and not isinstance(max_events, bool)
-        and max_events >= ref.get("events_total", 0)
+        and max_events >= reference_event_total
     )
     checks.append({
         "name": "full_dataset_event_limit",
@@ -242,12 +249,6 @@ def audit(reference_path: Path, candidate_path: Path, histogram_report_path: Pat
     check("regular_bin_total", ref.get("histogram_regular_bin_total"), cand.get("pairs_in_histogram_range"))
     check("underflow_count", ref.get("histogram_underflow"), cand.get("pairs_below_mass_range"))
     check("overflow_count", ref.get("histogram_overflow"), cand.get("pairs_at_or_above_mass_max"))
-    candidate_pair_accounting = (
-        cand.get("pairs_in_histogram_range", 0)
-        + cand.get("pairs_below_mass_range", 0)
-        + cand.get("pairs_at_or_above_mass_max", 0)
-        + cand.get("pairs_nonfinite_mass", 0)
-    )
     accounting_fields_valid = all(
         isinstance(cand.get(key), int) and not isinstance(cand.get(key), bool) and cand.get(key) >= 0
         for key in (
@@ -255,6 +256,16 @@ def audit(reference_path: Path, candidate_path: Path, histogram_report_path: Pat
             "pairs_at_or_above_mass_max", "pairs_nonfinite_mass",
             "opposite_charge_pairs_total",
         )
+    )
+    candidate_pair_accounting = (
+        sum(
+            cand[key]
+            for key in (
+                "pairs_in_histogram_range", "pairs_below_mass_range",
+                "pairs_at_or_above_mass_max", "pairs_nonfinite_mass",
+            )
+        )
+        if accounting_fields_valid else None
     )
     accounting_passed = (
         accounting_fields_valid
