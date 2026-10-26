@@ -86,3 +86,13 @@ Two additional official CERN records provide concrete leads for a properly scope
 - Detailed luminosity information for 2012: https://opendata.cern.ch/record/cms-1054. The record describes trigger-active run ranges and prescale factors as inputs to luminosity calculations for prescaled paths.
 
 These records help define what to verify next, but they do not establish that the project has read the actual derived ROOT files, calculated the applicable luminosity/prescales, or obtained an unbiased efficiency denominator. The DoubleMuParked sample's trigger-based selection remains a central limitation for efficiency claims.
+
+
+## Additional candidate sample for denominator feasibility — 2026-10-26
+
+The official Run2012B/C SingleMu derived records may be worth checking before declaring every trigger-efficiency question infeasible:
+
+- Run2012B SingleMu: 53,446,198 events, 107 files, 127.2 MiB; https://opendata.cern.ch/record/cms-31127
+- Run2012C SingleMu: 85,731,835 events, 157 files, 206.0 MiB; https://opendata.cern.ch/record/cms-31133
+
+Because these samples are selected by single-muon triggers, they may be candidates for a carefully designed tag-and-probe or conditional trigger study. They are not automatically unbiased for a dimuon trigger, and no efficiency denominator has been established. Check the actual HLT/trigger-object branches, path overlap, run coverage, and prescale treatment before choosing an estimand.
