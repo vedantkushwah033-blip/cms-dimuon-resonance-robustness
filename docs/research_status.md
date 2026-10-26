@@ -210,3 +210,10 @@ A planned task is not a result. A passing CI run validates the current automated
 - The PyROOT reference exporter supports `--max-events N`, using single-threaded `RDataFrame.Range` to limit processing during a smoke test. Full runs retain implicit multithreading; metadata identifies the event cap so a partial sample is not confused with a full-data run.
 - Synthetic integration confirms the one-event capped reference run and full-fixture candidate/reference parity. The Python 3.10–3.12 matrix and ROOT integration passed on code/test commit `cde7b263ee404bdbebe0659518c837dbef080858` (runs 40283199640 and 40283199631).
 - No bounded or full export has yet been executed on the official CMS file. The next scientific acceptance milestone remains checksum/schema capture, full-data reference and candidate exports, and an exact 30,000-bin comparison.
+
+
+## Candidate/reference input-integrity parity — 2026-10-26
+
+- Both implementations now reject malformed muon charge values and finite negative transverse momenta or masses before filling histograms. Non-finite candidate kinematics remain separately accounted for rather than being silently converted to a physical mass.
+- Regression tests cover invalid charges and negative finite kinematics. The full Python test/compile/Ruff matrix and ROOT synthetic integration passed on commit `23c17d919a02a452a391741b38434c867e95b21a` (runs 40283709403 and 40283709344).
+- Full official CMS input processing, checksum/schema capture, and exact 30,000-bin reference comparison are still outstanding.
