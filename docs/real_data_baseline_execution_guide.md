@@ -94,7 +94,7 @@ python scripts/export_reference_dimuon_histogram.py \\
 sha256sum ./Run2012BC_DoubleMuParked_Muons.root
 ```
 
-The exporter writes `dimuon_mass_histogram.csv` and `reference_metadata.json`; preserve the checksum output with these artifacts. It records the ROOT version, cut-flow counts, and histogram underflow/overflow. Do not digitize the reference PNG or infer counts from its pixels. The script has been added to the repository but has **not yet been executed** against the CMS file, and the generated CSV must still be independently inspected before it is accepted as the reference artifact.
+The exporter writes `dimuon_mass_histogram.csv` and `reference_metadata.json`; with `--sha256-input`, the metadata includes the input's byte size and SHA-256. Hashing adds one full input-file read. It records the ROOT version, cut-flow counts, and histogram underflow/overflow. Do not digitize the reference PNG or infer counts from its pixels. The script has been added to the repository but has **not yet been executed** against the CMS file, and the generated CSV must still be independently inspected before it is accepted as the reference artifact.
 
 Once both numerical CSVs exist, run:
 
