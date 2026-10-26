@@ -146,3 +146,9 @@ A planned task is not a result. A passing CI run validates the current automated
 - Updated the real-data guide with the command, artifact requirements, and warning that the script has not yet been executed against the CMS ROOT file. The generated reference artifact must be checked against the exact input checksum and official source before use.
 - CI now compiles project scripts and lints the new exporter in addition to existing tests. The workflow result for this change is pending; no passing status is claimed yet.
 - This closes an implementation gap, not the empirical gap: no real CMS spectrum or bin-by-bin parity result has been produced.
+
+
+## ROOT exporter CI follow-up — 2026-10-26
+- CI run [40257810613](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40257810613) passed on Python 3.10, 3.11, and 3.12 after adding file-size/optional SHA-256 metadata to the reference exporter. The workflow now compiles Python files and lints the exporter in addition to running tests.
+- The exporter records the official source commit `19a4a64fd58ef66a6ee3cf4f2a469fba61c60a09` and source URL. The final source-pin commit's CI status remains separate and must be checked before being called validated.
+- This is syntax/lint/software-suite evidence only; the CMS file has not been processed with PyROOT, and no reference/candidate histogram comparison has been run.
