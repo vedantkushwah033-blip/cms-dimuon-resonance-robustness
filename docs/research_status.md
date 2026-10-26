@@ -152,3 +152,13 @@ A planned task is not a result. A passing CI run validates the current automated
 - CI run [40257810613](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40257810613) passed on Python 3.10, 3.11, and 3.12 after adding file-size/optional SHA-256 metadata to the reference exporter. The workflow now compiles Python files and lints the exporter in addition to running tests.
 - The exporter records the official source commit `19a4a64fd58ef66a6ee3cf4f2a469fba61c60a09` and source URL. The final source-pin commit's CI status remains separate and must be checked before being called validated.
 - This is syntax/lint/software-suite evidence only; the CMS file has not been processed with PyROOT, and no reference/candidate histogram comparison has been run.
+
+
+## Metadata-audit acceptance hardening — 2026-10-26
+- The metadata audit now validates strict JSON types for booleans, counts, bin counts, mass ranges, tree names, SHA-256 digests, and input file sizes.
+- Full-data acceptance requires the candidate to read the complete reference event count, match `events_read` to `events_processed`, and avoid a partial `max_events` limit.
+- Pair accounting is conserved across in-range, below-range, overflow, and non-finite categories. Event and pair count bounds reject impossible cut-flow metadata.
+- Reference ROOT histogram entries including flow are checked against the opposite-sign event count. New regression tests cover partial runs, inconsistent pair totals, malformed types, impossible count relationships, and reference cut-flow mismatch.
+- Corrected fixtures after earlier CI failures exposed missing new metadata and a non-conserving synthetic count example. Latest code/test commit `475c0eb8dc5d7354442a515436a16c749ed90b54` passed the ordinary Python 3.10/3.11/3.12 tests, compilation, and Ruff workflow [40275514023](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40275514023) and ROOT synthetic integration workflow [40275522182](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40275522182).
+- A later documentation-only commit `c21d98e8537d70d92ef4eb2f33647c8527b3fecf` records these changes; its own CI was still running when this status entry was added.
+- None of these checks substitutes for processing the official CMS file. Actual data checksum/schema capture, full candidate run, independent reference CSV, and exact 30,000-bin comparison remain uncompleted.
