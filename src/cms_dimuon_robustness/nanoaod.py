@@ -1,4 +1,4 @@
-"""Awkward-array operations for dimuon pairs in reduced CMS NanoAOD."""
+"""Awkward-array operations for dimuon pairs in CMS NanoAOD-like files."""
 
 from __future__ import annotations
 
