@@ -16,7 +16,7 @@ The broad idea “test local dimuon bump hunts under background-model misspecifi
 
 ### 2. Cesarotti et al. (2019): direct overlap with CMS Open Data dimuon searches
 
-- Cari Cesarotti, Yotam Soreq, Matthew J. Strassler, Jesse Thaler, and Wei Xue, “Searching in CMS Open Data for Dimuon Resonances with Substantial Transverse Momentum,” *Physical Review D* 100, 015021 (2019), DOI: [10.1103/PhysRevD.100.015021](https://doi.org/10.1103/PhysRevD.100.015021); [arXiv:1902.04222](https://arxiv.org/abs/1902.04222).
+- Cari Cesarotti, Yotam Soreq, Matthew J. Strassler, Jesse Thaler, and Wei Xue, “Searching in CMS Open Data for Dimuon Resonances with Substantial Transverse Momentum,” *Physical Review D* 100, 015021 (2019), DOI: [10.1103/PhysRevD.100.015021](https://doi.org/10.1103/PhysRevD.100.015021); [arXiv:1902.04222](https://arxiv.org/abs/1902.07227).
 - The published methods describe local fits around each test mass, a fifth-order polynomial with six free parameters, fit-window choices, a cubic/quintic cross-check, and the risk of correlated spurious “ringing” features. The analysis also discusses a trigger-turn-on region.
 - Consequence: a project framed simply as “test polynomial background choice and local bump-hunt robustness on CMS dimuon data” risks substantial overlap. A distinct estimand and method comparison are required.
 
