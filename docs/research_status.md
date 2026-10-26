@@ -181,3 +181,6 @@ A planned task is not a result. A passing CI run validates the current automated
 - Added an audit invariant requiring the `differing_bins` list length to match `differing_bin_count` and each entry to be an object.
 - Updated exact-parity fixtures and added a regression test for a zero count paired with a nonempty mismatch list.
 - Latest code/test CI remains the acceptance gate; full CMS data processing and 30,000-bin parity remain outstanding.
+
+
+- Hardened audit JSON parsing against duplicate object keys, which standard `json.loads` behavior would otherwise silently resolve by keeping the last occurrence. Regression tests cover all three audit inputs (reference metadata, candidate metadata, and histogram report). The code and tests passed GitHub Actions on Python 3.10, 3.11, and 3.12; see `docs/validation_log.md`. This is input-integrity hardening, not real-data validation.
