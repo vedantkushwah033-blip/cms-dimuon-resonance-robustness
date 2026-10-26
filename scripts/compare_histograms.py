@@ -140,9 +140,24 @@ def main() -> int:
             f"--output resolves to the same path as {protected_inputs[output_path]}; "
             "refusing to overwrite an input histogram"
         )
-    report = compare(args.reference, args.candidate)
+    try:
+        report = compare(args.reference, args.candidate)
+    except (OSError, ValueError) as exc:
+        # Keep machine-readable failure evidence for CI artifacts, including
+        # incompatible bin edges or malformed input CSVs.
+        report = {
+            "reference_csv": str(args.reference),
+            "candidate_csv": str(args.candidate),
+            "exact_bin_by_bin_parity": False,
+            "comparison_error": str(exc),
+        }
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(json.dumps(report, indent=2) + "\\n", encoding="utf-8")
+        print(json.dumps(report, indent=2))
+        print(f"comparison failed: {exc}", file=__import__("sys").stderr)
+        return 2
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    args.output.write_text(json.dumps(report, indent=2) + "\\n", encoding="utf-8")
     print(json.dumps({key: value for key, value in report.items() if key != "differing_bins"}, indent=2))
     return 0 if report["exact_bin_by_bin_parity"] else 2
 
