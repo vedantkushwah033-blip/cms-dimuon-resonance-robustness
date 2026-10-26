@@ -152,8 +152,8 @@ def main() -> int:
         "Muon_pt.size() != Muon_phi.size() || "
         "Muon_pt.size() != Muon_mass.size() || "
         "Muon_pt.size() != Muon_charge.size() || "
-        "hasInvalidMuonCharge(Muon_charge) || "
-        "hasNegativeFiniteKinematics(Muon_pt, Muon_mass)",
+        "(nMuon == 2 && (hasInvalidMuonCharge(Muon_charge) || "
+        "hasNegativeFiniteKinematics(Muon_pt, Muon_mass)))",
         "Events with invalid muon collection lengths, charge, or kinematics",
     )
     invalid_collection_count = int(invalid_collections.Count().GetValue())
