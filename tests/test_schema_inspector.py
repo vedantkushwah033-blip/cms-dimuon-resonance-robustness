@@ -59,3 +59,26 @@ def test_schema_inspector_lists_trees_branches_and_trigger_candidates(tmp_path):
     ]
     assert "run" in events["branch_group_presence"]["event_identity"]["present"]
     assert json.loads(completed.stdout)["input"] == str(root_path)
+
+
+def test_schema_inspector_refuses_to_overwrite_input_file(tmp_path):
+    input_path = tmp_path / "precious.root"
+    input_path.write_bytes(b"preserve this input")
+    original = input_path.read_bytes()
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(REPO_ROOT / "scripts" / "inspect_root_schema.py"),
+            "--input",
+            str(input_path),
+            "--output",
+            str(tmp_path / "unused" / ".." / input_path.name),
+        ],
+        cwd=REPO_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert completed.returncode == 2
+    assert "refusing to overwrite it" in completed.stderr
+    assert input_path.read_bytes() == original
