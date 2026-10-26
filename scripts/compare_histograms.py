@@ -16,8 +16,8 @@ import numpy as np
 COLUMNS = ("mass_low_GeV", "mass_high_GeV", "pair_count")
 
 
-def load_histogram(path: Path) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Load and validate bin edges and nonnegative integer counts from a CSV."""
+def load_histogram(path: Path) -> tuple[np.ndarray, np.ndarray, list[int]]:
+    """Load and validate bin edges and exact nonnegative integer counts from CSV."""
     with path.open("r", encoding="utf-8", newline="") as stream:
         reader = csv.DictReader(stream)
         if reader.fieldnames is None or not set(COLUMNS).issubset(reader.fieldnames):
@@ -28,28 +28,30 @@ def load_histogram(path: Path) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     try:
         lows = np.asarray([float(row["mass_low_GeV"]) for row in rows], dtype=np.float64)
         highs = np.asarray([float(row["mass_high_GeV"]) for row in rows], dtype=np.float64)
-        raw_counts = [float(row["pair_count"]) for row in rows]
     except (TypeError, ValueError) as exc:
-        raise ValueError(f"{path}: bin edges and counts must be numeric") from exc
-    counts_as_float = np.asarray(raw_counts, dtype=np.float64)
+        raise ValueError(f"{path}: bin edges must be numeric") from exc
+    try:
+        # Parse counts as Python integers, never via float: float loses unit
+        # precision above 2**53, which is unacceptable for exact parity checks.
+        counts = [int(row["pair_count"]) for row in rows]
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"{path}: pair_count values must be exact base-10 integers") from exc
     if not np.all(np.isfinite(lows)) or not np.all(np.isfinite(highs)):
         raise ValueError(f"{path}: bin edges must be finite")
     if np.any(highs <= lows):
         raise ValueError(f"{path}: every bin must have high edge greater than low edge")
     if len(lows) > 1 and not np.array_equal(highs[:-1], lows[1:]):
         raise ValueError(f"{path}: bins must be contiguous and ordered")
-    if not np.all(np.isfinite(counts_as_float)) or np.any(counts_as_float < 0):
-        raise ValueError(f"{path}: counts must be finite and nonnegative")
-    if not np.all(counts_as_float == np.floor(counts_as_float)):
-        raise ValueError(f"{path}: pair_count values must be integers")
-    return lows, highs, counts_as_float.astype(np.int64)
+    if any(count < 0 for count in counts):
+        raise ValueError(f"{path}: counts must be nonnegative integers")
+    return lows, highs, counts
 
 
 def compare(reference_path: Path, candidate_path: Path) -> dict:
     """Compare histograms and summarize exact discrepancies."""
     ref_low, ref_high, ref_counts = load_histogram(reference_path)
     cand_low, cand_high, cand_counts = load_histogram(candidate_path)
-    if ref_counts.shape != cand_counts.shape:
+    if len(ref_counts) != len(cand_counts):
         raise ValueError(
             f"histogram bin-count differs: reference={len(ref_counts)}, "
             f"candidate={len(cand_counts)}"
@@ -62,34 +64,34 @@ def compare(reference_path: Path, candidate_path: Path) -> dict:
             default=-1,
         )
         raise ValueError(f"histogram bin edges differ; first mismatching bin index={first}")
-    delta = cand_counts - ref_counts
-    differing = np.flatnonzero(delta != 0)
+    delta = [candidate - reference for reference, candidate in zip(ref_counts, cand_counts)]
+    differing = [i for i, difference in enumerate(delta) if difference != 0]
     intervals = [
         {
-            "bin_index": int(i),
+            "bin_index": i,
             "mass_low_GeV": float(ref_low[i]),
             "mass_high_GeV": float(ref_high[i]),
-            "reference_count": int(ref_counts[i]),
-            "candidate_count": int(cand_counts[i]),
-            "candidate_minus_reference": int(delta[i]),
+            "reference_count": ref_counts[i],
+            "candidate_count": cand_counts[i],
+            "candidate_minus_reference": delta[i],
         }
         for i in differing
     ]
     return {
         "reference_csv": str(reference_path),
         "candidate_csv": str(candidate_path),
-        "bin_count": int(len(ref_counts)),
+        "bin_count": len(ref_counts),
         "bin_edges_exactly_equal": True,
-        "reference_total_count": int(ref_counts.sum()),
-        "candidate_total_count": int(cand_counts.sum()),
-        "total_absolute_bin_count_difference": int(np.abs(delta).sum()),
-        "maximum_absolute_bin_count_difference": int(np.abs(delta).max(initial=0)),
-        "differing_bin_count": int(len(differing)),
-        "exact_bin_by_bin_parity": bool(len(differing) == 0),
+        "reference_total_count": sum(ref_counts),
+        "candidate_total_count": sum(cand_counts),
+        "total_absolute_bin_count_difference": sum(abs(value) for value in delta),
+        "maximum_absolute_bin_count_difference": max((abs(value) for value in delta), default=0),
+        "differing_bin_count": len(differing),
+        "exact_bin_by_bin_parity": len(differing) == 0,
         "differing_bins": intervals,
         "interpretation": (
             "Exact integer parity across all bins."
-            if len(differing) == 0
+            if not differing
             else "Parity not established; investigate every listed discrepancy."
         ),
     }
