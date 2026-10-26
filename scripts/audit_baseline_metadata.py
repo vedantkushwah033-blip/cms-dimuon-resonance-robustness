@@ -372,6 +372,30 @@ def audit(reference_path: Path, candidate_path: Path, histogram_report_path: Pat
         0,
         hist.get("maximum_absolute_bin_count_difference"),
     )
+
+    differing_bins = hist.get("differing_bins")
+    differing_bin_count = hist.get("differing_bin_count")
+    discrepancy_list_valid = (
+        isinstance(differing_bins, list)
+        and all(isinstance(item, dict) for item in differing_bins)
+        and isinstance(differing_bin_count, int)
+        and not isinstance(differing_bin_count, bool)
+        and differing_bin_count >= 0
+        and len(differing_bins) == differing_bin_count
+    )
+    checks.append({
+        "name": "histogram_discrepancy_list_consistent",
+        "passed": discrepancy_list_valid,
+        "reference": {
+            "differing_bin_count": differing_bin_count,
+            "differing_bins_length": (
+                len(differing_bins) if isinstance(differing_bins, list) else None
+            ),
+        },
+        "detail": "differing-bin list length matches the strict integer discrepancy count"
+        if discrepancy_list_valid else
+        "differing_bins must be a list of objects whose length equals differing_bin_count",
+    })
     check("histogram_bin_count", ref.get("bins"), hist.get("bin_count"))
     check("histogram_regular_total", ref.get("histogram_regular_bin_total"), hist.get("reference_total_count"))
     check("candidate_regular_total", cand.get("pairs_in_histogram_range"), hist.get("candidate_total_count"))
