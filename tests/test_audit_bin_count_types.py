@@ -34,11 +34,15 @@ def _valid_metadata() -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
         "input_bytes": 100,
         "tree": "Events",
         "tree_entries_available": 10,
+        "events_read": 10,
+        "events_processed": 10,
+        "max_events": None,
         "events_selected": 5,
         "opposite_charge_pairs_total": 4,
         "pairs_in_histogram_range": 3,
         "pairs_below_mass_range": 1,
         "pairs_at_or_above_mass_max": 0,
+        "pairs_nonfinite_mass": 0,
         "bins": 2,
         "mass_range_GeV": [0.25, 300.0],
         "selection_mode": "exactly-two-opposite-charge",
@@ -109,3 +113,45 @@ def test_matching_non_string_tree_names_cannot_pass(tmp_path: Path) -> None:
     failed_names = {item["name"] for item in report["checks"] if not item["passed"]}
     assert "reference_tree_name_valid_nonempty_string" in failed_names
     assert "candidate_tree_name_valid_nonempty_string" in failed_names
+
+def test_partial_run_cannot_pass_full_data_audit(tmp_path: Path) -> None:
+    reference, candidate, histogram = _valid_metadata()
+    candidate["events_read"] = 9
+    candidate["events_processed"] = 9
+    candidate["max_events"] = 9
+    report = audit(
+        _write_json(tmp_path / "reference.json", reference),
+        _write_json(tmp_path / "candidate.json", candidate),
+        _write_json(tmp_path / "histogram.json", histogram),
+    )
+    assert report["status"] == "FAIL"
+    failed_names = {item["name"] for item in report["checks"] if not item["passed"]}
+    assert "full_dataset_events_read" in failed_names
+    assert "full_dataset_event_limit" in failed_names
+
+
+def test_pair_accounting_must_conserve_all_pairs(tmp_path: Path) -> None:
+    reference, candidate, histogram = _valid_metadata()
+    candidate["pairs_nonfinite_mass"] = 1
+    report = audit(
+        _write_json(tmp_path / "reference.json", reference),
+        _write_json(tmp_path / "candidate.json", candidate),
+        _write_json(tmp_path / "histogram.json", histogram),
+    )
+    assert report["status"] == "FAIL"
+    failed_names = {item["name"] for item in report["checks"] if not item["passed"]}
+    assert "candidate_pair_accounting_conservation" in failed_names
+
+
+def test_malformed_pair_count_does_not_crash_audit(tmp_path: Path) -> None:
+    reference, candidate, histogram = _valid_metadata()
+    candidate["pairs_nonfinite_mass"] = "0"
+    report = audit(
+        _write_json(tmp_path / "reference.json", reference),
+        _write_json(tmp_path / "candidate.json", candidate),
+        _write_json(tmp_path / "histogram.json", histogram),
+    )
+    assert report["status"] == "FAIL"
+    failed_names = {item["name"] for item in report["checks"] if not item["passed"]}
+    assert "candidate_nonfinite_mass_pairs_valid_nonnegative_integer" in failed_names
+    assert "candidate_pair_accounting_conservation" in failed_names
