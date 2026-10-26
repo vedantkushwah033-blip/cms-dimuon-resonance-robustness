@@ -155,3 +155,9 @@ An intermediate CI attempt failed because pre-existing audit fixtures did not ye
 Subsequent changes adding the reference histogram-entry invariant and its regression test are committed through `475c0eb8dc5d7354442a515436a16c749ed90b54`. Their ordinary and ROOT integration workflows were still running at the time of this entry; no passing result is claimed for those latest changes yet.
 
 All of these checks are software/audit validation. The full official CMS ROOT dataset, numerical reference export, and candidate/reference 30,000-bin parity comparison remain outstanding.
+
+## Reference histogram flow-count conservation — 2026-10-26
+
+A further metadata-integrity check now requires the reference ROOT histogram's regular-bin total, underflow, and overflow counts to sum exactly to `histogram_entries_including_flow`. This is distinct from checking that ROOT's fill-entry count matches the opposite-sign cut-flow: a corrupted or inconsistently recorded flow-bin field could otherwise evade the latter check. The new invariant rejects malformed counts, including booleans masquerading as integers, and has regression tests for both an inconsistent sum and a boolean count.
+
+The code and regression tests are committed; the latest CI result must be checked before this change is described as validated. This check still does not replace an actual CMS-data run or independent review of generated reference artifacts.
