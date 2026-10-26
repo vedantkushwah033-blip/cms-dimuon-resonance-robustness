@@ -54,3 +54,5 @@ The end-to-end metadata audit (`scripts/audit_baseline_metadata.py`) supplements
 Regression tests cover the wrong selection mode, opposite-sign cut-flow disagreement, malformed matching checksums, nonpositive file size, and float-encoded counts. These tests validate the audit's software contract only. The audit must be run on actual reference and candidate outputs before any parity claim; synthetic fixtures are not evidence of real-data reproduction.
 
 The histogram-report flags `bin_edges_exactly_equal` and `exact_bin_by_bin_parity` are now validated as actual JSON booleans. This avoids Python's permissive equality (`1 == True`) allowing malformed numeric values to pass a parity gate. Regression tests cover integer, float, string, null, list, and mismatched boolean values.
+
+The audit also requires the reference, candidate, and histogram-report bin counts to be positive JSON integers. Matching string values such as `"30000"` are rejected instead of passing equality checks without satisfying the metadata schema. An integration test checks both a valid minimal audit and the malformed matching-string case.
