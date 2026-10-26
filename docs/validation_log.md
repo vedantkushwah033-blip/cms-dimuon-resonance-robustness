@@ -278,3 +278,8 @@ The metadata audit now also requires the comparator report's `differing_bins` fi
 The attempted automatic GitHub Actions schema-audit workflow failed before creating jobs on multiple commits. I removed that unvalidated workflow rather than leaving a broken CI check and added a documented manual procedure to `docs/real_data_baseline_run_card.md`. The procedure uses the official CERN client to fetch one file from each of records 31123, 31129, 31127, and 31133, verifies downloads, writes schema reports, and records file sizes and SHA-256 values.
 
 This is still an unexecuted procedure. No actual ROOT file schema report exists yet. The latest Python/ROOT integration runs are queued; wait for them before claiming the branch-type reporting change and compatibility test are CI-green.
+
+
+## Research-level schema execution status — 2026-10-27
+
+The attempted automated research-level ROOT schema-audit workflows were removed in commits `67482e77c6896b800eabf48c5863a8b80145ef84` and `1d2c28ff368edfa6e88b2631691ca41bc4b8bd87` because workflow execution could not be verified and prior attempts had failed before job creation. The GitHub connector available in this session does not expose a workflow-dispatch operation, and its commit-run lookup is limited to pull-request-triggered runs; an empty result is inconclusive. The manual, bounded procedure remains documented in `docs/real_data_baseline_run_card.md`. No research-level CMS ROOT file was processed and no schema artifact was produced in this session.
