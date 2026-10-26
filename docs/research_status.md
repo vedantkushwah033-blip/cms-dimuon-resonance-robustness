@@ -87,3 +87,11 @@
 
 ## Evidence policy
 A planned task is not a result. A passing CI run validates the current automated software checks, not the scientific hypothesis. The baseline script has only been exercised on a tiny synthetic ROOT file; it has not yet been run against the official CMS event file. The schema inspector and independent four-vector test passed in the confirmed CI run recorded in `docs/validation_log.md`. A passing CI workflow would validate only the checks that actually ran. A repository commit is not evidence of novelty, peer review, or admissions impact.
+
+## Latest validation update — 2026-10-26
+
+- The schema-integrity guard and its malformed-event regression test are included in commit `8a58ba6b5bcb0ef6efd06a6d2c1f36f283bc0cd7`; the research-status ledger update is commit `63f840b6d3dabdcc5dabd3ac937e8a6e41f9c8fb`.
+- GitHub Actions run [40254596371](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40254596371), triggered by the status-ledger commit, completed successfully. The Python 3.10, 3.11, and 3.12 jobs each passed dependency installation, `pytest`, and `ruff check src tests`. This validates the committed software/test suite on those runtimes; it does **not** validate a real CMS input file or establish physics-level correctness.
+- **Still pending:** execute the documented workflow on the exact official ROOT file; preserve its official record, file URL, SHA-256, size, tree entry count, and branch inventory; inspect schema/units; compare the full baseline quantitatively against the public reference; and report discrepancies before proceeding to confirmatory statistical experiments.
+- Interpretation guardrail remains unchanged: the muon-only outreach record is suitable for an educational baseline reproduction, not by itself for quantitative trigger-efficiency or prescale claims.
+
