@@ -77,3 +77,14 @@ Confirmed CI run: https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-
 - Commit: `098606d9cc00546c192f23b0f60a1830ec87de0d`
 - Python 3.10, 3.11, 3.12: 21 tests passed; Ruff passed.
 - Tests use synthetic ROOT files. This remains software validation, not validation against CMS collision data.
+
+
+## Latest integration test: non-finite mass accounting
+
+GitHub Actions run: https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40248988274
+
+Commit: `e277b4cac0dc88418a9b086857501f78109a09c0`
+
+- Python 3.10, 3.11, and 3.12: all jobs passed.
+- The end-to-end synthetic ROOT test now includes a non-finite muon kinematic value and verifies that its pair is counted as non-finite rather than silently entering the histogram as a zero-mass pair.
+- The run validates the code path on synthetic data only; actual CMS-data reproduction remains outstanding.
