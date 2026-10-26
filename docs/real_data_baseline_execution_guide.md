@@ -40,7 +40,7 @@ python scripts/reproduce_dimuon_spectrum.py \
   --output-dir outputs/outreach-smoke
 ```
 
-If the schema-inspector CLI does not expose `--help` or uses different required arguments, consult `python scripts/inspect_root_schema.py --help` and record the actual command used; do not infer schema from a failed invocation. The spectrum script requires the five muon branches documented in its own source.
+The schema inventory is heuristic: branch-name matches are leads, not proof of variable semantics. Inspect the JSON and cite the authoritative record/documentation for each branch interpretation. The spectrum script requires the five muon branches documented in its own source.
 
 Inspect the metadata JSON, histogram CSV, and PNG. Confirm that:
 - The input checksum and byte size are present.
