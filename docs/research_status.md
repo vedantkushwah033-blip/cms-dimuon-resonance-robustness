@@ -48,6 +48,9 @@
 
 - Follow-up numerical audit: both invariant-mass implementations now require the mass-squared value and its scale to be finite before treating a negative result as round-off. This prevents an infinite tolerance from making a non-finite negative result eligible for clamping. Commits: `b0472a4` (Awkward/NanoAOD path) and `05de35b` (standalone vectorized path). These source changes have been committed; their new CI status has not yet been verified.
 
+- Added a defensive schema-integrity check in `opposite_charge_pair_masses`: required muon fields must exist and per-event multiplicities must match across kinematic and charge branches. Added a regression test with deliberately inconsistent jagged lengths. Commits: `3047bb4` and `8a58ba6`; their CI results are not yet verified.
+- Follow-up audit of recent numerical-fix commits found no combined status checks exposed by the connector at the time checked; treat CI for `b0472a4` and `05de35b` as unverified, not passed.
+
 ## Workflow status checked 2026-10-26
 - GitHub Actions run for commit `3ed0f9e` (decision gates): completed successfully.
 - GitHub Actions run for commit `40b819d` (scenario matrix): completed successfully.
