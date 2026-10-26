@@ -3,6 +3,8 @@
 **Last updated:** 2026-10-26
 
 ## Confirmed completed in this repository
+- Added `docs/real_data_baseline_execution_guide.md` with source-record distinctions, a staged smoke/full-run procedure, provenance requirements, and bounded interpretation; the guide explicitly does not claim a real-data run has occurred.
+- Added the ROOT schema inventory invocation and JSON output path to the run guide so the schema is actually inspected rather than merely showing the CLI help.
 - Added a shared mass-histogram helper with explicit half-open `[mass_min, mass_max)` semantics, separate non-finite accounting, and a count-conservation invariant.
 - Added unit tests for empty inputs, invalid configurations, non-finite values, and the upper-edge overflow case; corrected a test's expected bin counts after checking the exact bin edges.
 - Updated the baseline spectrum script to use the helper and record the histogram interval convention in run metadata.
@@ -35,7 +37,9 @@
 - GitHub Actions run for commit `1a40e06` (Monte Carlo precision planning): was still in progress at the last check; do not report it as passing until completed.
 
 ## Latest workflow status for histogram changes
-- At the last check, GitHub Actions runs for the new histogram helper, tests, and script integration were still in progress/queued. Treat them as unverified until completed.
+- The initial test commit `cc02702` failed because the test's expected bin counts were incorrect for its declared bin edges; the expectation was corrected in `370bf7e`.
+- The corrected test commit `370bf7e`, histogram script integration `3e474db`, metadata update `3e685ae`, and histogram audit documentation `ca67b79` have successful GitHub Actions runs.
+- The most recent guide commits were queued/in progress at the last status check; their workflows are not yet verified.
 
 ## Not yet completed
 - Exhaustive or systematic literature review.
