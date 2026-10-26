@@ -64,6 +64,7 @@ def test_spectrum_script_writes_reproducible_smoke_outputs(tmp_path):
     metadata = json.loads((output_dir / "run_metadata.json").read_text(encoding="utf-8"))
     assert metadata["events_read"] == 3
     assert metadata["events_selected"] == 3
+    assert metadata["events_with_opposite_charge_pair"] == 3
     assert metadata["events_processed"] == 3
     assert metadata["opposite_charge_pairs_total"] == 3
     assert metadata["pairs_below_mass_range"] + metadata["pairs_in_histogram_range"] + metadata["pairs_at_or_above_mass_max"] + metadata["pairs_nonfinite_mass"] == metadata["opposite_charge_pairs_total"]
