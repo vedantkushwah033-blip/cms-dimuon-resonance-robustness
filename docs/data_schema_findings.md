@@ -46,3 +46,21 @@ An HLT decision bit indicates a stored path decision; it does not by itself esta
 4. Cross-reference the actual branches with the producer tool and the original 2012 dimuon analysis code.
 5. Record a pass/fail/unknown for each required input. Unknown is not a pass.
 6. Only then select the primary dataset and revise the research question to match what the data can genuinely support.
+
+
+## Official variable-list cross-check — 2026-10-26
+
+I inspected the CERN-published variable-list documentation linked from both research-level records, rather than relying only on the record summaries:
+
+- Run2012B: https://opendata.cern.ch/eos/opendata/cms/dataset-semantics/derived-data/NanoAODRun1/31123/Run2012B_DoubleMuParked_doc.html
+- Run2012C: https://opendata.cern.ch/eos/opendata/cms/dataset-semantics/derived-data/NanoAODRun1/31129/Run2012C_DoubleMuParked_doc.html
+
+Both published variable lists document event-level HLT decision branches, including dimuon-related paths such as `HLT_Dimuon0_Jpsi`, `HLT_DoubleMu11_Acoplanarity03`, `HLT_DoubleMu5_IsoMu5`, `HLT_Mu13_Mu8`, and `HLT_Mu17_Mu8`. They also document muon kinematics, charge, and several quality/isolation fields. This strengthens the feasibility case for a trigger-aware *schema investigation* on the research-level records.
+
+This is documentation-level evidence only: it does not replace opening the exact downloadable ROOT file and checking its tree, branch types, event-level values, run coverage, and missingness. The published variable lists do not document prescale values. An HLT boolean records a path decision; by itself it does not provide trigger efficiency, prescale correction, the full run-dependent trigger menu, or an unbiased denominator for an efficiency measurement.
+
+Next file-level checks:
+1. Inspect a representative ROOT file from each period and preserve the schema reports and checksums.
+2. Confirm the exact dimuon HLT branches and any `GoodLumisection`/run/luminosity-block fields in those files.
+3. Establish the path versions and run ranges from CMS trigger documentation; do not pool periods or path versions without a justified mapping.
+4. Treat prescale availability as unresolved until a documented source is identified.
