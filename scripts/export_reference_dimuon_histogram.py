@@ -71,6 +71,21 @@ def main() -> int:
     )
 
     dataframe = ROOT.RDataFrame(args.tree, args.input)
+    required_columns = {
+        "nMuon",
+        "Muon_pt",
+        "Muon_eta",
+        "Muon_phi",
+        "Muon_mass",
+        "Muon_charge",
+    }
+    available_columns = {str(name) for name in dataframe.GetColumnNames()}
+    missing_columns = sorted(required_columns - available_columns)
+    if missing_columns:
+        raise ValueError(
+            f"Tree {args.tree!r} is missing required branches: {missing_columns}"
+        )
+
     exactly_two = dataframe.Filter("nMuon == 2", "Events with exactly two muons")
     opposite_sign = exactly_two.Filter(
         "Muon_charge[0] != Muon_charge[1]", "Muons with opposite charge"
