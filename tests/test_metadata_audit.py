@@ -21,6 +21,7 @@ def _fixtures(tmp_path: Path):
         "tree": "Events",
         "events_total": 100,
         "events_exactly_two_muons": 40,
+        "events_opposite_sign": 8,
         "bins": 3,
         "mass_min_GeV": 0.25,
         "mass_max_GeV": 300.0,
@@ -34,6 +35,8 @@ def _fixtures(tmp_path: Path):
         "tree": "Events",
         "tree_entries_available": 100,
         "events_selected": 40,
+        "opposite_charge_pairs_total": 8,
+        "selection_mode": "exactly-two-opposite-charge",
         "bins": 3,
         "mass_range_GeV": [0.25, 300.0],
         "pairs_in_histogram_range": 8,
@@ -117,5 +120,32 @@ def test_metadata_audit_rejects_nonpositive_file_size(tmp_path: Path) -> None:
     assert report["status"] == "FAIL"
     assert any(
         check["name"] == "input_bytes_positive_integer" and not check["passed"]
+        for check in report["checks"]
+    )
+
+
+
+def test_metadata_audit_rejects_wrong_selection_mode(tmp_path: Path) -> None:
+    reference_path, candidate_path, histogram_path = _fixtures(tmp_path)
+    candidate = json.loads(candidate_path.read_text(encoding="utf-8"))
+    candidate["selection_mode"] = "all-opposite-charge-pairs"
+    candidate_path.write_text(json.dumps(candidate), encoding="utf-8")
+    report = audit(reference_path, candidate_path, histogram_path)
+    assert report["status"] == "FAIL"
+    assert any(
+        check["name"] == "selection_mode" and not check["passed"]
+        for check in report["checks"]
+    )
+
+
+def test_metadata_audit_rejects_opposite_sign_cutflow_mismatch(tmp_path: Path) -> None:
+    reference_path, candidate_path, histogram_path = _fixtures(tmp_path)
+    candidate = json.loads(candidate_path.read_text(encoding="utf-8"))
+    candidate["opposite_charge_pairs_total"] = 7
+    candidate_path.write_text(json.dumps(candidate), encoding="utf-8")
+    report = audit(reference_path, candidate_path, histogram_path)
+    assert report["status"] == "FAIL"
+    assert any(
+        check["name"] == "opposite_sign_event_pair_accounting" and not check["passed"]
         for check in report["checks"]
     )
