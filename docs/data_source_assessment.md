@@ -76,3 +76,13 @@ The immediate next step remains a small file-level schema audit for each period,
 ## Precision correction to named HLT branch claims — 2026-10-26
 
 The official variable lists were checked for exact path names. They document HLT boolean branches such as `HLT_Mu13_Mu8` and `HLT_Mu17_Mu8`, but a search did not find `HLT_Dimuon0_Jpsi`, `HLT_DoubleMu11_Acoplanarity03`, or `HLT_DoubleMu5_IsoMu5` on those derived-schema pages. The original AOD dataset record's possible-trigger list is a different source and does not prove that those paths are branches in the derived ntuple. Therefore, only the general availability of many HLT decisions is established by the variable lists; target-path presence and semantics remain a file-level unknown.
+
+
+## Specific trigger and luminosity documentation — 2026-10-26
+
+Two additional official CERN records provide concrete leads for a properly scoped trigger audit:
+
+- `HLT_Mu13_Mu8` path-version/run-interval record: https://opendata.cern.ch/record/cms-6651. The listed versions change over the 2012 B/C run ranges; therefore the trigger must not be modeled as one time-invariant path.
+- Detailed luminosity information for 2012: https://opendata.cern.ch/record/cms-1054. The record describes trigger-active run ranges and prescale factors as inputs to luminosity calculations for prescaled paths.
+
+These records help define what to verify next, but they do not establish that the project has read the actual derived ROOT files, calculated the applicable luminosity/prescales, or obtained an unbiased efficiency denominator. The DoubleMuParked sample's trigger-based selection remains a central limitation for efficiency claims.
