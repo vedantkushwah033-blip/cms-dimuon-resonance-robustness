@@ -19,6 +19,7 @@ import numpy as np
 import uproot
 
 from cms_dimuon_robustness.nanoaod import opposite_charge_pair_masses
+from cms_dimuon_robustness.histogram import histogram_masses
 
 BRANCHES = ["Muon_pt", "Muon_eta", "Muon_phi", "Muon_mass", "Muon_charge"]
 
@@ -111,11 +112,16 @@ def main() -> None:
             masses = opposite_charge_pair_masses(selected)
             flat = ak.to_numpy(ak.flatten(masses, axis=None))
             opposite_charge_pairs += int(len(flat))
-            finite_flat = flat[np.isfinite(flat)]
-            pairs_nonfinite += int(len(flat) - len(finite_flat))
-            pairs_below_range += int(np.count_nonzero(finite_flat < args.mass_min))
-            pairs_above_range += int(np.count_nonzero(finite_flat > args.mass_max))
-            counts += np.histogram(finite_flat, bins=edges)[0]
+            chunk_counts, accounting = histogram_masses(
+                flat,
+                bins=args.bins,
+                mass_min=args.mass_min,
+                mass_max=args.mass_max,
+            )
+            counts += chunk_counts
+            pairs_nonfinite += accounting["pairs_nonfinite"]
+            pairs_below_range += accounting["pairs_below_range"]
+            pairs_above_range += accounting["pairs_above_range"]
             if args.max_events is not None and events_read >= args.max_events:
                 break
 
