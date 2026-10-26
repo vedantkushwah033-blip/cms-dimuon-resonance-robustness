@@ -83,3 +83,18 @@ def test_awkward_and_vectorized_invariant_mass_implementations_agree():
     )
     assert actual.shape == expected.shape == (n_events,)
     np.testing.assert_allclose(actual, expected, rtol=2e-12, atol=2e-10)
+
+
+
+def test_invalid_muon_charge_values_are_rejected():
+    events = ak.Array(
+        {
+            "Muon_pt": [[10.0, 10.0]],
+            "Muon_eta": [[0.0, 0.0]],
+            "Muon_phi": [[0.0, np.pi]],
+            "Muon_mass": [[0.105658, 0.105658]],
+            "Muon_charge": [[0, -1]],
+        }
+    )
+    with pytest.raises(ValueError, match="Muon_charge must contain only -1 or \+1 values"):
+        opposite_charge_pair_masses(events)
