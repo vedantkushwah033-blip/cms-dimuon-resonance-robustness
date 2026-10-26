@@ -61,8 +61,16 @@ def parse_args() -> argparse.Namespace:
     args = parser.parse_args()
     if args.max_events is not None and args.max_events <= 0:
         parser.error("--max-events must be positive")
-    if args.bins <= 0 or not 0 < args.mass_min < args.mass_max:
-        parser.error("bins must be positive and 0 < mass-min < mass-max (logarithmic x axis)")
+    if (
+        args.bins <= 0
+        or not np.isfinite(args.mass_min)
+        or not np.isfinite(args.mass_max)
+        or not 0 < args.mass_min < args.mass_max
+    ):
+        parser.error(
+            "bins must be positive and mass bounds must be finite with "
+            "0 < mass-min < mass-max (logarithmic x axis)"
+        )
     return args
 
 
