@@ -224,3 +224,11 @@ A planned task is not a result. A passing CI run validates the current automated
 - The ROOT reference exporter validates collection lengths for all events, while charge and finite-negative kinematic validation is limited to the selected `nMuon == 2` events. A regression test verifies that an unselected one-muon event with an invalid charge is not rejected.
 - Commit `206678e4fcb444de7c7e89bca4d2f3c157ca79b9` passed the Python 3.10–3.12 matrix and ROOT integration (runs 40283968358 and 40283968367; 8 ROOT integration tests passed).
 - The remaining scientific blocker is still the actual CMS file: no real-data reference export, candidate export, or exact 30,000-bin parity comparison has been performed.
+
+
+## Trigger feasibility gate and latest CI audit — 2026-10-26
+
+- Added `docs/run1_trigger_feasibility_gate.md` to distinguish the six-branch muon-only outreach sample from the richer Run2012B/Run2012C derived records, and to define evidence required before any trigger-efficiency claim. It explicitly separates schema documentation from file-level evidence and records no real-data trigger audit as completed.
+- Updated `docs/data_schema_findings.md` and `docs/data_source_assessment.md` with official CERN variable-list evidence and the limitations of HLT decision bits. The CERN trigger guide explains that path configurations vary by run and that stored decisions alone do not establish efficiency or prescale correction.
+- Latest confirmed Python test matrix and ROOT synthetic integration runs for commit `55728e154ee0c26ac9a0ff7cf8f3f48999194b5f` both have successful runs (`40287725284` and `40287725431`). A separate overlapping Python workflow (`40287731148`) failed in all three environments on an assertion expecting exactly four branches in `tests/test_schema_inspection.py`; its log does not match the test file present at that commit, where the corresponding test uses `>= 4` in `tests/test_schema_inspector.py`. The failed run's jobs were requested for rerun; do not call that rerun successful until checked.
+- No official CMS ROOT file has been inspected or processed by this repository. Actual file checksum/schema capture, run-dependent HLT interpretation, validated-lumisection application, candidate/reference full-data outputs, and exact 30,000-bin parity remain outstanding.
