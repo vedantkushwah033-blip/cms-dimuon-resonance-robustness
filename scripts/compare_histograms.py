@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import re
 from pathlib import Path
 
 import numpy as np
@@ -33,7 +34,10 @@ def load_histogram(path: Path) -> tuple[np.ndarray, np.ndarray, list[int]]:
     try:
         # Parse counts as Python integers, never via float: float loses unit
         # precision above 2**53, which is unacceptable for exact parity checks.
-        counts = [int(row["pair_count"]) for row in rows]
+        raw_counts = [row["pair_count"] for row in rows]
+        if any(value is None or re.fullmatch(r"[0-9]+", value) is None for value in raw_counts):
+            raise ValueError("pair_count values must be unsigned base-10 integer strings")
+        counts = [int(value, 10) for value in raw_counts]
     except (TypeError, ValueError) as exc:
         raise ValueError(f"{path}: pair_count values must be exact base-10 integers") from exc
     if not np.all(np.isfinite(lows)) or not np.all(np.isfinite(highs)):
