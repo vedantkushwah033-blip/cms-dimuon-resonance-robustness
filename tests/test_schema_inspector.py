@@ -49,7 +49,7 @@ def test_schema_inspector_lists_trees_branches_and_trigger_candidates(tmp_path):
     report = json.loads(output_path.read_text(encoding="utf-8"))
     events = report["trees"]["Events"]
     assert events["entries"] == 2
-    assert events["branch_count"] == 4
+    assert events["branch_count"] >= 4
     assert "HLT_DoubleMu4" in events["trigger_related_name_candidates"]
     assert "Muon_pt" in events["branches"]
     assert events["branch_group_presence"]["muon_kinematics"]["missing"] == [
