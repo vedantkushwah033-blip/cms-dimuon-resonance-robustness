@@ -156,3 +156,36 @@ def test_malformed_csv_structure_is_rejected(tmp_path, csv_text, error_fragment)
 
     assert result.returncode != 0
     assert error_fragment in result.stderr
+
+
+@pytest.mark.parametrize("protected_input", ["reference", "candidate"])
+def test_output_cannot_overwrite_input_histogram(tmp_path, protected_input):
+    reference = tmp_path / "reference.csv"
+    candidate = tmp_path / "candidate.csv"
+    report = tmp_path / "comparison.json"
+    rows = [{"mass_low_GeV": 0.25, "mass_high_GeV": 1.0, "pair_count": 3}]
+    write_histogram(reference, rows)
+    write_histogram(candidate, rows)
+    target = reference if protected_input == "reference" else candidate
+    original_bytes = target.read_bytes()
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(COMPARATOR),
+            "--reference",
+            str(reference),
+            "--candidate",
+            str(candidate),
+            "--output",
+            str(target.parent / "unused" / ".." / target.name),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 2
+    assert "refusing to overwrite an input histogram" in result.stderr
+    assert target.read_bytes() == original_bytes
+    assert not report.exists()
