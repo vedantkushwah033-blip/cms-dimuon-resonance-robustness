@@ -24,9 +24,10 @@ The education/outreach sample remains useful for pipeline development only. The 
 - `src/cms_dimuon_robustness/nanoaod.py` — Awkward-array opposite-charge pair-mass calculation.
 - `scripts/reproduce_dimuon_spectrum.py` — chunked ROOT/NanoAOD baseline reconstruction; requires an explicit input path to prevent accidental use of the unvalidated outreach dataset.
 - `scripts/inspect_root_schema.py` — inventories trees, entries, branch names, trigger-related candidates, and presence/absence of candidate branch groups; semantics still require review.
+- `tests/test_independent_four_vector.py` — compares vectorized mass calculations with an independently implemented four-vector reference on 250 fixed-seed random cases.
 - `docs/data_schema_findings.md` — separates what CERN's record-level documentation establishes from what still requires file-level checks.
 - `src/cms_dimuon_robustness/monte_carlo.py` — exact binomial confidence intervals and a sample-size planning approximation.
-- `tests/` — unit and synthetic-ROOT integration tests. GitHub Actions passed 17 tests plus Ruff checks on Python 3.10, 3.11 and 3.12 for commit `e6259abaaae0b9799b00ad125b20b521c00e40a3`. A new schema-inspector integration test has since been added; its workflow result is pending.
+- `tests/` — unit and synthetic-ROOT integration tests. GitHub Actions passed 19 tests plus Ruff checks on Python 3.10, 3.11 and 3.12 for commit `a093c2df61f68439791d7fb73d0f989f11852860`. The suite includes an independent four-vector cross-check and a synthetic-ROOT schema-inspector integration test.
 
 ## Setup
 Python 3.10 or newer:
