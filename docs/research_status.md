@@ -184,3 +184,6 @@ A planned task is not a result. A passing CI run validates the current automated
 
 
 - Hardened audit JSON parsing against duplicate object keys, which standard `json.loads` behavior would otherwise silently resolve by keeping the last occurrence. Regression tests cover all three audit inputs (reference metadata, candidate metadata, and histogram report). The code and tests passed GitHub Actions on Python 3.10, 3.11, and 3.12; see `docs/validation_log.md`. This is input-integrity hardening, not real-data validation.
+
+
+- The audit CLI now writes a structured `FAIL` JSON artifact and exits with status 2 when any input metadata file is malformed or contains duplicate keys. A regression test verifies this behavior; Python 3.10/3.11/3.12 automated checks and the synthetic ROOT integration workflow passed. This is defensive tooling work, not evidence of a successful CMS-data reproduction.
