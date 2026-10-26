@@ -83,3 +83,27 @@ def test_spectrum_script_writes_reproducible_smoke_outputs(tmp_path):
     assert metadata["selection"].startswith("exactly two reconstructed muons")
     assert (output_dir / "dimuon_mass_histogram.csv").is_file()
     assert (output_dir / "dimuon_mass_spectrum.png").is_file()
+
+
+
+def test_spectrum_cli_rejects_nonfinite_mass_bounds_before_opening_input(tmp_path):
+    missing_input = tmp_path / "does-not-exist.root"
+    script = REPO_ROOT / "scripts" / "reproduce_dimuon_spectrum.py"
+    for invalid_bound in ("nan", "inf", "-inf"):
+        completed = subprocess.run(
+            [
+                sys.executable,
+                str(script),
+                "--input",
+                str(missing_input),
+                "--mass-max",
+                invalid_bound,
+            ],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        assert completed.returncode == 2
+        assert "mass bounds must be finite" in completed.stderr
+        assert "does-not-exist.root" not in completed.stderr
