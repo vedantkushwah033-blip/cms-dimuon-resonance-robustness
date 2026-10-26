@@ -86,7 +86,7 @@ def test_different_bin_edges_fail_closed(tmp_path):
     assert "histogram bin edges differ" in result.stderr
 
 
-@pytest.mark.parametrize("bad_count", [-1, 1.5, "nan", "3.0"])
+@pytest.mark.parametrize("bad_count", [-1, 1.5, "nan", "3.0", "1_0", "+3", " 3", "3 "])
 def test_invalid_counts_are_rejected(tmp_path, bad_count):
     reference = [{"mass_low_GeV": 0.25, "mass_high_GeV": 1.0, "pair_count": 1}]
     candidate = [{"mass_low_GeV": 0.25, "mass_high_GeV": 1.0, "pair_count": bad_count}]
