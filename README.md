@@ -28,7 +28,7 @@ The education/outreach sample remains useful for pipeline development only. The 
 - `tests/test_spectrum_script.py` — runs the baseline command-line script on a synthetic ROOT file and checks event limits, counts, metadata, CSV and plot outputs.
 - `docs/data_schema_findings.md`, `docs/data_feasibility_decision.md` — separate record-level facts from file-level checks and define trigger-aware, limited-scope, and reproducibility-only routes.
 - `docs/reference_baseline_comparison.md` — maps the implementation to the official public example's event selection, binning, mass range, and axes.
-- The baseline records file size, optional SHA-256, tree entries/types, software versions, and in-range/out-of-range/non-finite pair accounting.
+- The baseline records file size, optional SHA-256, tree entries/types, software versions, and in-range/out-of-range/non-finite pair accounting. The latest CI run also verifies non-finite mass handling end-to-end on a synthetic ROOT event.
 - `docs/novelty_comparison.md` — documents overlap with closest prior work and explicit novelty no-go criteria.
 - `src/cms_dimuon_robustness/monte_carlo.py` — exact binomial confidence intervals and a sample-size planning approximation.
 - `tests/` — unit and synthetic-ROOT integration tests. GitHub Actions passed 20 tests plus Ruff checks on Python 3.10, 3.11 and 3.12 for commit `a9c3bf1dc56f911893d7bad928d060e41be6a519`. The suite includes an independent four-vector cross-check, a synthetic-ROOT schema-inspector test, and end-to-end synthetic-ROOT spectrum CLI tests.
