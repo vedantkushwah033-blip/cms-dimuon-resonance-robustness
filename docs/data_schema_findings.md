@@ -11,24 +11,19 @@
 - The CERN Open Data record describes a research-level NanoAOD-like ntuple processed from AOD using validated runs, with 26,084,708 events across 57 files (75.6 MiB).
 - CERN explicitly warns that not all variables are available.
 
-### Separate 2021 Run2012C reduced outreach file (not the research-level record)
+### Run2012C DoubleMuParked research-level ntuple
 - Record: https://opendata.cern.ch/record/cms-31129
-- The record describes a research-level NanoAOD-like ntuple processed from AOD using validated runs, with 35,455,705 events across 74 files (101.1 MiB).
+- The CERN Open Data record describes a research-level NanoAOD-like ntuple processed from AOD using validated runs, with 35,455,705 events across 74 files (101.1 MiB).
 - The linked official variable-list documentation includes HLT decision bits, including several dimuon trigger paths, as well as muon quality and isolation variables.
 
-### Education/outreach reduced samples
+### Education/outreach reduced samples (distinct from the research-level records)
 - Record: https://opendata.cern.ch/record/12341
 - The 61,540,413-event file is reduced to muon kinematics and charge for an educational analysis. CERN states that no further validation was performed on the reduced output.
 - Treat it as a development example unless a separate validation justifies a broader role.
 
-### Run2012C DoubleMuParked research-level ntuple
-- Record: https://opendata.cern.ch/record/cms-31129
-- The research-level record describes 35,455,705 events across 74 files (101.1 MiB), processed from AOD using validated runs.
-- This is a distinct record from the 4.2 GiB reduced outreach file listed above. Do not transfer the outreach file's variable list to this record without inspecting its exact file schema.
-
 ## What these facts do and do not establish
 
-The Run2012C variable-list documentation makes a trigger-aware study more plausible than the muon-only outreach sample. However, the record-level page is not an inspection of the actual file. We have not yet established:
+The Run2012B/C variable-list documentation makes a trigger-aware study more plausible than the muon-only outreach sample. However, the record-level pages are not inspections of the actual files. We have not yet established:
 - Exact branch names in a downloaded/streamed file for each period.
 - Whether Run2012B has the same HLT fields as Run2012C.
 - Whether prescale values, trigger menus, and run-dependent trigger definitions are available.
@@ -47,10 +42,9 @@ An HLT decision bit indicates a stored path decision; it does not by itself esta
 5. Record a pass/fail/unknown for each required input. Unknown is not a pass.
 6. Only then select the primary dataset and revise the research question to match what the data can genuinely support.
 
-
 ## Official variable-list cross-check — 2026-10-26
 
-I inspected the CERN-published variable-list documentation linked from both research-level records, rather than relying only on the record summaries:
+The CERN-published variable-list documentation linked from both research-level records was inspected directly:
 
 - Run2012B: https://opendata.cern.ch/eos/opendata/cms/dataset-semantics/derived-data/NanoAODRun1/31123/Run2012B_DoubleMuParked_doc.html
 - Run2012C: https://opendata.cern.ch/eos/opendata/cms/dataset-semantics/derived-data/NanoAODRun1/31129/Run2012C_DoubleMuParked_doc.html
@@ -64,7 +58,6 @@ Next file-level checks:
 2. Confirm the exact dimuon HLT branches and any `GoodLumisection`/run/luminosity-block fields in those files.
 3. Establish the path versions and run ranges from CMS trigger documentation; do not pool periods or path versions without a justified mapping.
 4. Treat prescale availability as unresolved until a documented source is identified.
-
 
 ## Precision correction to the trigger-branch inventory — 2026-10-26
 
