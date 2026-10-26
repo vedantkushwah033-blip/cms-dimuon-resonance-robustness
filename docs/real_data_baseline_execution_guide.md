@@ -94,7 +94,7 @@ python scripts/export_reference_dimuon_histogram.py \
   --output-dir outputs/reference
 ```
 
-The exporter writes `dimuon_mass_histogram.csv` and `reference_metadata.json`; with `--sha256-input`, the metadata includes the input's byte size and SHA-256. Hashing adds one full input-file read. It records the ROOT version, cut-flow counts, and histogram underflow/overflow. Do not digitize the reference PNG or infer counts from its pixels. The script has been added to the repository but has **not yet been executed** against the CMS file, and the generated CSV must still be independently inspected before it is accepted as the reference artifact.
+The exporter writes `dimuon_mass_histogram.csv` and `reference_metadata.json`; with `--sha256-input`, the metadata includes the input's byte size and SHA-256. Hashing adds one full input-file read. Before indexing muon vectors, it performs a preflight pass to reject any event where `nMuon` disagrees with the `Muon_pt` collection or the muon branches have inconsistent collection lengths; this adds a full event scan but avoids unsafe indexing on malformed data. It records the ROOT version, cut-flow counts, and histogram underflow/overflow. Do not digitize the reference PNG or infer counts from its pixels. The script has been added to the repository but has **not yet been executed** against the CMS file, and the generated CSV must still be independently inspected before it is accepted as the reference artifact.
 
 Once both numerical CSVs exist, run:
 
