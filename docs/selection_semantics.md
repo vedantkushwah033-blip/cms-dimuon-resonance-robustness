@@ -50,7 +50,7 @@ The expected outcomes are:
 | Events selected | 2 | 3 |
 | Opposite-charge pairs | 1 | 3 |
 
-These are software-contract tests, not measurements from CMS data.
+The run metadata records both `events_selected` (the event-multiplicity selection) and `events_with_opposite_charge_pair` (an event-level count after pair construction). These are intentionally distinct from `opposite_charge_pairs_total`, which counts pair-level entries. These are software-contract tests, not measurements from CMS data.
 
 ## Statistical consequences
 
