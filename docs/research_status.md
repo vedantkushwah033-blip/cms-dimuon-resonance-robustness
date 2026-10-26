@@ -3,6 +3,10 @@
 **Last updated:** 2026-10-26
 
 ## Confirmed completed in this repository
+- Audited the official CMS outreach Python source and documented a component-by-component parity checklist in `docs/reference_implementation_audit.md`.
+- Tightened opposite-sign selection semantics: the NanoAOD pair function now rejects charge values outside {-1,+1}, because `q1*q2 < 0` matches the reference's charge-inequality test only under that domain assumption.
+- Added a test that malformed charge values raise an explicit error.
+- The cross-implementation test comparing the Awkward and vectorized four-vector implementations completed successfully across configured Python versions.
 - Added cross-implementation validation comparing the Awkward-array pair-mass path against the standalone vectorized four-vector function on 100 deterministic random two-muon events.
 - Verified via GitHub Actions that the numerical-stability fix, pair-accounting invariant, and analytic/invalid-input tests completed successfully across the configured Python versions.
 - Added a runtime invariant to the baseline spectrum script that raises an error if below-range, in-range, upper-edge/overflow, and non-finite pair counts do not sum to the total opposite-charge pair count.
@@ -48,6 +52,8 @@
 - GitHub Actions run for commit `1a40e06` (Monte Carlo precision planning): was still in progress at the last check; do not report it as passing until completed.
 
 ## Latest workflow status for histogram changes
+- Cross-implementation test commit `1b5c488` completed successfully.
+- Charge-domain validation (`2531a59`), malformed-charge test (`ffd7081`), assertion cleanup (`355158f`), and reference audit note (`9337e58`) had pending/queued CI at the last check; do not treat these latest changes as validated yet.
 - The latest completed runs for commits `5d3ac5a`, `462e2af`, `208e264`, and `2085ec4` all succeeded.
 - Cross-implementation test commit `1b5c488` was queued on Python 3.10, 3.11, and 3.12 at the last check; its result is pending.
 - The end-to-end upper-edge fixture commit `0921ce3` and status-ledger commit `60d8237` both completed successfully in GitHub Actions.
