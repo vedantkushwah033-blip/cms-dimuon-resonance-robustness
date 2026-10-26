@@ -291,3 +291,24 @@ def test_reference_exporter_cli_rejects_nonfinite_mass_bounds_before_input_check
         assert completed.returncode == 2
         assert "mass bounds must be finite" in completed.stderr
         assert "does-not-exist.root" not in completed.stderr
+
+
+def test_reference_exporter_rejects_nonpositive_event_limit_before_file_access(tmp_path):
+    missing_input = tmp_path / "does-not-exist.root"
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(REPO_ROOT / "scripts" / "export_reference_dimuon_histogram.py"),
+            "--input",
+            str(missing_input),
+            "--max-events",
+            "0",
+        ],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert completed.returncode == 2
+    assert "--max-events must be positive" in completed.stderr
+    assert "must point to an existing local ROOT file" not in completed.stderr
