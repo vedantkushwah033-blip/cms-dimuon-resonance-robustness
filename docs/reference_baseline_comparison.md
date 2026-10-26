@@ -58,3 +58,5 @@ The histogram-report flags `bin_edges_exactly_equal` and `exact_bin_by_bin_parit
 The audit also requires the reference, candidate, and histogram-report bin counts to be positive JSON integers. Matching string values such as `"30000"` are rejected instead of passing equality checks without satisfying the metadata schema. An integration test checks both a valid minimal audit and the malformed matching-string case.
 
 Mass-range metadata is schema-checked as well: bounds must be finite JSON numbers, and both reference and candidate ranges must satisfy `0 < minimum < maximum`. Matching string-encoded bounds are rejected. This prevents equality alone from treating malformed metadata as a valid reproducibility record.
+
+The audit also validates that both metadata tree identifiers are non-empty strings; identical malformed values such as numeric tree identifiers cannot pass solely because they compare equal. The integration tests cover this case alongside the count and mass-range schema checks.
