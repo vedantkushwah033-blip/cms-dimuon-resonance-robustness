@@ -299,3 +299,11 @@ Cross-chat consistency notes:
 - The shared PR discussion already records the same key boundary: the research-level Run2012B/C files have not been inspected by this repository, and path-specific HLT semantics, denominator validity, prescale/luminosity handling, and trigger-efficiency feasibility remain open.
 - The workflow attempts for the research-level schema audit were removed because they were not executing verifiably; the existing outreach smoke-test workflow is a separate, confirmed-successful workflow and must not be conflated with the removed research-level workflow.
 - No change in this audit establishes a discovery, a validated trigger-efficiency result, a complete full-file reference reproduction, or novelty.
+
+
+## Focused literature-scope screening — 2026-10-27
+
+- Added `docs/literature_scope_decision_2026-10-27.md` and linked it from README. The memo screens primary-source records for Williams (2017), Cesarotti et al. (2019), a 2022 data-directed bump-hunting paper, a 2023 resonant-anomaly/background-sculpting paper, and a 2025 model-parameter-space paper. This is a focused screening memo, not a systematic review; full methods-level comparison remains outstanding.
+- Decision recorded: hold large Monte Carlo runs and novelty claims until a defensible gap is shown against the closest prior methods and exact-file data feasibility is established. This is a research-design decision, not an empirical finding.
+- Latest code was not changed in this step. The new memo and README link were verified through the repository file API. Documentation commits: `7e5a82f5b969a8bc1244b3f0ba0ec2ce112dc559` (memo), `febb4e9cf1d4e0ef3177ef09eb7be30196285a46` (README link), and `d06f92ec820b01879a398cf4e741ea1965b84aad` (status ledger).
+- CI status for the latest head has not been established: the available combined-status and commit-run lookups returned empty arrays. Do not interpret this as either a pass or a failure.
