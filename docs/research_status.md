@@ -320,3 +320,10 @@ The revised bounded baseline/parity workflow has not run. A dispatch-path audit 
 - The only candidate question retained is the global calibration and diagnostic false-alarm behavior of a fully specified model-selection-plus-scan pipeline on independently held-out null scenarios, compared with a credible existing method. This remains a hypothesis for literature comparison, not a demonstrated gap.
 - Decision remains **NO-GO for confirmatory simulations** until methods-level comparison, baseline validation, estimand, comparator, held-out scenario families, and Monte Carlo precision are frozen.
 - New memo commit: `a57c1a05f8f91346d134726325661b3ab327328a`. CI status for this commit has not yet been verified; no status entries should be interpreted as a pass.
+
+## Further protocol and methods audit — 2026-10-27
+
+- Added `docs/methods_level_literature_audit_2026-10-27.md` (commit `b4a5b2f6e25db0d4761958c2fc4a2be79e878a35`). It distinguishes the methods-level targets and assumptions in Williams (2017), Algeri (2020), and the CMS Open Data dimuon search by Cesarotti et al. (2019). This is a focused audit, not a systematic review or novelty certification.
+- Added `docs/confirmatory_protocol_freeze_checklist.md` (commit `50bfc14a7fa4fca8efecbb1993e964ac7130b559`). It defines unresolved gates for the primary estimand, development/calibration/held-out partitions, complete scan calibration, fair comparator, Monte Carlo precision, CMS provenance, and independent reproduction. It intentionally does not choose unresolved scientific settings on the user's behalf.
+- The GitHub combined-status lookup returned no status entries for either commit; CI for both is **unverified**, not passed.
+- The main decision remains **NO-GO for confirmatory simulation**. The exact CMS baseline comparison and methods-level comparator choice are unresolved. The candidate research question remains provisional; no novelty, trigger-efficiency, discovery, or publication claim is supported by these documentation changes.
