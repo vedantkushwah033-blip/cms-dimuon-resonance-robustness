@@ -406,3 +406,63 @@ def test_reference_exporter_rejects_negative_finite_kinematics(tmp_path):
     )
     assert completed.returncode != 0
     assert "negative finite kinematics" in completed.stderr
+
+
+@pytest.mark.skipif(
+    importlib.util.find_spec("ROOT") is None,
+    reason="PyROOT integration test runs in the dedicated ROOT-enabled CI job",
+)
+def test_reference_exporter_does_not_charge_validate_unselected_events(tmp_path):
+    root_path = tmp_path / "unselected_invalid_charge.root"
+    with uproot.recreate(root_path) as root_file:
+        tree = root_file.mktree(
+            "Events",
+            {
+                "nMuon": "int32",
+                "Muon_pt": "var * float32",
+                "Muon_eta": "var * float32",
+                "Muon_phi": "var * float32",
+                "Muon_mass": "var * float32",
+                "Muon_charge": "var * int32",
+            },
+        )
+        tree.extend(
+            {
+                "nMuon": np.array([1], dtype=np.int32),
+                "Muon_pt": ak.Array([[8.0]]),
+                "Muon_eta": ak.Array([[0.2]]),
+                "Muon_phi": ak.Array([[1.0]]),
+                "Muon_mass": ak.Array([[0.105658]]),
+                "Muon_charge": ak.Array([[0]]),
+            }
+        )
+
+    output_dir = tmp_path / "unselected-output"
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(REPO_ROOT / "scripts" / "export_reference_dimuon_histogram.py"),
+            "--input",
+            str(root_path),
+            "--output-dir",
+            str(output_dir),
+            "--bins",
+            "10",
+            "--mass-min",
+            "0.25",
+            "--mass-max",
+            "40",
+        ],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert completed.returncode == 0, completed.stderr
+    metadata = json.loads(
+        (output_dir / "reference_metadata.json").read_text(encoding="utf-8")
+    )
+    assert metadata["events_total"] == 1
+    assert metadata["events_exactly_two_muons"] == 0
+    assert metadata["events_opposite_sign"] == 0
+    assert metadata["histogram_regular_bin_total"] == 0
