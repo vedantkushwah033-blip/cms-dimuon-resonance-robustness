@@ -1,7 +1,7 @@
 # Analysis plan
 
 **Status:** pre-implementation plan; numerical results intentionally absent.  
-**Last updated:** 2026-10-25
+**Last updated:** 2026-10-26
 
 ## Stage 0 — literature and data feasibility
 Deliverables: verified source table; precise data record and format; documented trigger and event selection; list of observables and required simulated samples; novelty decision with stop/re-scope criteria.
@@ -10,7 +10,7 @@ Deliverables: verified source table; precise data record and format; documented 
 
 ## Stage 1 — reproducible baseline
 
-A chunked starter script is available at `scripts/reproduce_dimuon_spectrum.py`. Begin with `python scripts/reproduce_dimuon_spectrum.py --max-events 10000`; this is a proposed smoke test and has not yet been run against the official file. The script applies only opposite-charge pairing and is not a trigger/quality-selection analysis. Compare its output to the official reference before proceeding.
+A chunked starter script is available at `scripts/reproduce_dimuon_spectrum.py`. Begin by inspecting a specific selected file with `python scripts/inspect_root_schema.py --input /path/to/selected-file.root --output outputs/schema_report.json`, then use `python scripts/reproduce_dimuon_spectrum.py --input /path/to/selected-file.root --max-events 10000` only if its schema supports the baseline; this is a proposed smoke test and has not yet been run against the official file. The script applies only opposite-charge pairing and is not a trigger/quality-selection analysis. Compare its output to the official reference before proceeding.
 
 1. Reproduce a documented CMS dimuon mass spectrum using the official record and technical instructions.
 2. Record file identifiers, dataset DOI, data-taking period, luminosity information where documented, software versions, event filters, trigger requirements, muon quality requirements, opposite-charge condition, mass range, and binning.
