@@ -3,6 +3,7 @@ import numpy as np
 import pytest
 
 from cms_dimuon_robustness.nanoaod import opposite_charge_pair_masses
+from cms_dimuon_robustness.invariant_mass import pair_invariant_mass
 
 
 def test_opposite_charge_pairs_only_and_known_mass():
@@ -55,3 +56,30 @@ def test_nonfinite_kinematics_are_not_silently_changed_to_zero_mass():
     result = ak.to_list(opposite_charge_pair_masses(events))[0]
     assert len(result) == 1
     assert np.isnan(result[0])
+
+
+
+def test_awkward_and_vectorized_invariant_mass_implementations_agree():
+    rng = np.random.default_rng(20261026)
+    n_events = 100
+    fields = {
+        "Muon_pt": rng.uniform(1.0, 150.0, (n_events, 2)),
+        "Muon_eta": rng.uniform(-2.4, 2.4, (n_events, 2)),
+        "Muon_phi": rng.uniform(-np.pi, np.pi, (n_events, 2)),
+        "Muon_mass": rng.uniform(0.105, 0.106, (n_events, 2)),
+        "Muon_charge": np.tile([1, -1], (n_events, 1)),
+    }
+    events = ak.Array(fields)
+    actual = ak.to_numpy(ak.flatten(opposite_charge_pair_masses(events), axis=None))
+    expected = pair_invariant_mass(
+        fields["Muon_pt"][:, 0],
+        fields["Muon_eta"][:, 0],
+        fields["Muon_phi"][:, 0],
+        fields["Muon_mass"][:, 0],
+        fields["Muon_pt"][:, 1],
+        fields["Muon_eta"][:, 1],
+        fields["Muon_phi"][:, 1],
+        fields["Muon_mass"][:, 1],
+    )
+    assert actual.shape == expected.shape == (n_events,)
+    np.testing.assert_allclose(actual, expected, rtol=2e-12, atol=2e-10)
