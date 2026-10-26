@@ -187,3 +187,11 @@ The metadata audit now also requires the comparator report's `differing_bins` fi
 - Commit `7405599e09f845bc443d823aaf5180589f428568` adds regression cases for duplicate keys in each of the reference metadata, candidate metadata, and histogram comparison report.
 - GitHub Actions run [40278168904](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40278168904) passed on Python 3.10, 3.11, and 3.12, including pytest, compileall, and Ruff. The ROOT integration run [40278168818](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40278168818) also succeeded.
 - These results validate the metadata-parser regression tests and the synthetic ROOT integration workflow only. They do not constitute execution on the official CMS data or a real-data histogram parity result.
+
+
+## Structured failure artifacts for invalid audit metadata — 2026-10-26
+
+- Commit `ae5b003c44043a32211ca9e31c0c13307f9d9dda` makes the audit CLI fail closed on malformed or ambiguous metadata while still writing a machine-readable `FAIL` JSON report and returning exit code 2, instead of leaving only an uncaught traceback.
+- Commit `486c637a4334ef2362a7478507ecb3dba3ac8b2e` adds a CLI regression test confirming duplicate-key input produces the structured failure artifact.
+- GitHub Actions run [40278293192](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40278293192) passed on Python 3.10, 3.11, and 3.12 with pytest, compileall, and Ruff. The synthetic ROOT integration workflow [40278293215](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40278293215) also succeeded.
+- This improves failure reporting and automated input-integrity checks. It does not establish that the official CMS dataset has been processed or that reference and candidate histograms agree on real data.
