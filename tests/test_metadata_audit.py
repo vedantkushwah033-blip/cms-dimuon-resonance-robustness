@@ -8,7 +8,7 @@ from pathlib import Path
 
 # The CLI scripts are repository-local, not installed package modules.
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from scripts.audit_baseline_metadata import audit  # noqa: E402
+from scripts.audit_baseline_metadata import audit, main  # noqa: E402
 
 
 def _write(path: Path, data: dict) -> Path:
@@ -286,3 +286,30 @@ def test_metadata_audit_rejects_duplicate_json_keys(
     )
     with pytest.raises(ValueError, match="duplicate JSON object key"):
         audit(*paths)
+
+
+
+def test_audit_cli_writes_structured_failure_for_duplicate_json_keys(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    paths = _fixtures(tmp_path)
+    paths[0].write_text(
+        '{"events_total": 100, "events_total": 99}', encoding="utf-8"
+    )
+    output = tmp_path / "audit-failure.json"
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "audit_baseline_metadata.py",
+            "--reference-metadata", str(paths[0]),
+            "--candidate-metadata", str(paths[1]),
+            "--histogram-report", str(paths[2]),
+            "--output", str(output),
+        ],
+    )
+    assert main() == 2
+    report = json.loads(output.read_text(encoding="utf-8"))
+    assert report["status"] == "FAIL"
+    assert report["checks_total"] == 0
+    assert "duplicate JSON object key" in report["error"]
