@@ -1,6 +1,6 @@
 # Research status ledger
 
-**Last updated:** 2026-10-26
+**Last updated:** 2026-10-27
 
 ## Confirmed completed in this repository
 - Audited the official CMS outreach Python source and documented a component-by-component parity checklist in `docs/reference_implementation_audit.md`.
@@ -42,7 +42,7 @@
 - Added an end-to-end smoke test for the spectrum CLI, verifying `--max-events`, pair counts, metadata, CSV output, and plot creation on synthetic ROOT data.
 - Added optional local-input SHA-256 and provenance metadata (file size, tree entry count, selected branch types, Python/package versions).
 - Improved numerical stability handling: only tiny round-off-scale negative invariant-mass-squared values are clamped; non-finite kinematics remain non-finite and are counted instead of silently becoming zero-mass pairs. The end-to-end CLI test now verifies this behavior using a synthetic ROOT event.
-- Web-checked official Run2012B/Run2012C research-level records and identified documented HLT decision bits in the Run2012C variable list; actual file-level branch and prescale checks remain pending.
+- Web-checked official Run2012B/Run2012C research-level records and identified documented HLT decision bits. A later exact-file schema audit confirmed branch presence/types in one sampled DoubleMuParked ROOT file per period; event-level path semantics, denominator, prescales, and luminosity checks remain pending.
 - Added a dataset feasibility memo distinguishing the 2019 muon-only outreach file, the separate 2021 Run2012C reduced outreach file, and the research-level derived records.
 - The schema inspector now reports presence/absence for muon kinematics, charge, event identifiers, and candidate quality/isolation fields, while retaining a heuristic list of trigger-related names.
 
@@ -274,3 +274,13 @@ A planned task is not a result. A passing CI run validates the current automated
 - The current broad question—background misspecification plus fixed-versus-selected model comparison—has substantial overlap risk. The memo places large Monte Carlo runs and novelty claims on hold until the closest methods are compared and a distinct estimand/decision is justified.
 - The next priority remains the exact-file feasibility gate for Run2012B/C research-level ROOT data. The successful outreach smoke test is only a bounded software check; it does not establish trigger semantics, valid denominator/prescale handling, full reference parity, or a physics result.
 - README now links the scope memo. Latest documentation commit: `febb4e9cf1d4e0ef3177ef09eb7be30196285a46`. The available status/run lookup returned no entries for this commit; latest-head CI is **unverified**, not a pass.
+
+
+## Latest verified status — 2026-10-27
+
+- **Research-level schema audit completed:** workflow run [40403830670](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40403830670) succeeded for one checksum-verified file from Run2012B DoubleMuParked record 31123 and one from Run2012C DoubleMuParked record 31129. It uploaded JSON schema reports and a file manifest. The report `docs/exact_file_schema_audit_run2012b_c_2026-10-27.md` records exact filenames, byte sizes, SHA-256 digests, tree entry counts, branch types, and limitations.
+- The sampled `Events` trees contain `Muon_pt/eta/phi/mass/charge`, run/lumisection/event identifiers, candidate quality/isolation fields, `GoodLumisection`, and many HLT/L1-named branches. `HLT_Mu13_Mu8` and `HLT_Mu17_Mu8` are Boolean branches in both samples. This confirms schema-level availability only—not event-level trigger semantics, active path versions, prescale corrections, an unbiased denominator, or trigger efficiency.
+- The earlier section “Execution-path correction — 2026-10-27” records an intermediate point in the work when no successful audit was yet available. It is superseded by the later successful run and report above. The current workflow is manual-only so a push does not repeatedly redownload multi-gigabyte ROOT files.
+- Focused literature screening now covers close work on dimuon bump hunts, model selection, data-directed searches, background sculpting, and Bayesian marginal-likelihood methods. The review is not systematic and no novelty claim is justified yet.
+- CI for the code/tests and ROOT exporter on commit `88efc10e2c48a8662c2d17aa2669b4f36f3daad5` passed on Python 3.10, 3.11, and 3.12, and the ROOT exporter integration passed. CI for later documentation commits is being checked; do not generalize earlier passes to every latest commit.
+- **Next acceptance gate:** run the baseline spectrum pipeline on a bounded event subset from the research-level files and compare against a suitable public reference, then inspect event-level run/trigger values. Do not launch the main simulation campaign until baseline validity and the exact research gap are established.
