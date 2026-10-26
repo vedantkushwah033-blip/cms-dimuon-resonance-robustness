@@ -193,3 +193,6 @@ A planned task is not a result. A passing CI run validates the current automated
 
 
 - Added a numerical-stability guard for float32 NanoAOD branches: kinematic fields are promoted to float64 before invariant-mass arithmetic. A regression test targets nearly collinear high-pT muons, where float32 intermediate rounding can erase a nonzero invariant mass. The pinned reference returns a C++ `float`, so exact histogram parity remains an empirical question; this fix is not a parity claim. See `docs/validation_log.md`.
+
+
+- Both histogram CLIs now reject non-finite mass bounds before touching the ROOT input. Candidate and reference run metadata also record the checked-out project commit, separately from the pinned upstream reference-source revision. Regression tests were added for invalid bounds and project-commit metadata; validation is pending the latest CI runs.
