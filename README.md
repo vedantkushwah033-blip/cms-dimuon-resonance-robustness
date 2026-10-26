@@ -26,6 +26,9 @@ The education/outreach sample remains useful for pipeline development only. The 
 - `scripts/inspect_root_schema.py` — inventories trees, entries, branch names, trigger-related candidates, and presence/absence of candidate branch groups; semantics still require review.
 - `tests/test_independent_four_vector.py` — compares vectorized mass calculations with an independently implemented four-vector reference on 250 fixed-seed random cases.
 - `tests/test_spectrum_script.py` — runs the baseline command-line script on a synthetic ROOT file and checks event limits, counts, metadata, CSV and plot outputs.
+- `tests/test_spectrum_selection_modes.py` — verifies that exactly-two-muon event selection and all-opposite-charge-pairs selection produce distinct, expected event/pair counts on a mixed-multiplicity sample.
+- `tests/test_spectrum_input_validation.py` — checks that malformed muon counts, mismatched jagged-branch lengths, and missing required branches fail explicitly.
+- `docs/selection_semantics.md` — defines event-level versus pair-level selection and explains the statistical consequences of multiple pairs per event.
 - `docs/data_schema_findings.md`, `docs/data_feasibility_decision.md` — separate record-level facts from file-level checks and define trigger-aware, limited-scope, and reproducibility-only routes.
 - `docs/reference_baseline_comparison.md` — maps the implementation to the official public example's event selection, binning, mass range, and axes.
 - The baseline records file size, optional SHA-256, tree entries/types, software versions, and in-range/out-of-range/non-finite pair accounting. The latest CI run also verifies non-finite mass handling end-to-end on a synthetic ROOT event.
@@ -53,7 +56,7 @@ python scripts/inspect_root_schema.py --input /path/to/official-file.root --outp
 python scripts/reproduce_dimuon_spectrum.py --input /path/to/selected-file.root --max-events 10000
 ```
 
-The scripts require an explicit file path or supported ROOT URL. The spectrum script now defaults to exactly two reconstructed muons with opposite charge, 30,000 bins over 0.25–300 GeV, and logarithmic x/y axes to align with the public example. Inspect the schema first and save the report. The repository has not yet confirmed a successful run against the official event file. The spectrum script pairs all opposite-charge muons and applies no extra trigger or quality cuts, so it is not a complete physics selection. The education/outreach dataset is not considered validated physics input; prefer evaluating the research-level Run-1 ntuples first.
+The scripts require an explicit file path or supported ROOT URL. The spectrum script now defaults to exactly two reconstructed muons with opposite charge, 30,000 bins over 0.25–300 GeV, and logarithmic x/y axes to align with the public example. Inspect the schema first and save the report. The repository has not yet confirmed a successful run against the official event file. The default spectrum mode selects events with exactly two muons and then requires opposite charge; an optional all-pairs mode includes multi-muon events and is not reference-parity compatible. Neither mode applies trigger or object-quality cuts, so neither is a complete physics selection. The education/outreach dataset is not considered validated physics input; prefer evaluating the research-level Run-1 ntuples first.
 
 After the smoke test, inspect the output, verify event-level masses against an independent four-vector calculation, then increase the sample size only after resolving any discrepancies.
 
