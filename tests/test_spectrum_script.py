@@ -26,10 +26,10 @@ def test_spectrum_script_writes_reproducible_smoke_outputs(tmp_path):
         )
         tree.extend(
             {
-                "Muon_pt": ak.Array([[10.0, 10.0], [float("nan"), 12.0], [20.0, 20.0]]),
-                "Muon_eta": ak.Array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]),
+                "Muon_pt": ak.Array([[10.0, 10.0], [float("nan"), 12.0], [50.0, 50.0]]),
+                "Muon_eta": ak.Array([[0.0, 0.0], [0.0, 0.0], [0.0, np.pi]]),
                 "Muon_phi": ak.Array([[0.0, np.pi], [0.0, np.pi], [0.0, np.pi]]),
-                "Muon_mass": ak.Array([[0.105658, 0.105658]] * 3),
+                "Muon_mass": ak.Array([[0.105658, 0.105658], [0.105658, 0.105658], [0.0, 0.0]]),
                 "Muon_charge": ak.Array([[1, -1]] * 3),
             }
         )
@@ -44,7 +44,7 @@ def test_spectrum_script_writes_reproducible_smoke_outputs(tmp_path):
             "--output-dir",
             str(output_dir),
             "--max-events",
-            "2",
+            "3",
             "--bins",
             "20",
             "--mass-max",
@@ -60,13 +60,13 @@ def test_spectrum_script_writes_reproducible_smoke_outputs(tmp_path):
     )
 
     metadata = json.loads((output_dir / "run_metadata.json").read_text(encoding="utf-8"))
-    assert metadata["events_read"] == 2
-    assert metadata["events_selected"] == 2
-    assert metadata["events_processed"] == 2
-    assert metadata["opposite_charge_pairs_total"] == 2
+    assert metadata["events_read"] == 3
+    assert metadata["events_selected"] == 3
+    assert metadata["events_processed"] == 3
+    assert metadata["opposite_charge_pairs_total"] == 3
     assert metadata["pairs_below_mass_range"] + metadata["pairs_in_histogram_range"] + metadata["pairs_at_or_above_mass_max"] + metadata["pairs_nonfinite_mass"] == metadata["opposite_charge_pairs_total"]
     assert metadata["pairs_in_histogram_range"] == 1
-    assert metadata["pairs_at_or_above_mass_max"] == 0
+    assert metadata["pairs_at_or_above_mass_max"] == 1
     assert metadata["histogram_interval"] == "[mass_min, mass_max); values exactly at mass_max are overflow"
     assert metadata["pairs_nonfinite_mass"] == 1
     assert metadata["input_is_local_file"] is True
@@ -76,7 +76,7 @@ def test_spectrum_script_writes_reproducible_smoke_outputs(tmp_path):
     assert metadata["branch_types"]["Muon_pt"]
     assert metadata["software"]["python"]
     assert "git_commit" in metadata
-    assert metadata["max_events"] == 2
+    assert metadata["max_events"] == 3
     assert metadata["selection_mode"] == "exactly-two-opposite-charge"
     assert metadata["selection"].startswith("exactly two reconstructed muons")
     assert (output_dir / "dimuon_mass_histogram.csv").is_file()
