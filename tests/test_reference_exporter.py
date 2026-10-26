@@ -359,3 +359,50 @@ def test_reference_exporter_rejects_nonphysical_muon_charge(tmp_path):
     )
     assert completed.returncode != 0
     assert "invalid charge values" in completed.stderr
+
+
+@pytest.mark.skipif(
+    importlib.util.find_spec("ROOT") is None,
+    reason="PyROOT integration test runs in the dedicated ROOT-enabled CI job",
+)
+def test_reference_exporter_rejects_negative_finite_kinematics(tmp_path):
+    root_path = tmp_path / "negative_pt.root"
+    with uproot.recreate(root_path) as root_file:
+        tree = root_file.mktree(
+            "Events",
+            {
+                "nMuon": "int32",
+                "Muon_pt": "var * float32",
+                "Muon_eta": "var * float32",
+                "Muon_phi": "var * float32",
+                "Muon_mass": "var * float32",
+                "Muon_charge": "var * int32",
+            },
+        )
+        tree.extend(
+            {
+                "nMuon": np.array([2], dtype=np.int32),
+                "Muon_pt": ak.Array([[-10.0, 10.0]]),
+                "Muon_eta": ak.Array([[0.0, 0.0]]),
+                "Muon_phi": ak.Array([[0.0, np.pi]]),
+                "Muon_mass": ak.Array([[0.105658, 0.105658]]),
+                "Muon_charge": ak.Array([[1, -1]]),
+            }
+        )
+
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(REPO_ROOT / "scripts" / "export_reference_dimuon_histogram.py"),
+            "--input",
+            str(root_path),
+            "--output-dir",
+            str(tmp_path / "negative-pt-output"),
+        ],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert completed.returncode != 0
+    assert "negative finite kinematics" in completed.stderr
