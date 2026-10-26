@@ -435,7 +435,23 @@ def main() -> int:
     parser.add_argument("--histogram-report", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
-    report = audit(args.reference_metadata, args.candidate_metadata, args.histogram_report)
+    try:
+        report = audit(args.reference_metadata, args.candidate_metadata, args.histogram_report)
+    except ValueError as exc:
+        # Invalid input must fail closed, but still leave a machine-readable
+        # artifact for CI and downstream review instead of a traceback only.
+        report = {
+            "status": "FAIL",
+            "software_reference_reproduction_only": True,
+            "checks_passed": 0,
+            "checks_total": 0,
+            "checks": [],
+            "error": str(exc),
+            "limitations": [
+                "The audit could not evaluate malformed or ambiguous metadata.",
+                "A failed audit is not evidence of real-data parity.",
+            ],
+        }
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({key: value for key, value in report.items() if key != "checks"}, indent=2))
