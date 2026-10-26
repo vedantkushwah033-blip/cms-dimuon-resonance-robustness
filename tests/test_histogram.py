@@ -7,7 +7,7 @@ from cms_dimuon_robustness.histogram import histogram_masses
 def test_histogram_range_accounting_and_upper_edge_overflow():
     masses = np.array([0.25, 1.0, 2.0, 3.0, 3.1, np.nan, np.inf, -np.inf])
     counts, summary = histogram_masses(masses, bins=3, mass_min=0.25, mass_max=3.0)
-    assert counts.tolist() == [1, 1, 1]
+    assert counts.tolist() == [2, 1, 0]
     assert summary == {
         "pairs_total": 8,
         "pairs_nonfinite": 3,
