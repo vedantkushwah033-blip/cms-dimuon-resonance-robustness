@@ -20,6 +20,15 @@ def _boolean_matches(value: Any, expected: bool) -> bool:
     return type(value) is bool and value is expected
 
 
+def _finite_json_number(value: Any) -> bool:
+    """Accept finite JSON integers/floats while excluding booleans and non-numeric values."""
+    if isinstance(value, bool):
+        return False
+    if isinstance(value, int):
+        return True
+    return isinstance(value, float) and math.isfinite(value)
+
+
 def _read_json(path: Path) -> dict[str, Any]:
     try:
         value = json.loads(path.read_text(encoding="utf-8"))
@@ -72,7 +81,7 @@ def audit(reference_path: Path, candidate_path: Path, histogram_report_path: Pat
         })
 
     def finite_number(name: str, value: Any) -> None:
-        valid = isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
+        valid = _finite_json_number(value)
         checks.append({
             "name": f"{name}_valid_finite_number",
             "passed": valid,
@@ -151,9 +160,7 @@ def audit(reference_path: Path, candidate_path: Path, histogram_report_path: Pat
         isinstance(candidate_mass_range, list)
         and len(candidate_mass_range) == 2
         and all(
-            isinstance(value, (int, float))
-            and not isinstance(value, bool)
-            and math.isfinite(value)
+            _finite_json_number(value)
             for value in candidate_mass_range
         )
         and candidate_mass_range[0] > 0
@@ -169,12 +176,8 @@ def audit(reference_path: Path, candidate_path: Path, histogram_report_path: Pat
     reference_min = ref.get("mass_min_GeV")
     reference_max = ref.get("mass_max_GeV")
     reference_range_valid = (
-        isinstance(reference_min, (int, float))
-        and not isinstance(reference_min, bool)
-        and math.isfinite(reference_min)
-        and isinstance(reference_max, (int, float))
-        and not isinstance(reference_max, bool)
-        and math.isfinite(reference_max)
+        _finite_json_number(reference_min)
+        and _finite_json_number(reference_max)
         and 0 < reference_min < reference_max
     )
     checks.append({
