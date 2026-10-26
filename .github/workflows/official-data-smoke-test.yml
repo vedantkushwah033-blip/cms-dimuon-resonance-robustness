@@ -37,6 +37,10 @@ jobs:
             echo "max_events must be a positive integer" >&2
             exit 2
           fi
+          if (( MAX_EVENTS > 10000 )); then
+            echo "This smoke-test workflow is capped at 10000 events; use a separate reviewed run plan for larger processing." >&2
+            exit 2
+          fi
       - name: Inspect official outreach file schema
         env:
           CMS_DIMUON_OUTREACH_URL: root://eospublic.cern.ch//eos/opendata/cms/derived-data/AOD2NanoAODOutreachTool/Run2012BC_DoubleMuParked_Muons.root
