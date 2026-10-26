@@ -44,10 +44,16 @@ def opposite_charge_pair_masses(arrays: ak.Array) -> ak.Array:
     tolerance = 64 * np.finfo(float).eps * scale
     # Clamp only small negative round-off. Preserve non-finite inputs as non-finite
     # so data-quality problems cannot silently become zero-mass pairs.
+    roundoff_negative = (
+        np.isfinite(mass_squared)
+        & np.isfinite(scale)
+        & (mass_squared < 0)
+        & (mass_squared >= -tolerance)
+    )
     stable_mass_squared = ak.where(
         mass_squared >= 0,
         mass_squared,
-        ak.where(mass_squared >= -tolerance, 0.0, np.nan),
+        ak.where(roundoff_negative, 0.0, np.nan),
     )
     masses = np.sqrt(stable_mass_squared)
     return masses[keep]
