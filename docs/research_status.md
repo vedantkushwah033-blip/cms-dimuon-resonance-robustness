@@ -3,6 +3,9 @@
 **Last updated:** 2026-10-26
 
 ## Confirmed completed in this repository
+- Added `docs/scenario_matrix_template.csv` to distinguish development, pilot, held-out null-misspecification, and optional signal-injection scenarios; unresolved design choices remain explicitly marked for definition.
+- Added `docs/next_experiment_decision.md` with stop/go gates and criteria for narrowing claims when provenance, reference agreement, novelty, or validation fails.
+- Added `docs/monte_carlo_precision_planning.md` with illustrative binomial precision calculations and explicit limits on what 10,000 null trials can establish.
 - Initial research question and scope guardrails documented.
 - Starter bibliography identifies a close prior CMS Open Data dimuon resonance analysis.
 - Provisional data source and provenance checklist documented.
@@ -21,6 +24,11 @@
 - Web-checked official Run2012B/Run2012C research-level records and identified documented HLT decision bits in the Run2012C variable list; actual file-level branch and prescale checks remain pending.
 - Added a dataset feasibility memo distinguishing the 2019 muon-only outreach file, the separate 2021 Run2012C reduced outreach file, and the research-level derived records.
 - The schema inspector now reports presence/absence for muon kinematics, charge, event identifiers, and candidate quality/isolation fields, while retaining a heuristic list of trigger-related names.
+
+## Workflow status checked 2026-10-26
+- GitHub Actions run for commit `3ed0f9e` (decision gates): completed successfully.
+- GitHub Actions run for commit `40b819d` (scenario matrix): completed successfully.
+- GitHub Actions run for commit `1a40e06` (Monte Carlo precision planning): was still in progress at the last check; do not report it as passing until completed.
 
 ## Not yet completed
 - Exhaustive or systematic literature review.
