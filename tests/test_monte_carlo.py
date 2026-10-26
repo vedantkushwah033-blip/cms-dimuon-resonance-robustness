@@ -43,3 +43,38 @@ def test_precision_planning_ordering():
     n_halfpct = approximate_trials_for_absolute_precision(0.05, 0.005)
     assert n_halfpct > n_1pct
     assert n_1pct == 1825
+
+
+
+def test_zero_success_upper_bound_matches_exact_closed_form():
+    trials = 1000
+    result = clopper_pearson(0, trials, confidence_level=0.95)
+    # For zero successes, the two-sided exact interval's upper endpoint is
+    # 1 - (alpha / 2) ** (1 / n), not zero.
+    expected_upper = 1.0 - 0.025 ** (1.0 / trials)
+    assert result.upper == pytest.approx(expected_upper)
+    assert result.upper == pytest.approx(0.00368, abs=5e-6)
+
+
+def test_interval_is_symmetric_under_success_failure_complement():
+    successes, trials = 17, 83
+    original = clopper_pearson(successes, trials)
+    complemented = clopper_pearson(trials - successes, trials)
+    assert original.lower == pytest.approx(1.0 - complemented.upper)
+    assert original.upper == pytest.approx(1.0 - complemented.lower)
+
+
+def test_higher_confidence_level_gives_wider_interval():
+    ordinary = clopper_pearson(17, 100, confidence_level=0.90)
+    conservative = clopper_pearson(17, 100, confidence_level=0.99)
+    assert conservative.lower < ordinary.lower
+    assert conservative.upper > ordinary.upper
+
+
+@pytest.mark.parametrize(
+    "confidence_level",
+    [0.0, 1.0, float("nan"), float("inf"), -float("inf")],
+)
+def test_invalid_confidence_levels_are_rejected(confidence_level):
+    with pytest.raises(ValueError):
+        clopper_pearson(5, 20, confidence_level=confidence_level)
