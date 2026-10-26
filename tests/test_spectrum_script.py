@@ -64,7 +64,7 @@ def test_spectrum_script_writes_reproducible_smoke_outputs(tmp_path):
     assert metadata["events_selected"] == 2
     assert metadata["events_processed"] == 2
     assert metadata["opposite_charge_pairs_total"] == 2
-    assert metadata["pairs_below_mass_range"] + metadata["pairs_in_histogram_range"] + metadata["pairs_above_mass_range"] == metadata["opposite_charge_pairs_total"]
+    assert metadata["pairs_below_mass_range"] + metadata["pairs_in_histogram_range"] + metadata["pairs_above_mass_range"] + metadata["pairs_nonfinite_mass"] == metadata["opposite_charge_pairs_total"]
     assert metadata["pairs_in_histogram_range"] == 2
     assert metadata["input_is_local_file"] is True
     assert metadata["input_bytes"] > 0
