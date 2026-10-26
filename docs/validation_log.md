@@ -88,3 +88,10 @@ Commit: `e277b4cac0dc88418a9b086857501f78109a09c0`
 - Python 3.10, 3.11, and 3.12: all jobs passed.
 - The end-to-end synthetic ROOT test now includes a non-finite muon kinematic value and verifies that its pair is counted as non-finite rather than silently entering the histogram as a zero-mass pair.
 - The run validates the code path on synthetic data only; actual CMS-data reproduction remains outstanding.
+
+
+## Histogram exact-integer comparator validation follow-up — 2026-10-26
+
+- The first CI run for comparator commit `53c0ee6463d4366f6f27edda9d6edcbd6016294a` exposed three failing assertions in the pre-existing invalid-count test: the implementation correctly changed its error messages when counts began being parsed as exact integers, but the test still expected the old wording. The large-integer regression test itself passed in the separate successful run `40256259920`; the ledger update run `40256270175` also passed.
+- Updated the test assertion to match the current documented failure modes in commit `4e8fd45c14e865713790e8f9ad47d3f81033dac1`. Its workflow is queued at run `40256388844`; do not count the comparator suite as fully validated until that run completes successfully across Python 3.10, 3.11, and 3.12.
+- This is a test-contract mismatch, not a demonstrated defect in the exact-count arithmetic; nevertheless, the failed run is retained transparently. No actual CMS data or histogram parity result is implied.
