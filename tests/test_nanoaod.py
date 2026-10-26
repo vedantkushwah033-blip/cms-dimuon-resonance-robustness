@@ -143,3 +143,19 @@ def test_float32_nanoaod_kinematics_are_promoted_before_mass_arithmetic():
     assert actual.shape == (1,)
     assert actual[0] > 0.0
     assert actual[0] == pytest.approx(expected, rel=2e-5, abs=1e-8)
+
+
+def test_highly_boosted_float32_pair_retains_physical_mass():
+    events = ak.Array(
+        {
+            "Muon_pt": np.array([[1e8, 1e8]], dtype=np.float32),
+            "Muon_eta": np.array([[0.0, 0.0]], dtype=np.float32),
+            "Muon_phi": np.array([[0.0, 0.0]], dtype=np.float32),
+            "Muon_mass": np.array([[0.105658, 0.105658]], dtype=np.float32),
+            "Muon_charge": np.array([[1, -1]], dtype=np.int32),
+        }
+    )
+    actual = ak.to_numpy(ak.flatten(opposite_charge_pair_masses(events), axis=None))
+    expected = 2.0 * float(np.float32(0.105658))
+    assert actual.shape == (1,)
+    assert actual[0] == pytest.approx(expected, rel=2e-5, abs=1e-8)
