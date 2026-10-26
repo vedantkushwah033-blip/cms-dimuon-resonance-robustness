@@ -254,3 +254,11 @@ The metadata audit now also requires the comparator report's `differing_bins` fi
 - Added a synthetic test proving an unselected one-muon event with a nonphysical charge does not fail the exactly-two-muon reference export; selected invalid-charge and negative-finite-kinematics cases remain rejected.
 - Final code/test commit: `206678e4fcb444de7c7e89bca4d2f3c157ca79b9`. The [Python 3.10–3.12 matrix](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40283968358) and [ROOT integration suite](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40283968367) both passed; the ROOT suite reports 8 tests passed.
 - These are synthetic/software checks only. No claim is made about actual CMS input processing or full-data histogram parity.
+
+
+## Run-1 trigger-feasibility documentation and overlapping CI run audit — 2026-10-26
+
+- Added `docs/run1_trigger_feasibility_gate.md` with explicit PASS/FAIL/UNKNOWN requirements for provenance, actual branch schema/types, event identity, collection integrity, HLT path semantics and run dependence, denominator validity, prescale/luminosity treatment, data-quality certification, and independent validation.
+- Cross-checked official CERN source records and the CMS trigger-system guide. The 2019 muon-only sample's documented six branches support spectrum reconstruction, not trigger-efficiency measurement. The separate Run2012B/C derived records warrant file-level inspection, but their published variable lists do not establish the exact contents or validity of the downloaded files.
+- CI runs `40287725284` (Python 3.10–3.12 matrix) and `40287725431` (ROOT synthetic integration) passed on commit `55728e154ee0c26ac9a0ff7cf8f3f48999194b5f`. An overlapping run `40287731148` failed at a branch-count assertion in a test path/content that does not match the test file returned for that exact commit; its failed jobs were requested for rerun and require follow-up inspection.
+- These are documentation and synthetic CI results only. They are not evidence of real CMS data processing, trigger efficiency, or 30,000-bin full-data parity.
