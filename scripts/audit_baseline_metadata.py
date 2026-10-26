@@ -1,0 +1,102 @@
+#!/usr/bin/env python3
+"""Audit end-to-end parity evidence from reference and candidate run metadata.
+
+This supplements bin-by-bin histogram comparison with input identity, selection,
+cut-flow, binning, and flow-count checks. A pass is evidence of software-level
+reproduction only, not detector/trigger validation or a resonance discovery.
+"""
+from __future__ import annotations
+
+import argparse
+import json
+from pathlib import Path
+from typing import Any
+
+
+def _read_json(path: Path) -> dict[str, Any]:
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ValueError(f"Cannot read valid JSON from {path}: {exc}") from exc
+    if not isinstance(value, dict):
+        raise ValueError(f"{path}: top-level JSON value must be an object")
+    return value
+
+
+def audit(reference_path: Path, candidate_path: Path, histogram_report_path: Path) -> dict[str, Any]:
+    ref = _read_json(reference_path)
+    cand = _read_json(candidate_path)
+    hist = _read_json(histogram_report_path)
+    checks: list[dict[str, Any]] = []
+
+    def check(name: str, reference: Any, candidate: Any, *, required: bool = True) -> None:
+        if reference is None or candidate is None:
+            passed = not required
+            detail = "required value missing" if required else "optional value unavailable"
+        else:
+            passed = reference == candidate
+            detail = "equal" if passed else "values differ"
+        checks.append({
+            "name": name,
+            "passed": bool(passed),
+            "reference": reference,
+            "candidate": candidate,
+            "detail": detail,
+        })
+
+    # Input identity must be established, not inferred from matching filenames.
+    check("input_sha256", ref.get("input_sha256"), cand.get("input_sha256"))
+    check("input_bytes", ref.get("input_bytes"), cand.get("input_bytes"))
+    check("tree_name", ref.get("tree"), cand.get("tree"))
+    check("available_tree_entries", ref.get("events_total"), cand.get("tree_entries_available"))
+
+    # The candidate's events_selected is the exactly-two-muon stage for the
+    # reference-aligned default selection.
+    check("exactly_two_muon_events", ref.get("events_exactly_two_muons"), cand.get("events_selected"))
+    check("bin_count", ref.get("bins"), cand.get("bins"))
+    check(
+        "mass_range_GeV",
+        [ref.get("mass_min_GeV"), ref.get("mass_max_GeV")],
+        cand.get("mass_range_GeV"),
+    )
+    check("regular_bin_total", ref.get("histogram_regular_bin_total"), cand.get("pairs_in_histogram_range"))
+    check("underflow_count", ref.get("histogram_underflow"), cand.get("pairs_below_mass_range"))
+    check("overflow_count", ref.get("histogram_overflow"), cand.get("pairs_at_or_above_mass_max"))
+
+    check("histogram_bin_edges_exactly_equal", True, hist.get("bin_edges_exactly_equal"))
+    check("histogram_exact_bin_by_bin_parity", True, hist.get("exact_bin_by_bin_parity"))
+    check("histogram_bin_count", ref.get("bins"), hist.get("bin_count"))
+    check("histogram_regular_total", ref.get("histogram_regular_bin_total"), hist.get("reference_total_count"))
+    check("candidate_regular_total", cand.get("pairs_in_histogram_range"), hist.get("candidate_total_count"))
+
+    passed = all(item["passed"] for item in checks)
+    return {
+        "status": "PASS" if passed else "FAIL",
+        "software_reference_reproduction_only": True,
+        "checks_passed": sum(item["passed"] for item in checks),
+        "checks_total": len(checks),
+        "checks": checks,
+        "limitations": [
+            "This audit does not establish trigger efficiency, detector-level validity, or physics discovery.",
+            "A failed check must be explained; do not relax exact parity silently.",
+            "Input SHA-256 must be present in both metadata files and match.",
+        ],
+    }
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--reference-metadata", type=Path, required=True)
+    parser.add_argument("--candidate-metadata", type=Path, required=True)
+    parser.add_argument("--histogram-report", type=Path, required=True)
+    parser.add_argument("--output", type=Path, required=True)
+    args = parser.parse_args()
+    report = audit(args.reference_metadata, args.candidate_metadata, args.histogram_report)
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    print(json.dumps({key: value for key, value in report.items() if key != "checks"}, indent=2))
+    return 0 if report["status"] == "PASS" else 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
