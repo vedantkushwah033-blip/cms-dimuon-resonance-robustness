@@ -14,6 +14,9 @@ import json
 import platform
 from pathlib import Path
 
+REFERENCE_SOURCE_COMMIT = "19a4a64fd58ef66a6ee3cf4f2a469fba61c60a09"
+REFERENCE_SOURCE_URL = "https://github.com/cms-opendata-analyses/DimuonSpectrumNanoAODOutreachAnalysis/blob/19a4a64fd58ef66a6ee3cf4f2a469fba61c60a09/dimuonSpectrum.py"
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
@@ -112,6 +115,8 @@ def main() -> int:
         "root_version": str(ROOT.gROOT.GetVersion()),
         "python_version": platform.python_version(),
         "implementation": "official-style ROOT RDataFrame + PtEtaPhiMVector + TH1D",
+        "reference_source_commit": REFERENCE_SOURCE_COMMIT,
+        "reference_source_url": REFERENCE_SOURCE_URL,
         "selection": [
             "nMuon == 2",
             "Muon_charge[0] != Muon_charge[1]",
