@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 import sys
+
+import pytest
 from pathlib import Path
 
 # The CLI scripts are repository-local, not installed package modules.
@@ -269,3 +271,18 @@ def test_metadata_audit_rejects_nonempty_discrepancy_list_with_zero_count(
         and not check["passed"]
         for check in report["checks"]
     )
+
+
+
+@pytest.mark.parametrize("metadata_index", [0, 1, 2])
+def test_metadata_audit_rejects_duplicate_json_keys(
+    tmp_path: Path, metadata_index: int,
+) -> None:
+    paths = _fixtures(tmp_path)
+    # JSON parsers commonly accept duplicate keys and silently keep the last
+    # value, which can conceal contradictory provenance or count metadata.
+    paths[metadata_index].write_text(
+        '{"events_total": 100, "events_total": 99}', encoding="utf-8"
+    )
+    with pytest.raises(ValueError, match="duplicate JSON object key"):
+        audit(*paths)
