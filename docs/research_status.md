@@ -1,6 +1,6 @@
 # Research status ledger
 
-**Last updated:** 2026-10-25
+**Last updated:** 2026-10-26
 
 ## Confirmed completed in this repository
 - Initial research question and scope guardrails documented.
@@ -12,8 +12,9 @@
 - Unit tests for analytic kinematic cases and synthetic jagged muon arrays added; one incorrect analytic test expectation was corrected during development.
 - Python packaging and GitHub Actions test workflow added.
 - Novelty gate, literature matrix, experiment-protocol template, data-source assessment, milestones, quality gates, and independent-review plan added.
-- Added a ROOT schema inventory tool and synthetic-file integration test.
+- Added a ROOT schema inventory tool with candidate branch-group coverage and a synthetic-file integration test.
 - Web-checked official Run2012B/Run2012C research-level records and identified documented HLT decision bits in the Run2012C variable list; actual file-level branch and prescale checks remain pending.
+- The schema inspector now reports presence/absence for muon kinematics, charge, event identifiers, and candidate quality/isolation fields, while retaining a heuristic list of trigger-related names.
 
 ## Not yet completed
 - Exhaustive or systematic literature review.
