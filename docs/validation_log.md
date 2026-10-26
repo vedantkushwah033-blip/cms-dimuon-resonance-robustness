@@ -314,3 +314,9 @@ Cross-chat consistency notes:
 - During a link-level audit of the literature memos, corrected the arXiv identifier label for Cesarotti et al. (2019) to **1902.07227** and corrected the Williams (2017) DOI in the scope-update memo to **10.1088/1748-0221/12/09/P09034**. The Cesarotti article DOI is **10.1103/PhysRevD.100.015021**. These are citation corrections only; no scientific result or novelty conclusion changed.
 - Added `docs/literature_scope_update_2026-10-27.md` to the README index so the newer cross-chat literature review is discoverable alongside the original scope decision.
 - Citation correction commits: `45a70195bade5a2028ee1dce7bdea35e36f3a5a4`, `ddd8e6b4d4da1ea21a4a3b9899f43a9bc15803f2`, `e93f4ba06002eca26e4ac26182823d701711e7c4`; README index commit: `887307b252bf5866a26dfebc9ff5b488045f7b1d`.
+
+
+## Literature matrix extension — 2026-10-27
+
+- Extended `docs/literature_matrix.csv` with two close methodological predecessors already identified in the literature-scope update: Volkovich, De Vito Halevy and Bressler (2022), data-directed bump hunting; and Yallup and Handley (2023), Bayesian marginal-likelihood bump hunting. These entries make the novelty review more traceable; they do not establish that the full methods-level comparison has been completed.
+- Commit: `547ece3be4bc7751e581cfe00390a169e49e40d1`.
