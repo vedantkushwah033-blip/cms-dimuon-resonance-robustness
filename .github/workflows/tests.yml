@@ -20,4 +20,4 @@ jobs:
       - run: python -m pip install -e ".[dev]"
       - run: pytest
       - run: python -m compileall -q scripts src tests
-      - run: ruff check src tests scripts/export_reference_dimuon_histogram.py
+      - run: ruff check src tests scripts/export_reference_dimuon_histogram.py scripts/audit_baseline_metadata.py
