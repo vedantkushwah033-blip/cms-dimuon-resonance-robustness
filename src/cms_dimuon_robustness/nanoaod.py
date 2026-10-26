@@ -12,6 +12,25 @@ def opposite_charge_pair_masses(arrays: ak.Array) -> ak.Array:
     Required fields are Muon_pt, Muon_eta, Muon_phi, Muon_mass, and Muon_charge.
     This applies no additional trigger, object-quality, or event selection.
     """
+    required_fields = ("Muon_pt", "Muon_eta", "Muon_phi", "Muon_mass", "Muon_charge")
+    missing_fields = [field for field in required_fields if field not in arrays.fields]
+    if missing_fields:
+        raise KeyError(f"Required muon fields missing: {missing_fields}")
+
+    # Detect inconsistent per-event collection lengths explicitly before zipping.
+    # A mismatched branch can otherwise cause opaque broadcasting errors or,
+    # worse, make selection and kinematics refer to different muon objects.
+    multiplicities = {
+        field: ak.num(arrays[field], axis=1)
+        for field in required_fields
+    }
+    reference_counts = multiplicities["Muon_pt"]
+    for field, counts in multiplicities.items():
+        if not bool(ak.all(counts == reference_counts)):
+            raise ValueError(
+                f"Per-event muon multiplicities differ between Muon_pt and {field}"
+            )
+
     # The official reference uses charge inequality (charge[0] != charge[1]).
     # For this to be equivalent to a physical opposite-sign selection, charges
     # must be exactly -1 or +1. Reject malformed values instead of silently
