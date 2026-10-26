@@ -210,3 +210,10 @@ The metadata audit now also requires the comparator report's `differing_bins` fi
 - Commit `92ff8d4aa339be0bd15ff8f6b5de4e8ff566d50a` promotes the kinematic branches to float64 before evaluating hyperbolic/trigonometric functions and invariant-mass arithmetic. NanoAOD kinematic branches are commonly stored as float32; doing all intermediate operations in that dtype can round the energy to the momentum for high-pT, nearly collinear massive particles and erase their nonzero invariant mass.
 - Commit `401c2253c50a89cb300ac4194ab68fd081ec4691` adds a regression test using float32 branches with two 1,000 GeV nearly collinear muons. The test asserts that the nonzero mass is retained.
 - This change prioritizes numerically stable candidate kinematics. The official reference implementation returns a C++ `float`; exact bin parity against it must still be measured on the same real input. Higher-precision candidate arithmetic does not imply the candidate will match every reference bin, and any mismatch must be reported rather than hidden.
+
+
+## Preflight numeric bounds and project-code provenance — 2026-10-26
+
+- The candidate and ROOT reference CLIs now reject NaN and positive/negative infinity for mass-range bounds before opening or scanning an input file. This avoids wasting I/O on an invalid histogram definition. Regression tests cover all three non-finite upper-bound tokens for both CLIs.
+- Both run-metadata records now capture the checked-out project commit: the CI-provided `GITHUB_SHA` when available, or `git rev-parse HEAD` in local repository runs. The ROOT reference metadata keeps the pinned upstream reference-source commit as a separate field, distinguishing the project code revision from the code being reproduced.
+- Tests were added to verify that the candidate and reference metadata include a project commit. The associated GitHub Actions workflows are running; their final status will be recorded after completion.
