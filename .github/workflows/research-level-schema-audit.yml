@@ -43,7 +43,7 @@ jobs:
               --server https://opendata.cern.ch \
               --verbose > "outputs/research_level_schema/locations_$record_id.txt"
             selected="$(awk '$1 ~ /\.root$/ && $2 ~ /^[0-9]+$/ && $2 <= 524288000 {print $0}' \
-              "outputs/research_level_schema/locations_$record_id.txt" | sort -n -k2,2 | head -n 1)"
+              "outputs/research_level_schema/locations_$record_id.txt" | sort -n -k2,2 | sed -n '1p')"
             if [[ -z "$selected" ]]; then
               echo "No ROOT file <=500 MiB listed for record $record_id; refusing unbounded download." >&2
               exit 1
