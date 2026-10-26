@@ -88,3 +88,31 @@ def test_metadata_audit_fails_when_histogram_parity_is_false(tmp_path: Path) -> 
     histogram["exact_bin_by_bin_parity"] = False
     histogram_path.write_text(json.dumps(histogram), encoding="utf-8")
     assert audit(reference_path, candidate_path, histogram_path)["status"] == "FAIL"
+
+
+
+def test_metadata_audit_rejects_matching_but_malformed_sha256(tmp_path: Path) -> None:
+    reference_path, candidate_path, histogram_path = _fixtures(tmp_path)
+    for path in (reference_path, candidate_path):
+        data = json.loads(path.read_text(encoding="utf-8"))
+        data["input_sha256"] = "not-a-real-digest"
+        path.write_text(json.dumps(data), encoding="utf-8")
+    report = audit(reference_path, candidate_path, histogram_path)
+    assert report["status"] == "FAIL"
+    assert any(
+        check["name"] == "input_sha256_format" and not check["passed"]
+        for check in report["checks"]
+    )
+
+
+def test_metadata_audit_rejects_nonpositive_file_size(tmp_path: Path) -> None:
+    reference_path, candidate_path, histogram_path = _fixtures(tmp_path)
+    candidate = json.loads(candidate_path.read_text(encoding="utf-8"))
+    candidate["input_bytes"] = 0
+    candidate_path.write_text(json.dumps(candidate), encoding="utf-8")
+    report = audit(reference_path, candidate_path, histogram_path)
+    assert report["status"] == "FAIL"
+    assert any(
+        check["name"] == "input_bytes_positive_integer" and not check["passed"]
+        for check in report["checks"]
+    )
