@@ -1,6 +1,15 @@
 name: official-data-smoke-test
 
 on:
+  push:
+    branches:
+      - research-plan/initial-protocol
+    paths:
+      - .github/workflows/official-data-smoke-test.yml
+      - pyproject.toml
+      - scripts/inspect_root_schema.py
+      - scripts/reproduce_dimuon_spectrum.py
+      - src/cms_dimuon_robustness/**
   workflow_dispatch:
     inputs:
       max_events:
