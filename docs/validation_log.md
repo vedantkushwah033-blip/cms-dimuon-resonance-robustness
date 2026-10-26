@@ -171,3 +171,6 @@ A regression test intentionally supplies that contradictory report and verifies 
 
 
 The first CI run after adding the discrepancy-summary checks exposed two valid-audit fixtures that had not been updated with the comparator's three new required metrics. The failures were in test setup, not evidence of a production audit false negative: the fixtures omitted `differing_bin_count`, `total_absolute_bin_count_difference`, and `maximum_absolute_bin_count_difference`. Both fixtures now explicitly record zeros for exact-parity cases. The corrected fixture commits are `d059d6a3` and `6eb0ec9e`; their new CI runs must pass before the latest audit change is considered validated.
+
+
+The fixture correction itself exposed a duplicate-key mistake in the metadata-audit test fixture, caught by Ruff's F601 rule. The duplicated discrepancy-metric keys have now been removed in commit `0844aca6`. This is precisely why CI remains a gate rather than being treated as a formality; the current head's test, lint, and ROOT-integration workflows must be checked after this repair.
