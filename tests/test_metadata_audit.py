@@ -243,3 +243,29 @@ def test_metadata_audit_rejects_missing_comparator_discrepancy_metrics(
     assert "histogram_differing_bin_count_zero" in failed
     assert "histogram_total_absolute_bin_count_difference_zero" in failed
     assert "histogram_maximum_absolute_bin_count_difference_zero" in failed
+
+
+def test_metadata_audit_rejects_nonempty_discrepancy_list_with_zero_count(
+    tmp_path: Path,
+) -> None:
+    reference_path, candidate_path, histogram_path = _fixtures(tmp_path)
+    histogram = json.loads(histogram_path.read_text(encoding="utf-8"))
+    histogram["differing_bin_count"] = 0
+    histogram["differing_bins"] = [
+        {
+            "bin_index": 1,
+            "mass_low_GeV": 1.0,
+            "mass_high_GeV": 2.0,
+            "reference_count": 4,
+            "candidate_count": 5,
+            "candidate_minus_reference": 1,
+        }
+    ]
+    histogram_path.write_text(json.dumps(histogram), encoding="utf-8")
+    report = audit(reference_path, candidate_path, histogram_path)
+    assert report["status"] == "FAIL"
+    assert any(
+        check["name"] == "histogram_discrepancy_list_consistent"
+        and not check["passed"]
+        for check in report["checks"]
+    )
