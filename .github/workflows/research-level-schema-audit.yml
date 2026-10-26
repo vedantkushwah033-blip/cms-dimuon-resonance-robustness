@@ -24,7 +24,7 @@ jobs:
       - name: Install schema inspection dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -e ".[remote]" cernopendata-client
+          python -m pip install -e ".[remote]" cernopendata-client ROOT
       - name: Download one official ROOT file per record with checksum verification
         shell: bash
         run: |
@@ -47,13 +47,35 @@ jobs:
             sha256="$(sha256sum "$input_file" | awk '{print $1}')"
             printf "%s\t%s\t%s\t%s\n" "$record_id" "$input_file" "$bytes" "$sha256" \
               >> outputs/research_level_schema/manifest.tsv
-            # A bounded reconstruction smoke test, not a trigger-aware analysis.
+            # Bounded candidate reconstruction. This is not a trigger-aware analysis.
             python scripts/reproduce_dimuon_spectrum.py \
               --input "$input_file" \
               --max-events 100000 \
+              --step-size 10000 \
               --bins 30000 \
               --output-dir "outputs/research_level_schema/baseline_$record_id" \
               > "outputs/research_level_schema/baseline_stdout_$record_id.json"
+            # Independently reconstruct the same event prefix using ROOT/RDataFrame.
+            python scripts/export_reference_dimuon_histogram.py \
+              --input "$input_file" \
+              --max-events 100000 \
+              --bins 30000 \
+              --output-dir "outputs/research_level_schema/reference_$record_id" \
+              > "outputs/research_level_schema/reference_stdout_$record_id.json"
+            # Preserve discrepancies as machine-readable artifacts even when parity fails.
+            set +e
+            python scripts/compare_histograms.py \
+              --reference "outputs/research_level_schema/reference_$record_id/dimuon_mass_histogram.csv" \
+              --candidate "outputs/research_level_schema/baseline_$record_id/dimuon_mass_histogram.csv" \
+              --output "outputs/research_level_schema/comparison_$record_id.json" \
+              > "outputs/research_level_schema/comparison_stdout_$record_id.json"
+            compare_status=$?
+            set -e
+            printf "%s\n" "$compare_status" > "outputs/research_level_schema/comparison_exit_status_$record_id.txt"
+            if (( compare_status != 0 )); then
+              echo "Reference parity failed for record $record_id; discrepancy report preserved in artifacts." >&2
+              exit "$compare_status"
+            fi
           done
       - name: Upload schema reports and file manifest
         if: always()
