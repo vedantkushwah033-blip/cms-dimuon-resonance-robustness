@@ -162,6 +162,7 @@ def audit(reference_path: Path, candidate_path: Path, histogram_report_path: Pat
         ("reference_events_total", ref.get("events_total")),
         ("reference_events_exactly_two_muons", ref.get("events_exactly_two_muons")),
         ("reference_events_opposite_sign", ref.get("events_opposite_sign")),
+        ("reference_histogram_entries_including_flow", ref.get("histogram_entries_including_flow")),
         ("reference_histogram_regular_total", ref.get("histogram_regular_bin_total")),
         ("reference_underflow", ref.get("histogram_underflow")),
         ("reference_overflow", ref.get("histogram_overflow")),
@@ -266,6 +267,11 @@ def audit(reference_path: Path, candidate_path: Path, histogram_report_path: Pat
     check("exactly_two_muon_events", ref.get("events_exactly_two_muons"), cand.get("events_selected"))
     # With exactly two muons per selected event, every opposite-sign event
     # contributes exactly one opposite-charge pair, independent of its mass.
+    check(
+        "reference_opposite_sign_histogram_entries",
+        ref.get("events_opposite_sign"),
+        ref.get("histogram_entries_including_flow"),
+    )
     check(
         "opposite_sign_event_pair_accounting",
         ref.get("events_opposite_sign"),
