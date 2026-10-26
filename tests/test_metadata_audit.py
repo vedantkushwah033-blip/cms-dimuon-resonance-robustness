@@ -149,3 +149,18 @@ def test_metadata_audit_rejects_opposite_sign_cutflow_mismatch(tmp_path: Path) -
         check["name"] == "opposite_sign_event_pair_accounting" and not check["passed"]
         for check in report["checks"]
     )
+
+
+
+def test_metadata_audit_rejects_float_encoded_count_even_when_equal(tmp_path: Path) -> None:
+    reference_path, candidate_path, histogram_path = _fixtures(tmp_path)
+    candidate = json.loads(candidate_path.read_text(encoding="utf-8"))
+    candidate["events_selected"] = 40.0
+    candidate_path.write_text(json.dumps(candidate), encoding="utf-8")
+    report = audit(reference_path, candidate_path, histogram_path)
+    assert report["status"] == "FAIL"
+    assert any(
+        check["name"] == "candidate_events_selected_valid_nonnegative_integer"
+        and not check["passed"]
+        for check in report["checks"]
+    )
