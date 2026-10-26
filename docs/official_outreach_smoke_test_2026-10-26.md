@@ -20,7 +20,7 @@
 
 ## Observed schema facts
 
-The schema inspector found the required muon kinematics and charge branches. Their reported types were `float[]` for `Muon_pt`, `Muon_eta`, `Muon_phi`, `Muon_mass`, `Muon_charge`, and `uint32_t` for `nMuon`.
+The schema inspector found the required muon kinematics and charge branches. Their reported types were `float[]` for `Muon_pt`, `Muon_eta`, `Muon_phi`, and `Muon_mass`; `int32_t[]` for `Muon_charge`; and `uint32_t` for `nMuon`.
 
 The inspector found **no trigger-related branch-name candidates**, no event-identity branch group (`run`, `luminosityBlock`, `event`), and none of the listed muon quality/isolation candidate branches. This is direct file-level evidence that this reduced outreach file does not support the intended trigger-aware or quality-selection analysis as currently specified. The absence of candidate names is not a general statement about other CMS datasets.
 
