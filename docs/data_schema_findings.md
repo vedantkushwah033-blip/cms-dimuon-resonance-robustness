@@ -11,15 +11,20 @@
 - The CERN Open Data record describes a research-level NanoAOD-like ntuple processed from AOD using validated runs, with 26,084,708 events across 57 files (75.6 MiB).
 - CERN explicitly warns that not all variables are available.
 
-### Run2012C DoubleMuParked research-level ntuple
+### Separate 2021 Run2012C reduced outreach file (not the research-level record)
 - Record: https://opendata.cern.ch/record/cms-31129
 - The record describes a research-level NanoAOD-like ntuple processed from AOD using validated runs, with 35,455,705 events across 74 files (101.1 MiB).
 - The linked official variable-list documentation includes HLT decision bits, including several dimuon trigger paths, as well as muon quality and isolation variables.
 
-### Education/outreach reduced sample
+### Education/outreach reduced samples
 - Record: https://opendata.cern.ch/record/12341
 - The 61,540,413-event file is reduced to muon kinematics and charge for an educational analysis. CERN states that no further validation was performed on the reduced output.
 - Treat it as a development example unless a separate validation justifies a broader role.
+
+### Run2012C DoubleMuParked research-level ntuple
+- Record: https://opendata.cern.ch/record/cms-31129
+- The research-level record describes 35,455,705 events across 74 files (101.1 MiB), processed from AOD using validated runs.
+- This is a distinct record from the 4.2 GiB reduced outreach file listed above. Do not transfer the outreach file's variable list to this record without inspecting its exact file schema.
 
 ## What these facts do and do not establish
 
