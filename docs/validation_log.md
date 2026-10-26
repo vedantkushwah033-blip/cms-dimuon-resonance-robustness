@@ -129,3 +129,16 @@ Commit: `e277b4cac0dc88418a9b086857501f78109a09c0`
 - After adding strict integer-type checks, [40272102022](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40272102022) passed all three Python test jobs. The dedicated ROOT-enabled integration workflow [40272107761](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40272107761) also passed for the updated test commit.
 - The float-encoded-count regression suite passed across Python 3.10, 3.11, and 3.12 in [40272107680](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40272107680). The documentation-only follow-up commit's own CI runs were still in progress when this entry was written.
 - None of these workflows processes the full CMS outreach ROOT file. Actual input provenance capture, full-data execution, and numerical bin-by-bin parity remain outstanding.
+
+## Metadata parity-audit schema hardening — 2026-10-26
+
+The audit now requires strict JSON booleans for histogram edge/parity flags, positive integer bin counts, and finite numeric mass-range bounds with `0 < minimum < maximum`. This closes equality-based schema gaps such as `1 == True` and matching string values like `"30000"` that could otherwise pass comparisons without satisfying the expected metadata types. Numeric validation also avoids treating booleans as numbers.
+
+Regression coverage includes malformed boolean values, matching string-encoded bin counts, string-encoded mass bounds, and a minimal valid end-to-end metadata audit. The first CI attempt failed during test collection because the repository-local `scripts` package was not on pytest's import path; `pythonpath = ["."]` was added to the pytest configuration to make this explicit.
+
+Confirmed GitHub Actions test run: https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40274364785
+- Commit: `996a6f3ae3b0913cf03b71a75d5b65f2a612b4d1`
+- Python 3.10, 3.11, and 3.12: pytest, compileall, and Ruff passed.
+- The separate ROOT-reference integration workflow for this commit was still running when this entry was written; no result is claimed for that workflow here.
+
+These are metadata-audit software checks only. The actual CMS ROOT input, official reference export, and candidate/reference full-data parity remain outstanding.
