@@ -149,7 +149,7 @@ def test_reference_exporter_on_tiny_synthetic_root_file(tmp_path):
             sys.executable,
             str(REPO_ROOT / "scripts" / "export_reference_dimuon_histogram.py"),
             "--input",
-            str(root_path),
+            "~/reference-smoke.root",
             "--output-dir",
             str(limited_dir),
             "--max-events",
@@ -165,11 +165,13 @@ def test_reference_exporter_on_tiny_synthetic_root_file(tmp_path):
         capture_output=True,
         text=True,
         check=False,
+        env={**os.environ, "HOME": str(tmp_path)},
     )
     assert limited.returncode == 0, limited.stderr
     limited_metadata = json.loads(
         (limited_dir / "reference_metadata.json").read_text(encoding="utf-8")
     )
+    assert limited_metadata["input"] == str(root_path.resolve())
     assert limited_metadata["max_events"] == 1
     assert limited_metadata["events_total"] == 1
     assert limited_metadata["events_exactly_two_muons"] == 1
