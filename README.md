@@ -31,6 +31,7 @@ The education/outreach sample remains useful for pipeline development only. The 
 - `docs/selection_semantics.md` — defines event-level versus pair-level selection and explains the statistical consequences of multiple pairs per event.
 - `docs/data_schema_findings.md`, `docs/data_feasibility_decision.md` — separate record-level facts from file-level checks and define trigger-aware, limited-scope, and reproducibility-only routes.
 - `docs/reference_baseline_comparison.md` — maps the implementation to the official public example's event selection, binning, mass range, and axes.
+- `docs/official_reference_code_audit_2026-10-26.md` — source-level comparison with the official v1.4 reference implementation; confirms configuration alignment but explicitly does not claim numerical reproduction.
 - The baseline records file size, optional SHA-256, tree entries/types, software versions, and in-range/out-of-range/non-finite pair accounting. The latest CI run also verifies non-finite mass handling end-to-end on a synthetic ROOT event.
 - `docs/novelty_comparison.md` — documents overlap with closest prior work and explicit novelty no-go criteria.
 - `docs/literature_search_update_2026-10-26.md` — records a focused follow-up search, additional CMS context, and why novelty remains unproven; this is not a systematic review.
