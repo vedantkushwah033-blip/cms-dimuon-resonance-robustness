@@ -135,7 +135,7 @@ The workflow `research-level CMS ROOT schema audit` completed successfully for r
 
 The manual workflow `.github/workflows/research-level-schema-audit.yml` has since been extended beyond the successful schema-only run described above. When manually dispatched, it will download one checksum-verified file from each record (31123 and 31129), run both the candidate Uproot/NumPy implementation and the independent ROOT/RDataFrame implementation on the same first 100,000 entries, and compare all 30,000 histogram bins using `scripts/compare_histograms.py`. The workflow retains per-period comparison reports and uploads artifacts even if a parity check fails.
 
-**This revised workflow has not been executed as of this entry.** Run 40403830670 is evidence for the earlier schema audit only; it is not evidence for the new baseline or parity steps. Do not state that numerical parity passed until the revised workflow has run and its output CSVs, metadata, comparison JSON, and logs have been inspected. The workflow is available under the repository's GitHub Actions page and requires manual dispatch.
+**This revised workflow has not been executed as of this entry.** Run 40403830670 is evidence for the earlier schema audit only; it is not evidence for the new baseline or parity steps. Do not state that numerical parity passed until the revised workflow has run and its output CSVs, metadata, comparison JSON, and logs have been inspected. The workflow file is currently on the research branch and is not yet available for manual dispatch from the Actions UI because it has not been added to the default branch.
 
 
 ## Important dispatch prerequisite (2026-10-27)
