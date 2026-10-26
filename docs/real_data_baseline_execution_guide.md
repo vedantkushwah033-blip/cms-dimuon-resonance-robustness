@@ -88,10 +88,10 @@ mass_low_GeV,mass_high_GeV,pair_count
 The repository now includes `scripts/export_reference_dimuon_histogram.py`, which uses PyROOT/RDataFrame, ROOT's `PtEtaPhiMVector`, and `TH1D` to independently export regular-bin counts plus reference metadata. It is deliberately separate from the Uproot/NumPy candidate implementation. Run it in a ROOT-enabled environment on the *same local input file*:
 
 ```bash
-python scripts/export_reference_dimuon_histogram.py \\
-  --input ./Run2012BC_DoubleMuParked_Muons.root \\
+python scripts/export_reference_dimuon_histogram.py \
+  --input ./Run2012BC_DoubleMuParked_Muons.root \
+  --sha256-input \
   --output-dir outputs/reference
-sha256sum ./Run2012BC_DoubleMuParked_Muons.root
 ```
 
 The exporter writes `dimuon_mass_histogram.csv` and `reference_metadata.json`; with `--sha256-input`, the metadata includes the input's byte size and SHA-256. Hashing adds one full input-file read. It records the ROOT version, cut-flow counts, and histogram underflow/overflow. Do not digitize the reference PNG or infer counts from its pixels. The script has been added to the repository but has **not yet been executed** against the CMS file, and the generated CSV must still be independently inspected before it is accepted as the reference artifact.
