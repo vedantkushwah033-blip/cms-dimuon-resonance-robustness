@@ -34,7 +34,7 @@ jobs:
           for record_id in 31123 31129; do
             cernopendata-client download-files \
               --recid "$record_id" \
-              --filter-regexp '\\.root$' \
+              --filter-regexp '\.root$' \
               --filter-range 1-1 \
               --server https://opendata.cern.ch \
               --verify
