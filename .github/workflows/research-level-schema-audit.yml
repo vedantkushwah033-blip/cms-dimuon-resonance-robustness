@@ -77,6 +77,20 @@ jobs:
               echo "Reference parity failed for record $record_id; discrepancy report preserved in artifacts." >&2
               overall_status=1
             fi
+            # Independently compare event cut flow and common histogram settings.
+            set +e
+            python scripts/compare_baseline_metadata.py \
+              --candidate "outputs/research_level_schema/baseline_$record_id/run_metadata.json" \
+              --reference "outputs/research_level_schema/reference_$record_id/reference_metadata.json" \
+              --output "outputs/research_level_schema/metadata_comparison_$record_id.json" \
+              > "outputs/research_level_schema/metadata_comparison_stdout_$record_id.json"
+            metadata_status=$?
+            set -e
+            printf "%s\n" "$metadata_status" > "outputs/research_level_schema/metadata_comparison_exit_status_$record_id.txt"
+            if (( metadata_status != 0 )); then
+              echo "Cut-flow/configuration comparison failed for record $record_id; report preserved in artifacts." >&2
+              overall_status=1
+            fi
           done
           exit "$overall_status"
       - name: Upload schema reports and file manifest
