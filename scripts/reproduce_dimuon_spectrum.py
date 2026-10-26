@@ -21,7 +21,7 @@ import uproot
 from cms_dimuon_robustness.nanoaod import opposite_charge_pair_masses
 from cms_dimuon_robustness.histogram import histogram_masses
 
-BRANCHES = ["Muon_pt", "Muon_eta", "Muon_phi", "Muon_mass", "Muon_charge"]
+BRANCHES = ["nMuon", "Muon_pt", "Muon_eta", "Muon_phi", "Muon_mass", "Muon_charge"]
 
 
 def sha256_file(path: Path) -> str:
@@ -103,9 +103,24 @@ def main() -> None:
                     break
                 chunk = chunk[:remaining]
 
+            # Match the official reference scalar nMuon selection while
+            # verifying agreement with the jagged Muon_pt collection.
+            # A disagreement can silently change the selected event sample.
+            declared_multiplicity = ak.to_numpy(chunk["nMuon"])
+            observed_multiplicity = ak.to_numpy(ak.num(chunk["Muon_pt"], axis=1))
+            mismatches = np.flatnonzero(declared_multiplicity != observed_multiplicity)
+            if mismatches.size:
+                local_index = int(mismatches[0])
+                raise ValueError(
+                    "nMuon disagrees with Muon_pt collection length at event "
+                    f"{events_read + local_index}: "
+                    f"nMuon={int(declared_multiplicity[local_index])}, "
+                    f"len(Muon_pt)={int(observed_multiplicity[local_index])}"
+                )
+
             events_read += len(chunk[BRANCHES[0]])
             if args.selection == "exactly-two-opposite-charge":
-                selected = chunk[ak.num(chunk["Muon_pt"], axis=1) == 2]
+                selected = chunk[chunk["nMuon"] == 2]
             else:
                 selected = chunk
             events_selected += len(selected[BRANCHES[0]])
