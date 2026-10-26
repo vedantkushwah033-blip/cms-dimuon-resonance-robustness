@@ -86,11 +86,24 @@ def test_different_bin_edges_fail_closed(tmp_path):
     assert "histogram bin edges differ" in result.stderr
 
 
-@pytest.mark.parametrize("bad_count", [-1, 1.5, "nan"])
+@pytest.mark.parametrize("bad_count", [-1, 1.5, "nan", "3.0"])
 def test_invalid_counts_are_rejected(tmp_path, bad_count):
     reference = [{"mass_low_GeV": 0.25, "mass_high_GeV": 1.0, "pair_count": 1}]
     candidate = [{"mass_low_GeV": 0.25, "mass_high_GeV": 1.0, "pair_count": bad_count}]
     result, _ = run_comparison(tmp_path, reference, candidate)
 
     assert result.returncode != 0
-    assert "counts must be finite and nonnegative" in result.stderr or "pair_count values must be integers" in result.stderr
+    assert "pair_count values must be exact base-10 integers" in result.stderr or "counts must be nonnegative integers" in result.stderr
+
+
+def test_counts_above_float_exactness_limit_are_compared_without_precision_loss(tmp_path):
+    reference = [{"mass_low_GeV": 0.25, "mass_high_GeV": 1.0, "pair_count": "9007199254740993"}]
+    candidate = [{"mass_low_GeV": 0.25, "mass_high_GeV": 1.0, "pair_count": "9007199254740994"}]
+    result, report_path = run_comparison(tmp_path, reference, candidate)
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+
+    assert result.returncode == 2
+    assert report["reference_total_count"] == 9007199254740993
+    assert report["candidate_total_count"] == 9007199254740994
+    assert report["total_absolute_bin_count_difference"] == 1
+    assert report["maximum_absolute_bin_count_difference"] == 1
