@@ -1,0 +1,30 @@
+# Planning template only. Revise counts after runtime pilots and protocol freeze.
+project_status: planning_only
+primary_estimand: empirical_null_rejection_fraction
+confidence_interval: two_sided_Clopper_Pearson
+confidence_level: 0.95
+
+stages:
+  smoke_test:
+    pseudoexperiments_per_scenario: 20
+    purpose: catch implementation errors; not final calibration evidence
+  pilot:
+    pseudoexperiments_per_scenario: 500
+    purpose: estimate runtime, fit failures, and rough Monte Carlo uncertainty
+  main_run_candidate:
+    pseudoexperiments_per_scenario: 10000
+    purpose: candidate precision for ordinary 5 percent type-I-error studies
+    approval_gate: freeze_protocol_and_pass_pilot
+
+reporting_requirements:
+  - successes_and_total_trials
+  - empirical_rejection_fraction
+  - exact_binomial_interval
+  - random_seed_and_generator_version
+  - invalid_fit_count_and_prespecified_handling
+  - scenario_definition_and_fit_model
+
+not_supported_by_this_plan:
+  - empirical_validation_of_five_sigma_tail_probabilities
+  - global_significance_without_prespecified_scan_and_maximum_statistic_calibration
+  - claims_that_toy_pseudoexperiments_reproduce_detector_level_CMS_data

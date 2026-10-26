@@ -1,0 +1,103 @@
+# Data-source assessment and go/no-go decision
+
+**Assessment date:** 2026-10-25  
+**Status:** source inspected; full data processing not yet performed.
+
+## 1. Separate the analysis example from the event dataset
+
+The CERN Open Data analysis record for Wunsch's 2012 dimuon spectrum is DOI **10.7483/OPENDATA.CMS.AAR1.4NZQ** and is available at https://opendata.cern.ch/record/cms-12342. The record says its example uses the 2012 Run B/C DoubleMuParked dataset, reconstructs opposite-charge dimuon invariant masses, and warns that a feature near 30 GeV is trigger/data-taking related rather than a resonance.
+
+That analysis record itself contains two small files totalling 123.7 KiB. **Those are not the full event dataset.** The linked reduced NanoAOD event dataset is a separate record: DOI **10.7483/OPENDATA.CMS.LVG5.QT81**, https://opendata.cern.ch/record/12341. CERN describes it as one file, 2.1 GiB, with 61,540,413 events and muon branches for multiplicity, transverse momentum, pseudorapidity, azimuth, mass, and charge.
+
+This correction matters for storage, compute planning and provenance. Do not report the 123.7 KiB analysis example as the size of the event sample.
+
+## 2. What the available variables support
+
+The reduced event dataset has enough listed muon kinematics and charges to reconstruct opposite-charge dimuon masses. It does not, from the listed schema alone, provide a complete detector-level trigger model, all event-level trigger decisions, all isolation variables, or all information needed to reproduce a modern analysis selection. The portal says no further validation was done on the reduced output beyond using validated runs for the source data.
+
+Therefore:
+- It is a plausible **baseline reproduction and pipeline-validation** sample.
+- It is not automatically suitable for every proposed trigger-misspecification experiment.
+- A toy generator based on fitted mass shapes would test statistical behaviour under that toy model, not detector-level CMS realism.
+- We must inspect the original analysis source and data schema before claiming any selection or trigger variable is available.
+
+## 3. Candidate research-grade alternatives
+
+The 2019 Cesarotti et al. paper reports an analysis of 2.11 fb^-1 of 7 TeV CMS Open Data in a pT-enhanced dimuon search, using dimuon masses from 14 to 66 GeV and discussing background modelling. This is close prior work and must be reviewed in full before a novelty claim.
+
+A research-grade reanalysis might require an accessible primary CMS dataset with the needed trigger/selection branches and a defensible luminosity/data-quality description. The repository must not assume those inputs are available merely because an outreach-derived sample exists. A data feasibility check is a gate, not a formality.
+
+## 4. Go/no-go decision at this stage
+
+**GO for:** downloading/inspecting the documented reduced NanoAOD sample; reproducing the reference mass spectrum; verifying the schema; checking the trigger feature and invariant-mass calculation.
+
+**NOT YET APPROVED for:** claiming trigger-aware calibration on real CMS events, claiming a novel bump-hunt method, or launching a large main simulation.
+
+**Next evidence required:**
+1. Exact event schema and source code reviewed.
+2. Reference spectrum reproduced and discrepancy report recorded.
+3. Full closest-prior-work comparison completed.
+4. A clearly defined estimand and generating/fitting model frozen.
+5. A reasoned explanation of what the reduced dataset can and cannot validate.
+
+## 5. Source records
+
+- Wunsch, 2019 analysis record: DOI 10.7483/OPENDATA.CMS.AAR1.4NZQ; https://opendata.cern.ch/record/cms-12342
+- Wunsch, 2019 reduced event dataset: DOI 10.7483/OPENDATA.CMS.LVG5.QT81; https://opendata.cern.ch/record/12341
+- Cesarotti et al., Phys. Rev. D 100, 015021 (2019), DOI 10.1103/PhysRevD.100.015021; https://doi.org/10.1103/PhysRevD.100.015021
+
+
+## Updated dataset decision (2026-10-26)
+
+The two research-level records are now preferred over the education/outreach muon-only reduction for feasibility assessment:
+
+- Run2012B DoubleMuParked research-level ntuple: https://opendata.cern.ch/record/31123 — 26,084,708 events, 57 files, 75.6 MiB; processed from AOD using validated runs.
+- Run2012C DoubleMuParked research-level ntuple: https://opendata.cern.ch/record/cms-31129 — 35,455,705 events, 74 files, 101.1 MiB; processed from AOD using validated runs.
+
+The official Run2012C variable-list page documents HLT decision bits and muon quality/isolation fields. This supports further feasibility checking, not a claim that the merged file definitely contains all needed branches. Run2012B, actual file branch lists, trigger-menu interpretation, prescale availability, and event-selection provenance remain open checks.
+
+Next action: run `scripts/inspect_root_schema.py` on a small representative file from each period, save JSON reports, then compare branch coverage against the original analysis requirements. Do not claim trigger-efficiency calibration from HLT booleans alone.
+
+
+## Official branch-schema documentation check — 2026-10-26
+
+The CERN variable-list documents linked from the two research-level records were inspected directly:
+
+- Run2012B variable list: https://opendata.cern.ch/eos/opendata/cms/dataset-semantics/derived-data/NanoAODRun1/31123/Run2012B_DoubleMuParked_doc.html
+- Run2012C variable list: https://opendata.cern.ch/eos/opendata/cms/dataset-semantics/derived-data/NanoAODRun1/31129/Run2012C_DoubleMuParked_doc.html
+
+Both documents list named HLT decision branches for dimuon and single-muon paths, plus muon quality/isolation fields. This is stronger evidence that a trigger-aware file-level feasibility audit is worth pursuing than the outreach muon-only sample alone. It is not yet evidence that the downloaded merged files have been inspected by this project.
+
+Neither published variable list documents prescale values. Trigger efficiency or unbiased trigger calibration therefore remains **no-go pending further evidence**: HLT path decisions alone are insufficient, and run-dependent trigger versions, path semantics, prescales, good-lumisection coverage, and the denominator/sample definition must be established.
+
+The immediate next step remains a small file-level schema audit for each period, followed by a documented pass/fail/unknown table for every input required by the intended analysis. Do not begin the main Monte Carlo campaign or claim trigger calibration until that gate is passed.
+
+
+## Precision correction to named HLT branch claims — 2026-10-26
+
+The official variable lists were checked for exact path names. They document HLT boolean branches such as `HLT_Mu13_Mu8` and `HLT_Mu17_Mu8`, but a search did not find `HLT_Dimuon0_Jpsi`, `HLT_DoubleMu11_Acoplanarity03`, or `HLT_DoubleMu5_IsoMu5` on those derived-schema pages. The original AOD dataset record's possible-trigger list is a different source and does not prove that those paths are branches in the derived ntuple. Therefore, only the general availability of many HLT decisions is established by the variable lists; target-path presence and semantics remain a file-level unknown.
+
+
+## Specific trigger and luminosity documentation — 2026-10-26
+
+Two additional official CERN records provide concrete leads for a properly scoped trigger audit:
+
+- `HLT_Mu13_Mu8` path-version/run-interval record: https://opendata.cern.ch/record/cms-6651. The listed versions change over the 2012 B/C run ranges; therefore the trigger must not be modeled as one time-invariant path.
+- Detailed luminosity information for 2012: https://opendata.cern.ch/record/cms-1054. The record describes trigger-active run ranges and prescale factors as inputs to luminosity calculations for prescaled paths.
+
+These records help define what to verify next, but they do not establish that the project has read the actual derived ROOT files, calculated the applicable luminosity/prescales, or obtained an unbiased efficiency denominator. The DoubleMuParked sample's trigger-based selection remains a central limitation for efficiency claims.
+
+
+## Additional candidate sample for denominator feasibility — 2026-10-26
+
+The official Run2012B/C SingleMu derived records may be worth checking before declaring every trigger-efficiency question infeasible:
+
+- Run2012B SingleMu: 53,446,198 events, 107 files, 127.2 MiB; https://opendata.cern.ch/record/cms-31127
+- Run2012C SingleMu: 85,731,835 events, 157 files, 206.0 MiB; https://opendata.cern.ch/record/cms-31133
+
+Because these samples are selected by single-muon triggers, they may be candidates for a carefully designed tag-and-probe or conditional trigger study. They are not automatically unbiased for a dimuon trigger, and no efficiency denominator has been established. Check the actual HLT/trigger-object branches, path overlap, run coverage, and prescale treatment before choosing an estimand.
+
+
+## SingleMu variable-list caveat — 2026-10-26
+
+The published Run2012B and Run2012C SingleMu variable lists include HLT decision branches and trigger-object fields (`TrigObj_pt/eta/phi/id/filterBits`), but explicitly describe `nTrigObj` as only partially filled and `GoodLumisection` as not available in every dataset. This weakens any assumption that the SingleMu records automatically solve the denominator problem. The actual file-level fraction of events with usable trigger objects and valid data-quality metadata must be measured before deciding whether a tag-and-probe design is defensible.

@@ -1,0 +1,108 @@
+import hashlib
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+import awkward as ak
+import numpy as np
+import uproot
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_spectrum_script_writes_reproducible_smoke_outputs(tmp_path):
+    input_path = tmp_path / "tiny_events.root"
+    with uproot.recreate(input_path) as root_file:
+        tree = root_file.mktree(
+            "Events",
+            {
+                "nMuon": "int32",
+                "Muon_pt": "var * float64",
+                "Muon_eta": "var * float64",
+                "Muon_phi": "var * float64",
+                "Muon_mass": "var * float64",
+                "Muon_charge": "var * int32",
+            },
+        )
+        tree.extend(
+            {
+                "nMuon": np.array([2, 2, 2], dtype=np.int32),
+                "Muon_pt": ak.Array([[10.0, 10.0], [float("nan"), 12.0], [50.0, 50.0]]),
+                "Muon_eta": ak.Array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]),
+                "Muon_phi": ak.Array([[0.0, np.pi], [0.0, np.pi], [0.0, np.pi]]),
+                "Muon_mass": ak.Array([[0.105658, 0.105658], [0.105658, 0.105658], [0.0, 0.0]]),
+                "Muon_charge": ak.Array([[1, -1]] * 3),
+            }
+        )
+
+    output_dir = tmp_path / "outputs"
+    subprocess.run(
+        [
+            sys.executable,
+            str(REPO_ROOT / "scripts" / "reproduce_dimuon_spectrum.py"),
+            "--input",
+            str(input_path),
+            "--output-dir",
+            str(output_dir),
+            "--max-events",
+            "3",
+            "--bins",
+            "20",
+            "--mass-max",
+            "100",
+            "--step-size",
+            "1 KB",
+            "--sha256-input",
+        ],
+        cwd=REPO_ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+    metadata = json.loads((output_dir / "run_metadata.json").read_text(encoding="utf-8"))
+    assert metadata["events_read"] == 3
+    assert metadata["events_selected"] == 3
+    assert metadata["events_processed"] == 3
+    assert metadata["opposite_charge_pairs_total"] == 3
+    assert metadata["pairs_below_mass_range"] + metadata["pairs_in_histogram_range"] + metadata["pairs_at_or_above_mass_max"] + metadata["pairs_nonfinite_mass"] == metadata["opposite_charge_pairs_total"]
+    assert metadata["pairs_in_histogram_range"] == 1
+    assert metadata["pairs_at_or_above_mass_max"] == 1
+    assert metadata["histogram_interval"] == "[mass_min, mass_max); values exactly at mass_max are overflow"
+    assert metadata["pairs_nonfinite_mass"] == 1
+    assert metadata["input_is_local_file"] is True
+    assert metadata["input_bytes"] > 0
+    assert metadata["input_sha256"] == hashlib.sha256(input_path.read_bytes()).hexdigest()
+    assert metadata["tree_entries_available"] == 3
+    assert metadata["branch_types"]["Muon_pt"]
+    assert metadata["software"]["python"]
+    assert metadata["git_commit"]
+    assert metadata["max_events"] == 3
+    assert metadata["selection_mode"] == "exactly-two-opposite-charge"
+    assert metadata["selection"].startswith("exactly two reconstructed muons")
+    assert (output_dir / "dimuon_mass_histogram.csv").is_file()
+    assert (output_dir / "dimuon_mass_spectrum.png").is_file()
+
+
+
+def test_spectrum_cli_rejects_nonfinite_mass_bounds_before_opening_input(tmp_path):
+    missing_input = tmp_path / "does-not-exist.root"
+    script = REPO_ROOT / "scripts" / "reproduce_dimuon_spectrum.py"
+    for invalid_bound in ("nan", "inf", "-inf"):
+        completed = subprocess.run(
+            [
+                sys.executable,
+                str(script),
+                "--input",
+                str(missing_input),
+                "--mass-max=" + invalid_bound,
+            ],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        assert completed.returncode == 2
+        assert "mass bounds must be finite" in completed.stderr
+        assert "does-not-exist.root" not in completed.stderr
