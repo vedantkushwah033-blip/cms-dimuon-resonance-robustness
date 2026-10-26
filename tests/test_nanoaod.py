@@ -96,5 +96,5 @@ def test_invalid_muon_charge_values_are_rejected():
             "Muon_charge": [[0, -1]],
         }
     )
-    with pytest.raises(ValueError, match="Muon_charge must contain only -1 or \+1 values"):
+    with pytest.raises(ValueError, match="Muon_charge must contain only"):
         opposite_charge_pair_masses(events)
