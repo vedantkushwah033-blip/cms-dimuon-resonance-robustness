@@ -95,3 +95,11 @@ Commit: `e277b4cac0dc88418a9b086857501f78109a09c0`
 - The first CI run for comparator commit `53c0ee6463d4366f6f27edda9d6edcbd6016294a` exposed three failing assertions in the pre-existing invalid-count test: the implementation correctly changed its error messages when counts began being parsed as exact integers, but the test still expected the old wording. The large-integer regression test itself passed in the separate successful run `40256259920`; the ledger update run `40256270175` also passed.
 - Updated the test assertion to match the current documented failure modes in commit `4e8fd45c14e865713790e8f9ad47d3f81033dac1`. Its workflow is queued at run `40256388844`; do not count the comparator suite as fully validated until that run completes successfully across Python 3.10, 3.11, and 3.12.
 - This is a test-contract mismatch, not a demonstrated defect in the exact-count arithmetic; nevertheless, the failed run is retained transparently. No actual CMS data or histogram parity result is implied.
+
+
+## Exact-count histogram comparator: corrective CI verified — 2026-10-26
+
+- The corrected comparator test suite completed successfully in GitHub Actions run [40256388844](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40256388844) for commit `4e8fd45c14e865713790e8f9ad47d3f81033dac1`. Python 3.10, 3.11, and 3.12 jobs all passed.
+- The subsequent documentation/ledger update also passed in run [40256407530](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40256407530) for commit `ee2265993c9236f4b286874883e378f336f4ae82`.
+- The comparator's regression test detects a one-count difference between values above 2^53, where binary floating-point conversion could otherwise erase the difference. Invalid fractional/non-integer counts are rejected; bin-edge equality is checked separately from count parity.
+- The earlier failed run remains part of the audit trail; it revealed stale test expectations after an error-message change. The corrected run now passes. These workflows validate automated software checks only. No official CMS ROOT file has been processed, and no reference histogram parity result exists yet.
