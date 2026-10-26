@@ -40,7 +40,7 @@ jobs:
           python -m pip install -e ".[remote]"
       - name: Validate requested event limit
         env:
-          MAX_EVENTS: ${{ inputs.max_events }}
+          MAX_EVENTS: ${{ inputs.max_events || '10000' }}
         run: |
           if ! [[ "$MAX_EVENTS" =~ ^[1-9][0-9]*$ ]]; then
             echo "max_events must be a positive integer" >&2
@@ -61,7 +61,7 @@ jobs:
       - name: Run bounded spectrum smoke test
         env:
           CMS_DIMUON_OUTREACH_URL: root://eospublic.cern.ch//eos/opendata/cms/derived-data/AOD2NanoAODOutreachTool/Run2012BC_DoubleMuParked_Muons.root
-          MAX_EVENTS: ${{ inputs.max_events }}
+          MAX_EVENTS: ${{ inputs.max_events || '10000' }}
         run: |
           python scripts/reproduce_dimuon_spectrum.py \
             --input "$CMS_DIMUON_OUTREACH_URL" \
