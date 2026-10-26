@@ -129,3 +129,10 @@ If download or checksum verification fails, preserve the complete error output a
 ## Audit status update — 2026-10-27
 
 The workflow `research-level CMS ROOT schema audit` completed successfully for record 31123 (Run2012B DoubleMuParked) and record 31129 (Run2012C DoubleMuParked). Exact filenames, byte sizes, SHA-256 hashes, `Events` tree entry counts, relevant branch types, and limitations are recorded in `docs/exact_file_schema_audit_run2012b_c_2026-10-27.md`; the machine-readable JSON reports and manifest are attached to [workflow run 40403830670](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40403830670). This audit did **not** run the dimuon spectrum script on these research-level files. The optional SingleMu records 31127 and 31133 have not been downloaded by this workflow.
+
+
+## Revised bounded parity workflow — 2026-10-27
+
+The manual workflow `.github/workflows/research-level-schema-audit.yml` has since been extended beyond the successful schema-only run described above. When manually dispatched, it will download one checksum-verified file from each record (31123 and 31129), run both the candidate Uproot/NumPy implementation and the independent ROOT/RDataFrame implementation on the same first 100,000 entries, and compare all 30,000 histogram bins using `scripts/compare_histograms.py`. The workflow retains per-period comparison reports and uploads artifacts even if a parity check fails.
+
+**This revised workflow has not been executed as of this entry.** Run 40403830670 is evidence for the earlier schema audit only; it is not evidence for the new baseline or parity steps. Do not state that numerical parity passed until the revised workflow has run and its output CSVs, metadata, comparison JSON, and logs have been inspected. The workflow is available under the repository's GitHub Actions page and requires manual dispatch.
