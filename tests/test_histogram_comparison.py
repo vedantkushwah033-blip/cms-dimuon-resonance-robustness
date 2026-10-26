@@ -99,10 +99,13 @@ def test_sub_precision_bin_edge_roundoff_is_tolerated_and_reported(tmp_path):
 def test_different_bin_edges_fail_closed(tmp_path):
     reference = [{"mass_low_GeV": 0.25, "mass_high_GeV": 1.0, "pair_count": 3}]
     candidate = [{"mass_low_GeV": 0.25, "mass_high_GeV": 1.1, "pair_count": 3}]
-    result, _ = run_comparison(tmp_path, reference, candidate)
+    result, report_path = run_comparison(tmp_path, reference, candidate)
 
-    assert result.returncode != 0
-    assert "histogram bin edges differ" in result.stderr
+    assert result.returncode == 2
+    assert "histogram bin edges differ beyond tolerance" in result.stderr
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    assert report["exact_bin_by_bin_parity"] is False
+    assert "comparison_error" in report
 
 
 @pytest.mark.parametrize("bad_count", [-1, 1.5, "nan", "3.0", "1_0", "+3", " 3", "3 "])
