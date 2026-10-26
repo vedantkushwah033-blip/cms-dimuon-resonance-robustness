@@ -164,6 +164,8 @@ def main() -> None:
         "pairs_nonfinite_mass": pairs_nonfinite,
         "bins": args.bins,
         "mass_range_GeV": [args.mass_min, args.mass_max],
+        "histogram_interval": "[mass_min, mass_max); values exactly at mass_max are overflow",
+        "pairs_at_or_above_mass_max": pairs_above_range,
         "selection_mode": args.selection,
         "step_size": args.step_size,
         "max_events": args.max_events,
