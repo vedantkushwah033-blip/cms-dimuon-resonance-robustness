@@ -49,3 +49,16 @@ Commit: `1056145fe5708f6c6983262180f4cf845e29953e`
 - The new spectrum CLI integration test created a synthetic ROOT file, limited processing to two events, checked pair counts and run metadata, and verified that the CSV and PNG outputs were written.
 
 This is a reproducible software smoke test on synthetic data. It is not a successful run on CMS collision data and does not reproduce the public physics reference.
+
+
+## Reference-alignment changes and latest test run
+
+The baseline script now defaults to the public example's exactly-two-muon selection, opposite-charge pair requirement, 30,000 bins, 0.25–300 GeV mass range, and logarithmic axes. The public reference is the [CMS Open Data dimuon example](https://github.com/cms-opendata-analyses/DimuonSpectrumNanoAODOutreachAnalysis), whose implementation uses ROOT RDataFrame and ROOT four-vectors. Our implementation uses Uproot/Awkward and NumPy, so it is an independent implementation rather than a verified reproduction.
+
+A test initially failed after the mass lower bound was changed to a positive value for the log x-axis; the old test still passed zero. The test input was updated to use 0.25 GeV, and event-limit accounting was corrected to use the number of input events read.
+
+Confirmed CI run: https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40248510940
+
+- Commit: `a9c3bf1dc56f911893d7bad928d060e41be6a519`
+- Python 3.10, 3.11, 3.12: 20 tests passed and Ruff passed.
+- The tests use synthetic ROOT files. No CMS file has yet been processed by this repository.
