@@ -38,3 +38,12 @@ def test_invalid_transverse_momentum_rejected(bad_pt):
 def test_negative_mass_rejected():
     with pytest.raises(ValueError):
         pair_invariant_mass(10, 0, 0, -0.1, 10, 0, 1, 0)
+
+
+def test_highly_boosted_collinear_pair_retains_physical_rest_mass():
+    mass = 0.105658
+    result = pair_invariant_mass(
+        1e8, 0.0, 0.0, mass,
+        1e8, 0.0, 0.0, mass,
+    )
+    assert float(result) == pytest.approx(2.0 * mass, rel=1e-12, abs=1e-12)
