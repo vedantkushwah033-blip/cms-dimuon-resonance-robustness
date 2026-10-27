@@ -333,3 +333,10 @@ The revised bounded baseline/parity workflow has not run. A dispatch-path audit 
 - Added `docs/estimand_choice_decision_memo.md` in commit `f89031990dc1caccd0e60b2f30c580a25f0ca352`. It recommends considering scenario-specific global type-I error as the primary outcome if the project remains about full-pipeline discovery calibration; diagnostic false-alarm rate and interval coverage are explicitly distinct estimands, not interchangeable headline metrics.
 - The memo is a provisional recommendation, not a preregistration freeze. The primary estimand, comparator, held-out scenario population, and analysis rules remain OPEN pending baseline validation and methods comparison.
 - CI for the new memo and the preceding documentation commits has not been confirmed; no missing status entries are treated as passes.
+
+
+## Literature-gap checkpoint — 2026-10-27
+
+- Added `docs/literature_gap_checkpoint_2026-10-27.md`, a bounded desk-review update covering Williams (2017), Cesarotti et al. (2019), BumpNet (2025), NPLM-based resonant anomaly detection (2025), and LaCATHODE (2023).
+- The decision remains **NO-GO for a confirmatory Monte Carlo campaign** until the closest methods are compared against an exact estimand and procedure. Broad background-model-selection and generic calibration claims overlap with established literature; novelty is unproven.
+- This was a literature/protocol update only. It adds no empirical result, does not validate any local CMS file, and does not establish publication prospects. The baseline spectrum reproduction and trigger/event-selection feasibility gates remain open.
