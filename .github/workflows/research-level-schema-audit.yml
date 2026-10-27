@@ -1,0 +1,26 @@
+name: research-level CMS schema and bounded baseline audit
+
+# Dispatch bootstrap only. GitHub requires a workflow_dispatch workflow on the
+# default branch before the UI/API can offer manual runs. When launching the
+# research workflow, select research-plan/initial-protocol in the branch picker;
+# GitHub runs that branch's workflow definition, not this safe default-branch
+# guard. This default-branch copy deliberately does not download data.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  guard:
+    name: Prevent accidental data run from the default branch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require the reviewed research branch
+        shell: bash
+        run: |
+          if [[ "$GITHUB_REF_NAME" != "research-plan/initial-protocol" ]]; then
+            echo "::error::This default-branch workflow is a dispatch bootstrap only. Select research-plan/initial-protocol in the branch picker to run the reviewed research workflow."
+            exit 1
+          fi
+          echo "The research branch was selected. This bootstrap copy intentionally performs no data processing."
