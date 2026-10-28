@@ -19,7 +19,7 @@ Both candidate and reference are expected to process the same input file and exa
 
 | Priority | Finding | Required action |
 |---|---|---|
-| High | CSV summaries were not linked to metadata | Add CSV summary checks; next add exact CSV SHA-256 to exporter metadata |
+| High | CSV summaries were not linked to metadata | Add summary and exact CSV SHA-256 checks in exporter metadata |
 | High | Both outputs could be truncated identically | Require exact event-prefix count in both metadata files |
 | High | Real-data parity is unestablished | Run bounded workflow after validating dependency and provenance choices |
 | Moderate | Reference ROOT distribution is alpha-stage | Prefer a supported, versioned conda-forge ROOT environment for reference validation |
