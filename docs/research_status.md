@@ -435,3 +435,11 @@ The revised bounded baseline/parity workflow has not run. A dispatch-path audit 
 - The failed test workflow for commit `599dbc3487194a71ab0b8932d6a7f3691521bbe5` exposed a Ruff F811 error: a held-out false-positive test had been defined twice in `tests/test_calibration.py`. The test run did not reach a trustworthy full-suite result.
 - Removed the duplicate function definition in commit `2eda30ca237b8b76e3008c5284264e7c506fbdfd`. This is a test-maintenance correction, not evidence that the statistical method is validated.
 - New test and ROOT integration workflows for the correction were queued at the last check; pass/fail is still pending.
+
+## Held-out refitted-background evaluation and draft protocol — 2026-10-28
+
+- Added `evaluate_refitted_background_false_positive_rate`, which generates separate calibration and held-out evaluation samples with a background refit in every pseudoexperiment, applies plus-one empirical upper-tail rank p-values with ties counted conservatively, and reports the rejection fraction, Wilson interval, and p-value resolution.
+- Added deterministic regression coverage for repeatability, the reported resolution, interval containment, and rejection of identical calibration/evaluation seeds. This remains a small toy test, not a power or coverage study.
+- Added `docs/refitted_background_null_calibration_protocol_draft_2026-10-28.md` to specify the estimand, procedure, assumptions, limitations, validation requirements, and stop conditions. It is explicitly a draft, not a preregistration.
+- Commits: `f6d785a8fce0472b02dc6df5429794b8fd2a5583` (evaluation function), `da19e98f65f5b35d44c7aeece354a06a1cc49290` (tests), `035a4a7aacf5f1ace9729c4546acbe7f988d1935` (draft protocol).
+- CI for the earlier commits exposed a duplicated test function (Ruff F811); it was removed in `2eda30ca237b8b76e3008c5284264e7c506fbdfd`. The ledger update itself is on `ede5b4881dd2f4c3d0ab730c35a11fd00d890eac`. The newest test/ROOT workflows must finish before reporting a pass.
