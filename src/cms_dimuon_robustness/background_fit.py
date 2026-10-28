@@ -78,6 +78,16 @@ def fit_log_polynomial_background(
     eta = design @ beta
     fitted = np.exp(eta)
     objective_value, gradient = objective(beta)
+    # The raw gradient can remain large at a legitimate constrained optimum.
+    # Report a box-constraint projected gradient as a separate KKT diagnostic:
+    # outward-pointing components at active bounds are zeroed, while inward-
+    # pointing components remain visible. This is diagnostic, not a guarantee
+    # that the optimizer found a global optimum.
+    projected_gradient = gradient.copy()
+    at_lower = beta <= -coefficient_bound + boundary_tolerance
+    at_upper = beta >= coefficient_bound - boundary_tolerance
+    projected_gradient[at_lower & (gradient > 0)] = 0.0
+    projected_gradient[at_upper & (gradient < 0)] = 0.0
     if (
         not result.success
         or not np.all(np.isfinite(beta))
@@ -93,6 +103,7 @@ def fit_log_polynomial_background(
         "polynomial_order": int(order),
         "negative_log_likelihood_without_constants": float(objective_value),
         "gradient_infinity_norm": float(np.max(np.abs(gradient))),
+        "projected_gradient_infinity_norm": float(np.max(np.abs(projected_gradient))),
         "coefficient_bound": coefficient_bound,
         "coefficient_boundary_tolerance": boundary_tolerance,
         "coefficient_boundary_indices": boundary_indices,
