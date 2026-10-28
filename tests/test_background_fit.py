@@ -80,3 +80,31 @@ def test_fit_reports_no_boundary_warning_for_interior_solution():
     assert result["coefficient_boundary_active"] is False
     assert result["coefficient_boundary_indices"] == []
     assert result["coefficient_boundary_warning"] is None
+
+
+def test_fit_reports_projected_gradient_at_active_upper_bound(monkeypatch):
+    from types import SimpleNamespace
+
+    import cms_dimuon_robustness.background_fit as background_fit
+
+    def fake_minimize(*args, **kwargs):
+        # With these large counts, the raw intercept gradient points outward
+        # from the upper bound; the projected KKT diagnostic should zero it.
+        return SimpleNamespace(
+            x=np.array([20.0, 0.0]), success=True, message="synthetic constrained fixture"
+        )
+
+    monkeypatch.setattr(background_fit, "minimize", fake_minimize)
+    result = fit_log_polynomial_background([10**10] * 4, order=1)
+
+    assert result["coefficient_boundary_active"] is True
+    assert result["gradient_infinity_norm"] > 1.0
+    assert result["projected_gradient_infinity_norm"] == 0.0
+
+
+def test_interior_fit_projected_gradient_matches_raw_gradient():
+    result = fit_log_polynomial_background(np.full(20, 12, dtype=int), order=0)
+    assert result["coefficient_boundary_active"] is False
+    assert np.isclose(
+        result["projected_gradient_infinity_norm"], result["gradient_infinity_norm"]
+    )
