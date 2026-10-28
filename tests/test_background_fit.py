@@ -52,3 +52,31 @@ def test_all_zero_spectrum_returns_finite_bounded_fit():
     assert np.all(np.isfinite(expected))
     assert np.all(expected > 0)
     assert np.allclose(expected, expected[0])
+
+
+def test_fit_reports_coefficients_at_optimizer_bounds(monkeypatch):
+    from types import SimpleNamespace
+
+    import cms_dimuon_robustness.background_fit as background_fit
+
+    def fake_minimize(*args, **kwargs):
+        # Deliberately emulate a nominally successful optimizer returning a
+        # coefficient at the hard upper bound; no expensive fit is needed.
+        return SimpleNamespace(
+            x=np.array([20.0, 0.0]), success=True, message="synthetic boundary fixture"
+        )
+
+    monkeypatch.setattr(background_fit, "minimize", fake_minimize)
+    result = fit_log_polynomial_background([2, 3, 4, 5], order=1)
+
+    assert result["optimizer_success"] is True
+    assert result["coefficient_boundary_active"] is True
+    assert result["coefficient_boundary_indices"] == [0]
+    assert "inspect fit stability" in result["coefficient_boundary_warning"]
+
+
+def test_fit_reports_no_boundary_warning_for_interior_solution():
+    result = fit_log_polynomial_background(np.full(20, 12, dtype=int), order=0)
+    assert result["coefficient_boundary_active"] is False
+    assert result["coefficient_boundary_indices"] == []
+    assert result["coefficient_boundary_warning"] is None
