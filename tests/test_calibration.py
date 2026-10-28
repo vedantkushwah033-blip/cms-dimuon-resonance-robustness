@@ -70,3 +70,75 @@ def test_fixed_background_null_simulation_rejects_invalid_configuration(
 
     with pytest.raises(ValueError):
         simulate_fixed_background_null(expected, widths, n_experiments, seed)
+
+
+
+def test_wilson_interval_is_non_degenerate_at_zero_rejections():
+    from cms_dimuon_robustness.calibration import wilson_interval
+
+    interval = wilson_interval(0, 100)
+    assert interval["lower"] == 0.0
+    assert 0.0 < interval["upper"] < 0.1
+
+
+def test_wilson_interval_validates_counts():
+    from cms_dimuon_robustness.calibration import wilson_interval
+
+    with pytest.raises(ValueError):
+        wilson_interval(11, 10)
+    with pytest.raises(ValueError):
+        wilson_interval(0, 0)
+
+
+def test_held_out_false_positive_evaluation_is_reproducible_and_reports_resolution():
+    from cms_dimuon_robustness.calibration import evaluate_fixed_background_false_positive_rate
+
+    kwargs = dict(
+        expected_background=[4.0, 5.0, 4.0],
+        window_widths=[1, 2],
+        n_calibration=99,
+        n_evaluation=120,
+        alpha=0.05,
+        seed_calibration=101,
+        seed_evaluation=202,
+    )
+    first = evaluate_fixed_background_false_positive_rate(**kwargs)
+    second = evaluate_fixed_background_false_positive_rate(**kwargs)
+    assert first == second
+    assert first["n_calibration"] == 99
+    assert first["n_evaluation"] == 120
+    assert first["calibration_minimum_resolvable_pvalue"] == 0.01
+    assert first["calibration_resolution_allows_alpha_rejection"] is True
+    assert 0 <= first["rejections"] <= 120
+    assert 0 <= first["false_positive_rate"] <= 1
+    assert 0 <= first["wilson_95_interval"]["lower"] <= first["false_positive_rate"]
+    assert first["false_positive_rate"] <= first["wilson_95_interval"]["upper"] <= 1
+    assert "not CMS validation" in first["interpretation"]
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"n_calibration": 0},
+        {"n_evaluation": 0},
+        {"alpha": 0.0},
+        {"alpha": 1.0},
+        {"seed_calibration": 4, "seed_evaluation": 4},
+        {"seed_calibration": -1},
+    ],
+)
+def test_held_out_false_positive_evaluation_rejects_invalid_configuration(kwargs):
+    from cms_dimuon_robustness.calibration import evaluate_fixed_background_false_positive_rate
+
+    parameters = dict(
+        expected_background=[4.0, 5.0],
+        window_widths=[1],
+        n_calibration=20,
+        n_evaluation=20,
+        alpha=0.05,
+        seed_calibration=10,
+        seed_evaluation=11,
+    )
+    parameters.update(kwargs)
+    with pytest.raises(ValueError):
+        evaluate_fixed_background_false_positive_rate(**parameters)
