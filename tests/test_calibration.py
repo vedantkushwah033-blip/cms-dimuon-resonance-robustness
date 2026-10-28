@@ -316,3 +316,71 @@ def test_empirical_rank_test_resolution_rejects_invalid_inputs(n_calibration, al
 
     with pytest.raises(ValueError):
         empirical_rank_test_resolution(n_calibration, alpha)
+
+
+
+def test_refitted_null_reports_indices_of_boundary_active_fits(monkeypatch):
+    import cms_dimuon_robustness.background_fit as background_fit
+    from cms_dimuon_robustness.calibration import simulate_refitted_background_null
+
+    calls = {"n": 0}
+
+    def fake_fit(counts, order=1):
+        index = calls["n"]
+        calls["n"] += 1
+        return {
+            "expected_counts": np.ones(len(counts), dtype=float),
+            "coefficient_boundary_active": index in {1, 3},
+        }
+
+    monkeypatch.setattr(background_fit, "fit_log_polynomial_background", fake_fit)
+    result = simulate_refitted_background_null(
+        [4.0, 5.0, 6.0, 7.0],
+        [1, 2],
+        n_experiments=5,
+        seed=20261028,
+        background_order=1,
+    )
+
+    assert result["n_boundary_fits"] == 2
+    assert result["boundary_fit_rate"] == pytest.approx(0.4)
+    assert result["boundary_fit_indices"] == [1, 3]
+
+
+def test_refitted_evaluator_reports_boundary_rates_for_both_samples(monkeypatch):
+    import cms_dimuon_robustness.calibration as calibration
+
+    outputs = iter(
+        [
+            {
+                "null_statistics": [0.0, 1.0, 2.0, 3.0],
+                "n_boundary_fits": 2,
+                "boundary_fit_rate": 0.5,
+            },
+            {
+                "null_statistics": [0.0, 0.0, 1.0, 2.0],
+                "n_boundary_fits": 1,
+                "boundary_fit_rate": 0.25,
+            },
+        ]
+    )
+
+    def fake_simulator(*args, **kwargs):
+        return next(outputs)
+
+    monkeypatch.setattr(calibration, "simulate_refitted_background_null", fake_simulator)
+    result = calibration.evaluate_refitted_background_false_positive_rate(
+        null_generating_means=[3.0, 4.0, 5.0, 6.0],
+        window_widths=[1],
+        n_calibration=4,
+        n_evaluation=4,
+        alpha=0.5,
+        seed_calibration=101,
+        seed_evaluation=202,
+        background_order=1,
+    )
+
+    assert result["calibration_n_boundary_fits"] == 2
+    assert result["calibration_boundary_fit_rate"] == 0.5
+    assert result["evaluation_n_boundary_fits"] == 1
+    assert result["evaluation_boundary_fit_rate"] == 0.25
