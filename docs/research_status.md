@@ -62,3 +62,11 @@
 - Added `docs/synthetic_null_generators_2026-10-28.md` describing their equations and emphasizing that they are mathematical toys, not CMS background models. These utilities do not run simulations or select confirmatory parameter values.
 - Commits: `a586fb3ee0c52a4fc9067286ac1f8f98a211b7aa` (generator), `ff833fb83998043fb9bdf63be8374b7eaf22b97f` (initial tests), `1ecfd9058135ccfaaa0f52b3bd58825c14b726f3` (documentation), `ec88078f36ea7f1024c0dc8c034399c947363249` (expanded edge-case tests).
 - **Latest code changes are not yet CI-verified.** Wait for the workflow triggered by the latest commit and inspect its final conclusions before claiming the new module passes. Confirmatory simulation remains NO-GO pending independent review and frozen scenario values.
+
+
+## Scenario-level calibration orchestration — 2026-10-28
+- Added `src/cms_dimuon_robustness/scenario_evaluation.py`, a reusable runner that accepts explicit scenario mean vectors and a common scan design, evaluates each with the held-out refitted-background evaluator, and returns per-scenario summaries plus the design metadata.
+- Enforced explicit scenario names, positive finite means, exact scenario/seed-map agreement, distinct calibration/evaluation seeds, and seed uniqueness across all scenario roles. Added unit tests using a mocked evaluator for orchestration and validation failures.
+- Added `docs/scenario_evaluation_runner_2026-10-28.md`. The runner does not choose parameters, launch any simulation now, or assert CMS validity. No confirmatory experiment was run.
+- Commits: `21be811f400c350bccbbb8d48823cea712316664` (runner), `90c935ad5e0fc113d0756c8013fd99e23bef5cb0` (tests), `0e6f4459be1e96e4c3a60dcd71a4ba04b40ac0db` (documentation).
+- Latest workflows for the prior null-generator commit were still in progress at last poll; new scenario-runner changes are also awaiting CI. Do not claim the latest code is verified until the exact latest workflow runs finish.
