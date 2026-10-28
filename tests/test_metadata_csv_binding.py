@@ -165,6 +165,33 @@ def test_cli_binds_csvs_and_fails_on_stale_csv(tmp_path):
     assert _checks(report)["candidate_csv_total_matches_metadata_in_range_count"] is True
 
 
+def test_cli_refuses_to_overwrite_histogram_csv_with_report(tmp_path):
+    cand, ref = candidate_metadata(), reference_metadata()
+    (tmp_path / "c.json").write_text(json.dumps(cand), encoding="utf-8")
+    (tmp_path / "r.json").write_text(json.dumps(ref), encoding="utf-8")
+    candidate_csv = tmp_path / "c.csv"
+    reference_csv = tmp_path / "r.csv"
+    write_csv(candidate_csv, [20, 7])
+    write_csv(reference_csv, [20, 7])
+    original = candidate_csv.read_bytes()
+
+    result = subprocess.run(
+        [
+            sys.executable, str(COMPARATOR),
+            "--candidate", str(tmp_path / "c.json"),
+            "--reference", str(tmp_path / "r.json"),
+            "--candidate-csv", str(candidate_csv),
+            "--reference-csv", str(reference_csv),
+            "--output", str(candidate_csv),
+        ],
+        capture_output=True, text=True, check=False,
+    )
+
+    assert result.returncode == 2
+    assert "refusing to overwrite an input file" in result.stderr
+    assert candidate_csv.read_bytes() == original
+
+
 def test_cli_requires_csv_arguments_as_a_pair(tmp_path):
     cand, ref = candidate_metadata(), reference_metadata()
     (tmp_path / "c.json").write_text(json.dumps(cand), encoding="utf-8")
