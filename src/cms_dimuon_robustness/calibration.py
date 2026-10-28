@@ -1,6 +1,8 @@
 """Finite-sample empirical calibration utilities."""
 from __future__ import annotations
 
+import math
+
 import numpy as np
 from numpy.typing import ArrayLike
 
@@ -76,8 +78,9 @@ def simulate_fixed_background_null(
     }
 
 
-
-def wilson_interval(successes: int, trials: int, confidence_z: float = 1.959963984540054) -> dict[str, float]:
+def wilson_interval(
+    successes: int, trials: int, confidence_z: float = 1.959963984540054
+) -> dict[str, float]:
     """Return a two-sided Wilson score interval for a binomial proportion.
 
     This is a normal-score interval, not an exact Clopper-Pearson interval.
@@ -90,6 +93,8 @@ def wilson_interval(successes: int, trials: int, confidence_z: float = 1.9599639
         raise ValueError("trials must be a positive integer")
     if trials <= 0 or successes < 0 or successes > trials:
         raise ValueError("require trials > 0 and 0 <= successes <= trials")
+    if isinstance(confidence_z, bool) or not isinstance(confidence_z, (int, float, np.integer, np.floating)):
+        raise ValueError("confidence_z must be a finite positive number")
     if not np.isfinite(confidence_z) or confidence_z <= 0:
         raise ValueError("confidence_z must be finite and positive")
 
@@ -102,10 +107,17 @@ def wilson_interval(successes: int, trials: int, confidence_z: float = 1.9599639
         * np.sqrt(p_hat * (1 - p_hat) / trials + z2 / (4 * trials**2))
         / denominator
     )
+    # The mathematical Wilson endpoints are exactly 0 or 1 at the
+    # corresponding all-failure/all-success boundary. Clamp explicitly to
+    # prevent floating-point roundoff from leaking tiny positive/negative
+    # values through those known endpoints.
+    lower = 0.0 if successes == 0 else max(0.0, center - half_width)
+    upper = 1.0 if successes == trials else min(1.0, center + half_width)
+    confidence_level = math.erf(float(confidence_z) / math.sqrt(2))
     return {
-        "lower": float(max(0.0, center - half_width)),
-        "upper": float(min(1.0, center + half_width)),
-        "confidence_level_approx": 0.95 if abs(confidence_z - 1.959963984540054) < 1e-12 else float("nan"),
+        "lower": float(lower),
+        "upper": float(upper),
+        "confidence_level_approx": float(confidence_level),
     }
 
 
@@ -130,6 +142,8 @@ def evaluate_fixed_background_false_positive_rate(
     for value, name in ((n_calibration, "n_calibration"), (n_evaluation, "n_evaluation")):
         if isinstance(value, bool) or not isinstance(value, (int, np.integer)) or value <= 0:
             raise ValueError(f"{name} must be a positive integer")
+    if isinstance(alpha, bool) or not isinstance(alpha, (int, float, np.integer, np.floating)):
+        raise ValueError("alpha must be a finite number strictly between 0 and 1")
     if not np.isfinite(alpha) or not 0 < alpha < 1:
         raise ValueError("alpha must be finite and strictly between 0 and 1")
     for seed, name in ((seed_calibration, "seed_calibration"), (seed_evaluation, "seed_evaluation")):
