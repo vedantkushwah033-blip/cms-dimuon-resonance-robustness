@@ -1,3 +1,4 @@
+import hashlib
 import json
 import subprocess
 import sys
@@ -24,7 +25,10 @@ def _checks(report):
 def test_csv_summary_uses_exact_integers(tmp_path):
     p = tmp_path / "h.csv"
     write_csv(p, [2**60 + 1, 3])
-    assert histogram_csv_summary(p) == {"bins": 2, "total": 2**60 + 4}
+    summary = histogram_csv_summary(p)
+    assert summary["bins"] == 2
+    assert summary["total"] == 2**60 + 4
+    assert summary["sha256"] == hashlib.sha256(p.read_bytes()).hexdigest()
 
 
 @pytest.mark.parametrize("bad", ["1.5", "-1", "abc", ""])
@@ -54,6 +58,24 @@ def test_csv_totals_bound_to_metadata_pass_and_fail():
                          candidate_csv={"bins": 2, "total": cand["pairs_in_histogram_range"], "sha256": "a" * 64},
                          reference_csv={"bins": 3, "total": ref["histogram_regular_bin_total"], "sha256": "b" * 64})
     assert _checks(wrong_bins)["candidate_csv_bin_count_matches_metadata"] is False
+
+
+def test_csv_sha256_must_match_metadata_even_when_summary_matches(tmp_path):
+    cand, ref = candidate_metadata(), reference_metadata()
+    cand["bins"] = ref["bins"] = 2
+    write_csv(tmp_path / "c.csv", [20, 7])
+    write_csv(tmp_path / "r.csv", [20, 7])
+    cand["histogram_csv_sha256"] = "0" * 64
+    ref["histogram_csv_sha256"] = hashlib.sha256((tmp_path / "r.csv").read_bytes()).hexdigest()
+    report = compare(
+        cand,
+        ref,
+        candidate_csv=histogram_csv_summary(tmp_path / "c.csv"),
+        reference_csv=histogram_csv_summary(tmp_path / "r.csv"),
+    )
+    assert report["comparison_passed"] is False
+    assert _checks(report)["candidate_csv_sha256_matches_metadata"] is False
+    assert _checks(report)["reference_csv_sha256_matches_metadata"] is True
 
 
 def test_event_prefix_must_equal_expected_in_both_outputs():
