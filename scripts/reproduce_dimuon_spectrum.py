@@ -230,6 +230,7 @@ def main() -> None:
         "input_is_local_file": is_local_file,
         "input_bytes": input_bytes,
         "input_sha256": input_sha256,
+        "histogram_csv_sha256": sha256_file(csv_path),
         "tree": args.tree,
         "tree_entries_available": tree_entries,
         "branch_types": branch_types,
