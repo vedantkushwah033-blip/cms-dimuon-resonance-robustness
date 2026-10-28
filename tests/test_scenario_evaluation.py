@@ -26,6 +26,7 @@ def test_scenario_runner_returns_declared_scenarios_in_input_order(monkeypatch):
     )
     assert [row["scenario"] for row in result["results"]] == ["matched", "shoulder"]
     assert result["design"]["scenario_count"] == 2
+    assert result["design"]["n_bins"] == 8
     assert result["design"]["interpretation"].startswith("per-scenario fixed toy nulls")
     assert calls[0]["seed_calibration"] == 10
     assert calls[1]["seed_evaluation"] == 13
@@ -44,6 +45,7 @@ def test_scenario_runner_returns_declared_scenarios_in_input_order(monkeypatch):
         ({"a": [0.0, 1.0]}, {"a": (1, 2)}),
         ({"a": []}, {"a": (1, 2)}),
         ({"a": [1.0]}, {"a": (1, 2), "b": (2, 3)}),
+        ({"a": [1.0], "b": [2.0, 3.0]}, {"a": (1, 2), "b": (3, 4)}),
     ],
 )
 def test_scenario_runner_rejects_invalid_means_or_seed_design(means, seeds):
