@@ -34,7 +34,12 @@ def exact_nonnegative_int(metadata: dict[str, Any], key: str, source: str) -> in
     return value
 
 
-def compare(candidate: dict[str, Any], reference: dict[str, Any]) -> dict[str, Any]:
+def compare(
+    candidate: dict[str, Any],
+    reference: dict[str, Any],
+    expected_sha256: str | None = None,
+    expected_bytes: int | None = None,
+) -> dict[str, Any]:
     """Return explicit checks for cut flow, configuration, and mass accounting."""
     checks: list[dict[str, Any]] = []
 
@@ -93,6 +98,48 @@ def compare(candidate: dict[str, Any], reference: dict[str, Any]) -> dict[str, A
         "reference": reference_bytes,
         "passed": bool(candidate_bytes_valid and reference_bytes_valid and candidate_bytes == reference_bytes),
     })
+
+    if expected_sha256 is not None:
+        expected_sha_valid = isinstance(expected_sha256, str) and sha_pattern.fullmatch(expected_sha256) is not None
+        checks.append({
+            "check": "expected_manifest_sha256_present_and_valid",
+            "candidate": expected_sha256,
+            "reference": "64 hexadecimal SHA-256 characters required",
+            "passed": expected_sha_valid,
+        })
+        checks.append({
+            "check": "candidate_sha256_matches_manifest",
+            "candidate": candidate_sha.lower() if candidate_sha_valid else candidate_sha,
+            "reference": expected_sha256.lower() if expected_sha_valid else expected_sha256,
+            "passed": bool(expected_sha_valid and candidate_sha_valid and candidate_sha.lower() == expected_sha256.lower()),
+        })
+        checks.append({
+            "check": "reference_sha256_matches_manifest",
+            "candidate": reference_sha.lower() if reference_sha_valid else reference_sha,
+            "reference": expected_sha256.lower() if expected_sha_valid else expected_sha256,
+            "passed": bool(expected_sha_valid and reference_sha_valid and reference_sha.lower() == expected_sha256.lower()),
+        })
+
+    if expected_bytes is not None:
+        expected_bytes_valid = isinstance(expected_bytes, int) and not isinstance(expected_bytes, bool) and expected_bytes > 0
+        checks.append({
+            "check": "expected_manifest_input_bytes_present_and_valid",
+            "candidate": expected_bytes,
+            "reference": "positive integer byte count required",
+            "passed": expected_bytes_valid,
+        })
+        checks.append({
+            "check": "candidate_input_bytes_match_manifest",
+            "candidate": candidate_bytes,
+            "reference": expected_bytes,
+            "passed": bool(expected_bytes_valid and candidate_bytes_valid and candidate_bytes == expected_bytes),
+        })
+        checks.append({
+            "check": "reference_input_bytes_match_manifest",
+            "candidate": reference_bytes,
+            "reference": expected_bytes,
+            "passed": bool(expected_bytes_valid and reference_bytes_valid and reference_bytes == expected_bytes),
+        })
 
     mappings = [
         ("events_read_vs_events_total", "events_read", "events_total"),
@@ -184,7 +231,10 @@ def compare(candidate: dict[str, Any], reference: dict[str, Any]) -> dict[str, A
     provenance_checks = [
         item for item in checks
         if item["check"].startswith((
-            "candidate_input_", "reference_input_", "input_sha256_", "input_byte_count_"
+            "candidate_input_", "reference_input_", "input_sha256_", "input_byte_count_",
+            "expected_manifest_", "candidate_sha256_matches_manifest",
+            "reference_sha256_matches_manifest", "candidate_input_bytes_match_manifest",
+            "reference_input_bytes_match_manifest"
         ))
     ]
     non_provenance_checks = [item for item in checks if item not in provenance_checks]
@@ -212,6 +262,8 @@ def main() -> int:
     parser.add_argument("--candidate", required=True, type=Path)
     parser.add_argument("--reference", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument("--expected-sha256", help="Expected SHA-256 from the downloaded-input manifest")
+    parser.add_argument("--expected-bytes", type=int, help="Expected input byte count from the downloaded-input manifest")
     args = parser.parse_args()
     output_path = args.output.resolve()
     protected_inputs = {
@@ -224,7 +276,12 @@ def main() -> int:
             "refusing to overwrite an input metadata file"
         )
     try:
-        report = compare(load_json(args.candidate), load_json(args.reference))
+        report = compare(
+            load_json(args.candidate),
+            load_json(args.reference),
+            expected_sha256=args.expected_sha256,
+            expected_bytes=args.expected_bytes,
+        )
     except (OSError, json.JSONDecodeError, ValueError) as exc:
         report = {
             "cutflow_and_configuration_agree": False,
