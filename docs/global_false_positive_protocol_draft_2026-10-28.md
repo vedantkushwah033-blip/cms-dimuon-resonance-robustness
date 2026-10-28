@@ -121,6 +121,18 @@ No large or costly workflow should be dispatched until its exact input, resource
 
 A calibrated simulation result would support a statement about the tested procedures under the tested generators. It would not, by itself, prove the true background of CMS data belongs to those generators, establish trigger validity, claim a resonance, or establish publication novelty. Any publication-level claim requires expert review and a documented comparison with prior bump-hunting literature.
 
+## Machine-readable fail-closed gate
+
+The draft configuration lives at `configs/confirmatory_global_calibration_protocol.yaml`. It intentionally contains unresolved fields and is marked `status: draft`; it must not be used to start confirmatory simulations.
+
+Before a future confirmatory run, validate the reviewed configuration with:
+
+```bash
+python scripts/validate_confirmatory_protocol.py configs/confirmatory_global_calibration_protocol.yaml
+```
+
+The validator must exit with status 2 while the protocol or required scientific gates remain incomplete. It checks structural completeness, non-overlapping development/calibration/held-out generator identifiers, declared failure handling, independent random streams, and explicit gate fields. A structural pass is only a checklist result; it does not prove scientific validity, novelty, physical realism, or authorization outside the recorded gate fields. The validator is covered by `tests/test_protocol_validator.py` and the Python CI workflow.
+
 ## Pre-run checklist
 
 - [ ] Specify and justify each background generator and parameter range.
