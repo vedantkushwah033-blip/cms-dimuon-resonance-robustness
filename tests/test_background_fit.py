@@ -109,3 +109,41 @@ def test_interior_fit_projected_gradient_matches_raw_gradient():
     assert np.isclose(
         result["projected_gradient_infinity_norm"], result["gradient_infinity_norm"]
     )
+
+
+@pytest.mark.parametrize(
+    "coefficient,counts,expect_projected_gradient_zero",
+    [
+        # At an upper bound, a positive gradient points into the feasible set
+        # and must remain visible: this is not KKT-stationary.
+        (20.0, [0, 0, 0, 0], False),
+        # At a lower bound, a negative gradient points out of the feasible set
+        # and should be zeroed in the projected-gradient diagnostic.
+        (-20.0, [10**10, 10**10, 10**10, 10**10], True),
+        # At a lower bound, a positive gradient points inward and must remain.
+        (-20.0, [0, 0, 0, 0], False),
+    ],
+)
+def test_projected_gradient_respects_bound_direction(
+    monkeypatch, coefficient, counts, expect_projected_gradient_zero
+):
+    from types import SimpleNamespace
+
+    import cms_dimuon_robustness.background_fit as background_fit
+
+    def fake_minimize(*args, **kwargs):
+        return SimpleNamespace(
+            x=np.array([coefficient, 0.0]),
+            success=True,
+            message="synthetic bound-direction fixture",
+        )
+
+    monkeypatch.setattr(background_fit, "minimize", fake_minimize)
+    result = fit_log_polynomial_background(counts, order=1)
+
+    assert result["coefficient_boundary_active"] is True
+    if expect_projected_gradient_zero:
+        # The slope gradient may retain a tiny floating-point residual.
+        assert result["projected_gradient_infinity_norm"] < 1e-4
+    else:
+        assert result["projected_gradient_infinity_norm"] > 1.0
