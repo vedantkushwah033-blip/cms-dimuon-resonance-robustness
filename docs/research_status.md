@@ -70,3 +70,10 @@
 - Added `docs/scenario_evaluation_runner_2026-10-28.md`. The runner does not choose parameters, launch any simulation now, or assert CMS validity. No confirmatory experiment was run.
 - Commits: `21be811f400c350bccbbb8d48823cea712316664` (runner), `90c935ad5e0fc113d0756c8013fd99e23bef5cb0` (tests), `0e6f4459be1e96e4c3a60dcd71a4ba04b40ac0db` (documentation).
 - Latest workflows for the prior null-generator commit were still in progress at last poll; new scenario-runner changes are also awaiting CI. Do not claim the latest code is verified until the exact latest workflow runs finish.
+
+
+## CI follow-up — 2026-10-28
+- Inspected scenario-runner workflow `40732582407`: pytest and compileall passed on Python 3.11, but Ruff failed because `tests/test_scenario_evaluation.py` imported unused NumPy; Python 3.10/3.12 jobs were cancelled after the matrix stopped on that failure. This is a lint issue, not a failing test assertion.
+- Removed the unused import and strengthened orchestration assertions in commit `8fea8256d630bef7f53f866f784dd92c031732fa`. The workflow triggered by this repair must finish before declaring the scenario-runner change CI-green.
+- ROOT integration workflow `40732582349` passed, including the synthetic ROOT exporter test. This checks the ROOT pipeline on synthetic data only, not the real CMS dataset or reference-spectrum parity.
+- Confirmatory simulation remains **NO-GO**; PR #6 remains unmerged.
