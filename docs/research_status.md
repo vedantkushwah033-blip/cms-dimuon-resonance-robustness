@@ -421,3 +421,11 @@ The revised bounded baseline/parity workflow has not run. A dispatch-path audit 
 - Test added in commit `be54732546517c97e34e98c04c7aba77ca6bdc07`, then corrected to call the actual `scan_poisson_excess` API in commit `ecb6a083fde25a428ba63a46586cd24dac9557a3`.
 - The newest workflow must finish before claiming the integration tests pass. Existing queued/in-progress workflows are not evidence of success.
 - Important limitation: the current scan consumes the same fitted expected counts used by residual diagnostics, but the observed scan statistic is not calibrated under this fitted-background procedure. Do not interpret its value as a p-value or discovery significance.
+
+## Refitted-background null toy generator — 2026-10-28
+
+- Added `simulate_refitted_background_null` in `src/cms_dimuon_robustness/calibration.py`. Each independent Poisson pseudoexperiment is generated from an explicitly supplied fixed null mean vector, refit with the same fixed-order log-polynomial fitter, and scanned against its own fitted expectation. Failed fits are not silently dropped.
+- Added deterministic-seed reproducibility and configuration-validation tests in `tests/test_calibration.py`.
+- This is an important step toward calibrating the statistic after background refitting, but it is **not yet a complete inference pipeline**: the null-generating mean vector is assumed, background-model misspecification and order selection are not handled, and no CMS data validation is implied. The observed spectrum must be processed with the same fit, scan, and failure policy; empirical calibration/evaluation must remain independent and predeclared.
+- Commits: `599dbc3487194a71ab0b8932d6a7f3691521bbe5` (generator), `7fb13938fec488ebc5b45e4f0b7cc25aeca34330` (tests).
+- CI investigation found a failed run on the earlier `be547325...` commit because its first version imported nonexistent `scan_for_excess`; that was corrected in `ecb6a083...`. Do not conflate that earlier failure with results for the corrected or newest commits; newest CI remains pending until its final conclusions are reported.
