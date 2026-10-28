@@ -17,7 +17,7 @@ The target is a toy-model operating characteristic, not a discovery claim and no
 5. Repeat steps 2–4 with a separate random seed for the held-out evaluation sample.
 6. For each held-out maximum statistic T, calculate p = (1 + count(T_calibration >= T)) / (M + 1). Ties count in the upper tail.
 7. Reject when p <= alpha; report the observed rejection fraction and its Wilson score interval. The Wilson interval summarizes binomial Monte Carlo uncertainty; it is not an exact interval.
-8. Report the calibration resolution 1/(M+1). If this exceeds alpha, the procedure cannot reject at the requested level.
+8. Report the calibration resolution 1/(M+1). If this exceeds alpha, the procedure cannot reject at the requested level. Also report the discrete rejection grid: under iid continuous null statistics, the unconditional rejection probability of the plus-one rank rule is floor(alpha * (M + 1)) / (M + 1); ties may make it more conservative. This is an unconditional rank property, not the conditional rejection rate for one fixed calibration sample.
 
 ## Assumptions and limits
 
@@ -48,3 +48,7 @@ Do not report a calibrated discovery p-value if the observed and pseudoexperimen
 - evaluate_refitted_background_false_positive_rate: compares independent calibration and held-out toy samples and reports the rejection fraction.
 
 Both are research prototypes. CI success, once established, demonstrates software checks—not scientific validity.
+
+## Discrete rank resolution diagnostic
+
+The code now exposes `empirical_rank_test_resolution(n_calibration, alpha)`. It reports the smallest attainable p-value, the maximum number of calibration statistics that may equal or exceed an evaluation statistic while still allowing rejection, and the nominal unconditional rejection probability on the rank grid under an iid continuous null. For example, with `M=100` and `alpha=0.05`, the grid permits rejection only for at most four calibration exceedances, giving unconditional rank-grid size `5/101 ≈ 0.0495`. This diagnostic does not measure conditional size for a fixed calibration sample, nor does it address whether the null scenario is scientifically adequate. The helper is covered by unit tests; its new commits still require CI verification.
