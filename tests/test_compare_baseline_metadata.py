@@ -9,6 +9,8 @@ COMPARATOR = REPO_ROOT / "scripts" / "compare_baseline_metadata.py"
 
 def candidate_metadata():
     return {
+        "input_sha256": "a".repeat(64),
+        "input_bytes": 123456,
         "events_read": 100,
         "events_selected": 40,
         "events_with_opposite_charge_pair": 31,
@@ -26,6 +28,8 @@ def candidate_metadata():
 
 def reference_metadata():
     return {
+        "input_sha256": "a".repeat(64),
+        "input_bytes": 123456,
         "events_total": 100,
         "events_exactly_two_muons": 40,
         "events_opposite_sign": 31,
@@ -75,6 +79,65 @@ def test_matching_cutflow_configuration_and_mass_accounting_pass(tmp_path):
     assert report["cutflow_and_configuration_agree"] is True
     assert report["failed_check_count"] == 0
     assert report_path.read_bytes().endswith(b"\n")
+
+
+def test_mismatched_input_hash_fails_even_when_cutflow_matches(tmp_path):
+    reference = reference_metadata()
+    reference["input_sha256"] = "b" * 64
+    result, report_path = run_comparison(
+        tmp_path, candidate_metadata(), reference
+    )
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+
+    assert result.returncode == 2
+    assert report["input_provenance_agrees"] is False
+    failed = {item["check"] for item in report["checks"] if not item["passed"]}
+    assert "input_sha256_matches" in failed
+
+
+def test_missing_or_malformed_input_hash_fails(tmp_path):
+    candidate = candidate_metadata()
+    candidate.pop("input_sha256")
+    reference = reference_metadata()
+    reference["input_sha256"] = "not-a-sha256"
+    result, report_path = run_comparison(tmp_path, candidate, reference)
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+
+    assert result.returncode == 2
+    assert report["input_provenance_agrees"] is False
+    failed = {item["check"] for item in report["checks"] if not item["passed"]}
+    assert "candidate_input_sha256_present_and_valid" in failed
+    assert "reference_input_sha256_present_and_valid" in failed
+    assert "input_sha256_matches" in failed
+
+
+def test_mismatched_input_byte_count_fails(tmp_path):
+    reference = reference_metadata()
+    reference["input_bytes"] += 1
+    result, report_path = run_comparison(
+        tmp_path, candidate_metadata(), reference
+    )
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+
+    assert result.returncode == 2
+    assert report["input_provenance_agrees"] is False
+    failed = {item["check"] for item in report["checks"] if not item["passed"]}
+    assert "input_byte_count_matches" in failed
+
+
+def test_missing_or_invalid_input_byte_count_fails(tmp_path):
+    candidate = candidate_metadata()
+    candidate["input_bytes"] = True
+    reference = reference_metadata()
+    reference.pop("input_bytes")
+    result, report_path = run_comparison(tmp_path, candidate, reference)
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+
+    assert result.returncode == 2
+    assert report["input_provenance_agrees"] is False
+    failed = {item["check"] for item in report["checks"] if not item["passed"]}
+    assert "candidate_input_bytes_present_and_valid" in failed
+    assert "reference_input_bytes_present_and_valid" in failed
 
 
 def test_cutflow_mismatch_fails_with_machine_readable_report(tmp_path):
