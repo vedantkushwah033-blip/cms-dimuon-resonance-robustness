@@ -213,6 +213,9 @@ def test_refitted_background_null_simulation_is_reproducible():
     assert first["background_order"] == 1
     assert len(first["null_statistics"]) == 12
     assert all(value >= 0 for value in first["null_statistics"])
+    assert 0 <= first["n_boundary_fits"] <= 12
+    assert first["boundary_fit_rate"] == first["n_boundary_fits"] / 12
+    assert len(first["boundary_fit_indices"]) == first["n_boundary_fits"]
     assert "not CMS validation" in first["interpretation"]
 
 
@@ -257,6 +260,10 @@ def test_refitted_background_held_out_false_positive_evaluation_is_reproducible(
     assert first["n_calibration"] == 19
     assert first["n_evaluation"] == 25
     assert first["background_order"] == 1
+    assert 0 <= first["calibration_n_boundary_fits"] <= 19
+    assert 0 <= first["evaluation_n_boundary_fits"] <= 25
+    assert first["calibration_boundary_fit_rate"] == first["calibration_n_boundary_fits"] / 19
+    assert first["evaluation_boundary_fit_rate"] == first["evaluation_n_boundary_fits"] / 25
     assert first["calibration_minimum_resolvable_pvalue"] == pytest.approx(0.05)
     assert first["calibration_resolution_allows_alpha_rejection"] is True
     assert 0 <= first["false_positive_rate"] <= 1
