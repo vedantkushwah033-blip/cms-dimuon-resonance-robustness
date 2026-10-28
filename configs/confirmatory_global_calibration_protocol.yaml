@@ -1,0 +1,60 @@
+# Confirmatory global-calibration protocol — machine-readable draft
+# This file is intentionally NOT executable as a confirmatory design.
+# Replace every null / placeholder only after literature review and protocol review.
+protocol_version: "0.1-draft"
+status: "draft"
+research_question: "How does the complete declared dimuon bump-hunt procedure control its global false-positive rate under prespecified background-generating scenarios, including held-out misspecification?"
+estimand:
+  name: "global_null_rejection_probability"
+  definition: "P_H0(T_max >= c), with the entire fitting, model-selection, and mass-scan procedure repeated per pseudo-experiment"
+  nominal_alpha: null
+analysis:
+  mass_range_GeV: null
+  histogram_bins: null
+  local_test_statistic: null
+  global_statistic: null
+  scan_windows: null
+  likelihood: null
+  nuisance_parameter_policy: null
+  fit_range_policy: null
+background_models:
+  - id: "UNRESOLVED"
+    functional_form: null
+    parameter_bounds: null
+    role: null
+model_selection:
+  enabled: null
+  algorithm: null
+  tie_breaking: null
+generators:
+  development:
+    - "UNRESOLVED"
+  calibration:
+    - "UNRESOLVED"
+  held_out_evaluation:
+    - "UNRESOLVED"
+  held_out_outside_candidate_family: null
+calibration:
+  threshold_method: null
+  quantile_convention: null
+  calibration_replicates: null
+  evaluation_replicates_per_scenario: null
+  confidence_interval: "two-sided Clopper-Pearson exact binomial interval"
+  primary_comparison: null
+failure_policy:
+  definition: null
+  primary_handling: null
+  sensitivity_analysis: null
+randomness:
+  seed_strategy: null
+  independent_streams_for_partitions: null
+artifacts:
+  per_replicate_schema: null
+  environment_lock: null
+  manifest: null
+  output_checksums: null
+gates:
+  real_data_baseline_parity: "not established"
+  literature_novelty_review: "incomplete"
+  expert_protocol_review: "not completed"
+  confirmatory_execution_authorized: false
