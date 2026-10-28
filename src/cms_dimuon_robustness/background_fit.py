@@ -66,6 +66,15 @@ def fit_log_polynomial_background(
         options={"maxiter": int(max_iterations), "ftol": 1e-12, "gtol": 1e-8},
     )
     beta = np.asarray(result.x, dtype=float)
+    coefficient_bound = 20.0
+    # Treat coefficients within this absolute tolerance of a hard optimizer
+    # bound as boundary-active; this is a diagnostic, not a fit-failure rule.
+    boundary_tolerance = 1e-6
+    boundary_indices = [
+        int(i)
+        for i, value in enumerate(beta)
+        if abs(abs(float(value)) - coefficient_bound) <= boundary_tolerance
+    ]
     eta = design @ beta
     fitted = np.exp(eta)
     objective_value, gradient = objective(beta)
@@ -84,6 +93,16 @@ def fit_log_polynomial_background(
         "polynomial_order": int(order),
         "negative_log_likelihood_without_constants": float(objective_value),
         "gradient_infinity_norm": float(np.max(np.abs(gradient))),
+        "coefficient_bound": coefficient_bound,
+        "coefficient_boundary_tolerance": boundary_tolerance,
+        "coefficient_boundary_indices": boundary_indices,
+        "coefficient_boundary_active": bool(boundary_indices),
+        "coefficient_boundary_warning": (
+            "one or more fitted coefficients are at the optimizer bound; "
+            "inspect fit stability before interpreting this fit"
+            if boundary_indices
+            else None
+        ),
         "optimizer_success": True,
         "optimizer_message": str(result.message),
         "n_bins": int(y.size),
