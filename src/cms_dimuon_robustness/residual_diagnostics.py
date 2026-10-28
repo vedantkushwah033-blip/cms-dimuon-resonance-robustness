@@ -21,8 +21,11 @@ def poisson_fit_residual_diagnostics(
     are descriptive only: comparing either with a naive chi-square reference
     distribution is not justified automatically after fitting or selecting a model.
     """
-    observed = np.asarray(observed_counts)
-    expected = np.asarray(expected_counts, dtype=float)
+    try:
+        observed = np.asarray(observed_counts, dtype=float)
+        expected = np.asarray(expected_counts, dtype=float)
+    except (TypeError, ValueError) as exc:
+        raise ValueError("observed_counts and expected_counts must be numeric arrays") from exc
     if (
         observed.ndim != 1
         or expected.ndim != 1
