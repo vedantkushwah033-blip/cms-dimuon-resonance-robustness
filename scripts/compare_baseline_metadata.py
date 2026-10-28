@@ -187,7 +187,11 @@ def compare(candidate: dict[str, Any], reference: dict[str, Any]) -> dict[str, A
         "reference_metadata": "reference",
         "check_count": len(checks),
         "failed_check_count": sum(not item["passed"] for item in checks),
-        "cutflow_and_configuration_agree": passed,\n        "input_provenance_agrees": all(\n            item["passed"] for item in checks\n            if item["check"].startswith(("candidate_input_", "reference_input_", "input_sha256_", "input_byte_count_"))\n        ),
+        "cutflow_and_configuration_agree": passed,
+        "input_provenance_agrees": all(
+            item["passed"] for item in checks
+            if item["check"].startswith(("candidate_input_", "reference_input_", "input_sha256_", "input_byte_count_"))
+        ),
         "checks": checks,
         "interpretation": (
             "Event cut flow, histogram configuration, regular-bin totals, and flow-bin "
