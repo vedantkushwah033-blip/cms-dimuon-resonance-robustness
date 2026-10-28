@@ -1,7 +1,7 @@
 name: research-level CMS schema and bounded baseline audit
 
-# This is a deliberately manual, data-download workflow. Each selected ROOT file
-# can be >1 GiB; do not redownload it on every documentation or code push.
+# Deliberately manual: each selected ROOT file is >1 GiB.
+# Do not redownload it on every code or documentation push.
 on:
   workflow_dispatch:
 
@@ -14,86 +14,143 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
-      - name: Check out research branch
+      - name: Check out selected research branch
         uses: actions/checkout@v4
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: pip
-      - name: Install schema inspection dependencies
+      - name: Install schema and spectrum dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -e ".[remote]" cernopendata-client ROOT
-      - name: Download one official ROOT file per record with checksum verification
+          python -m pip install -e ".[remote]" cernopendata-client "ROOT==0.1a12"
+      - name: Record ROOT runtime
+        run: python -c "import ROOT; print('PyROOT distribution installed; ROOT runtime:', ROOT.gROOT.GetVersion())"
+      - name: Download and compare one ROOT file per record
         shell: bash
         run: |
-          set -euo pipefail
-          mkdir -p outputs/research_level_schema
-          printf "record_id\tfilename\tbytes\tsha256\n" > outputs/research_level_schema/manifest.tsv
+          set -uo pipefail
+          out="outputs/research_level_schema"
+          mkdir -p "$out"
+          printf "record_id\tfilename\tbytes\tsha256\n" > "$out/manifest.tsv"
           overall_status=0
+
           for record_id in 31123 31129; do
-            cernopendata-client download-files \
+            record_dir="$out/record_$record_id"
+            mkdir -p "$record_dir"
+
+            # A failure for one record must not prevent attempting the other.
+            if cernopendata-client download-files \
               --recid "$record_id" \
-              --filter-regexp '\.root$' \
+              --filter-regexp '\\.root$' \
               --filter-range 1-1 \
               --server https://opendata.cern.ch \
-              --verify
-            input_file="$(find "$record_id" -type f -name '*.root' -print -quit)"
-            test -n "$input_file"
-            python scripts/inspect_root_schema.py \
+              --verify > "$record_dir/download.log" 2>&1; then
+              download_status=0
+            else
+              download_status=$?
+            fi
+            printf "%s\n" "$download_status" > "$record_dir/download_exit_status.txt"
+            if (( download_status != 0 )); then
+              echo "Download failed for record $record_id; see retained log." >&2
+              overall_status=1
+              continue
+            fi
+
+            input_file="$(find "$record_id" -type f -name '*.root' -print -quit 2>/dev/null || true)"
+            if [[ -z "$input_file" || ! -f "$input_file" ]]; then
+              echo "No ROOT file found after successful download for record $record_id." > "$record_dir/input_error.txt"
+              overall_status=1
+              continue
+            fi
+
+            if python scripts/inspect_root_schema.py \
               --input "$input_file" \
-              --output "outputs/research_level_schema/schema_$record_id.json"
-            bytes="$(stat -c '%s' "$input_file")"
-            sha256="$(sha256sum "$input_file" | awk '{print $1}')"
-            printf "%s\t%s\t%s\t%s\n" "$record_id" "$input_file" "$bytes" "$sha256" \
-              >> outputs/research_level_schema/manifest.tsv
-            # Bounded candidate reconstruction. This is not a trigger-aware analysis.
-            python scripts/reproduce_dimuon_spectrum.py \
+              --output "$record_dir/schema_$record_id.json" > "$record_dir/schema.log" 2>&1; then
+              schema_status=0
+            else
+              schema_status=$?
+              overall_status=1
+            fi
+            printf "%s\n" "$schema_status" > "$record_dir/schema_exit_status.txt"
+
+            if ! bytes="$(stat -c '%s' "$input_file")"; then
+              echo "Could not determine file size for $input_file" > "$record_dir/provenance_error.txt"
+              overall_status=1
+              continue
+            fi
+            if ! sha256="$(sha256sum "$input_file" | awk '{print $1}')"; then
+              echo "Could not calculate SHA-256 for $input_file" > "$record_dir/provenance_error.txt"
+              overall_status=1
+              continue
+            fi
+            printf "%s\t%s\t%s\t%s\n" "$record_id" "$input_file" "$bytes" "$sha256" >> "$out/manifest.tsv"
+
+            # Each export is attempted independently; record the exact local
+            # input hash in both metadata files for later provenance comparison.
+            if python scripts/reproduce_dimuon_spectrum.py \
               --input "$input_file" \
+              --sha256-input \
               --max-events 100000 \
               --step-size 10000 \
               --bins 30000 \
-              --output-dir "outputs/research_level_schema/baseline_$record_id" \
-              > "outputs/research_level_schema/baseline_stdout_$record_id.json"
-            # Independently reconstruct the same event prefix using ROOT/RDataFrame.
-            python scripts/export_reference_dimuon_histogram.py \
+              --output-dir "$record_dir/baseline" > "$record_dir/baseline.log" 2>&1; then
+              candidate_status=0
+            else
+              candidate_status=$?
+              overall_status=1
+              echo "Candidate reconstruction failed for record $record_id." >&2
+            fi
+            printf "%s\n" "$candidate_status" > "$record_dir/candidate_exit_status.txt"
+
+            if python scripts/export_reference_dimuon_histogram.py \
               --input "$input_file" \
+              --sha256-input \
               --max-events 100000 \
               --bins 30000 \
-              --output-dir "outputs/research_level_schema/reference_$record_id" \
-              > "outputs/research_level_schema/reference_stdout_$record_id.json"
-            # Preserve discrepancies as machine-readable artifacts even when parity fails.
-            set +e
-            python scripts/compare_histograms.py \
-              --reference "outputs/research_level_schema/reference_$record_id/dimuon_mass_histogram.csv" \
-              --candidate "outputs/research_level_schema/baseline_$record_id/dimuon_mass_histogram.csv" \
-              --output "outputs/research_level_schema/comparison_$record_id.json" \
-              > "outputs/research_level_schema/comparison_stdout_$record_id.json"
-            compare_status=$?
-            set -e
-            printf "%s\n" "$compare_status" > "outputs/research_level_schema/comparison_exit_status_$record_id.txt"
-            if (( compare_status != 0 )); then
-              echo "Reference parity failed for record $record_id; discrepancy report preserved in artifacts." >&2
+              --output-dir "$record_dir/reference" > "$record_dir/reference.log" 2>&1; then
+              reference_status=0
+            else
+              reference_status=$?
+              overall_status=1
+              echo "ROOT reference export failed for record $record_id." >&2
+            fi
+            printf "%s\n" "$reference_status" > "$record_dir/reference_exit_status.txt"
+
+            if (( candidate_status == 0 && reference_status == 0 )); then
+              if python scripts/compare_histograms.py \
+                --reference "$record_dir/reference/dimuon_mass_histogram.csv" \
+                --candidate "$record_dir/baseline/dimuon_mass_histogram.csv" \
+                --output "$record_dir/comparison.json" > "$record_dir/comparison.log" 2>&1; then
+                compare_status=0
+              else
+                compare_status=$?
+                overall_status=1
+                echo "Histogram comparison failed for record $record_id; report/log retained." >&2
+              fi
+              if python scripts/compare_baseline_metadata.py \
+                --candidate "$record_dir/baseline/run_metadata.json" \
+                --reference "$record_dir/reference/reference_metadata.json" \
+                --output "$record_dir/metadata_comparison.json" > "$record_dir/metadata_comparison.log" 2>&1; then
+                metadata_status=0
+              else
+                metadata_status=$?
+                overall_status=1
+                echo "Metadata comparison failed for record $record_id; report/log retained." >&2
+              fi
+            else
+              compare_status=125
+              metadata_status=125
+              echo "Comparators NOT RUN for record $record_id because at least one exporter failed." > "$record_dir/comparators_not_run.txt"
               overall_status=1
             fi
-            # Independently compare event cut flow and common histogram settings.
-            set +e
-            python scripts/compare_baseline_metadata.py \
-              --candidate "outputs/research_level_schema/baseline_$record_id/run_metadata.json" \
-              --reference "outputs/research_level_schema/reference_$record_id/reference_metadata.json" \
-              --output "outputs/research_level_schema/metadata_comparison_$record_id.json" \
-              > "outputs/research_level_schema/metadata_comparison_stdout_$record_id.json"
-            metadata_status=$?
-            set -e
-            printf "%s\n" "$metadata_status" > "outputs/research_level_schema/metadata_comparison_exit_status_$record_id.txt"
-            if (( metadata_status != 0 )); then
-              echo "Cut-flow/configuration comparison failed for record $record_id; report preserved in artifacts." >&2
-              overall_status=1
-            fi
+            printf "%s\n" "$compare_status" > "$record_dir/comparison_exit_status.txt"
+            printf "%s\n" "$metadata_status" > "$record_dir/metadata_comparison_exit_status.txt"
           done
+
           exit "$overall_status"
-      - name: Upload schema reports and file manifest
+      - name: Upload baseline, schema reports, logs, and manifest
         if: always()
         uses: actions/upload-artifact@v4
         with:
