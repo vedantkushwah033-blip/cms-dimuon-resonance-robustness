@@ -181,21 +181,26 @@ def compare(candidate: dict[str, Any], reference: dict[str, Any]) -> dict[str, A
         "passed": range_passed,
     })
 
+    provenance_checks = [
+        item for item in checks
+        if item["check"].startswith((
+            "candidate_input_", "reference_input_", "input_sha256_", "input_byte_count_"
+        ))
+    ]
+    non_provenance_checks = [item for item in checks if item not in provenance_checks]
     passed = all(item["passed"] for item in checks)
     return {
         "candidate_metadata": "candidate",
         "reference_metadata": "reference",
         "check_count": len(checks),
         "failed_check_count": sum(not item["passed"] for item in checks),
-        "cutflow_and_configuration_agree": passed,
-        "input_provenance_agrees": all(
-            item["passed"] for item in checks
-            if item["check"].startswith(("candidate_input_", "reference_input_", "input_sha256_", "input_byte_count_"))
-        ),
+        "cutflow_and_configuration_agree": all(item["passed"] for item in non_provenance_checks),
+        "input_provenance_agrees": all(item["passed"] for item in provenance_checks),
+        "comparison_passed": passed,
         "checks": checks,
         "interpretation": (
-            "Event cut flow, histogram configuration, regular-bin totals, and flow-bin "
-            "accounting agree; candidate non-finite mass count is zero."
+            "Cut flow, configuration, mass accounting, and input provenance all agree; "
+            "candidate non-finite mass count is zero."
             if passed else
             "Metadata comparison failed; inspect every failed check before interpreting histogram parity."
         ),
@@ -223,6 +228,8 @@ def main() -> int:
     except (OSError, json.JSONDecodeError, ValueError) as exc:
         report = {
             "cutflow_and_configuration_agree": False,
+            "input_provenance_agrees": False,
+            "comparison_passed": False,
             "comparison_error": str(exc),
         }
         args.output.parent.mkdir(parents=True, exist_ok=True)
@@ -233,7 +240,7 @@ def main() -> int:
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(report, indent=2))
-    return 0 if report["cutflow_and_configuration_agree"] else 2
+    return 0 if report.get("comparison_passed", False) else 2
 
 
 if __name__ == "__main__":
