@@ -45,7 +45,7 @@ def reference_metadata():
     }
 
 
-def run_comparison(tmp_path, candidate, reference):
+def run_comparison(tmp_path, candidate, reference, expected_sha256=None, expected_bytes=None):
     candidate_path = tmp_path / "candidate.json"
     reference_path = tmp_path / "reference.json"
     output_path = tmp_path / "comparison.json"
@@ -61,6 +61,16 @@ def run_comparison(tmp_path, candidate, reference):
             str(reference_path),
             "--output",
             str(output_path),
+            *(
+                ["--expected-sha256", expected_sha256]
+                if expected_sha256 is not None
+                else []
+            ),
+            *(
+                ["--expected-bytes", str(expected_bytes)]
+                if expected_bytes is not None
+                else []
+            ),
         ],
         capture_output=True,
         text=True,
@@ -237,3 +247,56 @@ def test_output_cannot_overwrite_candidate_metadata(tmp_path):
     assert result.returncode == 2
     assert "refusing to overwrite an input metadata file" in result.stderr
     assert candidate_path.read_bytes() == original_bytes
+
+
+
+def test_manifest_hash_and_byte_count_must_match_both_metadata_files(tmp_path):
+    result, report_path = run_comparison(
+        tmp_path,
+        candidate_metadata(),
+        reference_metadata(),
+        expected_sha256="a" * 64,
+        expected_bytes=123456,
+    )
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    assert result.returncode == 0, result.stderr
+    assert report["input_provenance_agrees"] is True
+    assert report["comparison_passed"] is True
+    failed = {item["check"] for item in report["checks"] if not item["passed"]}
+    assert not failed
+
+
+def test_candidate_and_reference_must_match_manifest_hash_and_size(tmp_path):
+    candidate = candidate_metadata()
+    reference = reference_metadata()
+    reference["input_sha256"] = "b" * 64
+    reference["input_bytes"] = 123457
+    result, report_path = run_comparison(
+        tmp_path,
+        candidate,
+        reference,
+        expected_sha256="a" * 64,
+        expected_bytes=123456,
+    )
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    assert result.returncode == 2
+    assert report["input_provenance_agrees"] is False
+    failed = {item["check"] for item in report["checks"] if not item["passed"]}
+    assert "reference_sha256_matches_manifest" in failed
+    assert "reference_input_bytes_match_manifest" in failed
+
+
+def test_invalid_manifest_provenance_fails_closed(tmp_path):
+    result, report_path = run_comparison(
+        tmp_path,
+        candidate_metadata(),
+        reference_metadata(),
+        expected_sha256="not-a-sha256",
+        expected_bytes=0,
+    )
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    assert result.returncode == 2
+    assert report["input_provenance_agrees"] is False
+    failed = {item["check"] for item in report["checks"] if not item["passed"]}
+    assert "expected_manifest_sha256_present_and_valid" in failed
+    assert "expected_manifest_input_bytes_present_and_valid" in failed
