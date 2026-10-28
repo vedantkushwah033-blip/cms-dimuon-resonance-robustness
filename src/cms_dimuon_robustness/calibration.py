@@ -74,3 +74,95 @@ def simulate_fixed_background_null(
         "n_experiments": int(n_experiments),
         "seed": int(seed),
     }
+
+
+
+def wilson_interval(successes: int, trials: int, confidence_z: float = 1.959963984540054) -> dict[str, float]:
+    """Return a two-sided Wilson score interval for a binomial proportion.
+
+    This is a normal-score interval, not an exact Clopper-Pearson interval.
+    It is useful for reporting Monte Carlo uncertainty without returning
+    degenerate [0, 0] bounds when no false positives are observed.
+    """
+    if isinstance(successes, bool) or not isinstance(successes, (int, np.integer)):
+        raise ValueError("successes must be an integer")
+    if isinstance(trials, bool) or not isinstance(trials, (int, np.integer)):
+        raise ValueError("trials must be a positive integer")
+    if trials <= 0 or successes < 0 or successes > trials:
+        raise ValueError("require trials > 0 and 0 <= successes <= trials")
+    if not np.isfinite(confidence_z) or confidence_z <= 0:
+        raise ValueError("confidence_z must be finite and positive")
+
+    p_hat = successes / trials
+    z2 = confidence_z**2
+    denominator = 1 + z2 / trials
+    center = (p_hat + z2 / (2 * trials)) / denominator
+    half_width = (
+        confidence_z
+        * np.sqrt(p_hat * (1 - p_hat) / trials + z2 / (4 * trials**2))
+        / denominator
+    )
+    return {
+        "lower": float(max(0.0, center - half_width)),
+        "upper": float(min(1.0, center + half_width)),
+        "confidence_level_approx": 0.95 if abs(confidence_z - 1.959963984540054) < 1e-12 else float("nan"),
+    }
+
+
+def evaluate_fixed_background_false_positive_rate(
+    expected_background: ArrayLike,
+    window_widths: tuple[int, ...] | list[int],
+    n_calibration: int,
+    n_evaluation: int,
+    alpha: float,
+    seed_calibration: int,
+    seed_evaluation: int,
+) -> dict[str, int | float | bool | dict[str, float]]:
+    """Evaluate empirical-rank rejection rate on a separate held-out toy null sample.
+
+    A calibration sample defines the plus-one empirical upper-tail p-value for
+    each held-out maximum scan statistic. The held-out false-positive fraction
+    and Wilson score interval are returned. This is a fixed-known-background
+    simulation only; it does not validate fitted-background uncertainty, model
+    selection, detector effects, or real CMS data. Use distinct seeds and freeze
+    the scan, alpha, and simulation design before interpreting the result.
+    """
+    for value, name in ((n_calibration, "n_calibration"), (n_evaluation, "n_evaluation")):
+        if isinstance(value, bool) or not isinstance(value, (int, np.integer)) or value <= 0:
+            raise ValueError(f"{name} must be a positive integer")
+    if not np.isfinite(alpha) or not 0 < alpha < 1:
+        raise ValueError("alpha must be finite and strictly between 0 and 1")
+    for seed, name in ((seed_calibration, "seed_calibration"), (seed_evaluation, "seed_evaluation")):
+        if isinstance(seed, bool) or not isinstance(seed, (int, np.integer)) or seed < 0:
+            raise ValueError(f"{name} must be a non-negative integer")
+    if seed_calibration == seed_evaluation:
+        raise ValueError("calibration and evaluation seeds must differ")
+
+    calibration = simulate_fixed_background_null(
+        expected_background, window_widths, int(n_calibration), int(seed_calibration)
+    )["null_statistics"]
+    evaluation = simulate_fixed_background_null(
+        expected_background, window_widths, int(n_evaluation), int(seed_evaluation)
+    )["null_statistics"]
+    calibration_array = np.asarray(calibration, dtype=float)
+    evaluation_array = np.asarray(evaluation, dtype=float)
+
+    # Apply the same plus-one rank convention to every held-out replicate.
+    p_values = (1 + np.sum(calibration_array[None, :] >= evaluation_array[:, None], axis=1)) / (
+        int(n_calibration) + 1
+    )
+    rejected = int(np.count_nonzero(p_values <= alpha))
+    interval = wilson_interval(rejected, int(n_evaluation))
+    return {
+        "alpha": float(alpha),
+        "n_calibration": int(n_calibration),
+        "n_evaluation": int(n_evaluation),
+        "seed_calibration": int(seed_calibration),
+        "seed_evaluation": int(seed_evaluation),
+        "rejections": rejected,
+        "false_positive_rate": float(rejected / int(n_evaluation)),
+        "wilson_95_interval": interval,
+        "calibration_minimum_resolvable_pvalue": float(1 / (int(n_calibration) + 1)),
+        "calibration_resolution_allows_alpha_rejection": bool(1 / (int(n_calibration) + 1) <= alpha),
+        "interpretation": "fixed-known-background toy simulation only; not CMS validation",
+    }
