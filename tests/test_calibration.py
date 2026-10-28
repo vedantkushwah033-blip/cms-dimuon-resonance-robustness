@@ -1,3 +1,4 @@
+import numpy as np
 import pytest
 
 from cms_dimuon_robustness.calibration import empirical_upper_tail_pvalue
