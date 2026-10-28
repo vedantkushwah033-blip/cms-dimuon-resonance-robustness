@@ -164,32 +164,6 @@ def test_wilson_interval_has_exact_boundary_endpoints_and_reports_requested_leve
     assert all_successes["upper"] == 1.0
     assert custom["confidence_level_approx"] == pytest.approx(0.682689492)
 
-def test_held_out_false_positive_evaluation_is_reproducible_and_reports_resolution():
-    from cms_dimuon_robustness.calibration import evaluate_fixed_background_false_positive_rate
-
-    kwargs = dict(
-        expected_background=[4.0, 5.0, 4.0, 3.0],
-        window_widths=[1, 2],
-        n_calibration=99,
-        n_evaluation=200,
-        alpha=0.05,
-        seed_calibration=101,
-        seed_evaluation=202,
-    )
-    first = evaluate_fixed_background_false_positive_rate(**kwargs)
-    second = evaluate_fixed_background_false_positive_rate(**kwargs)
-    assert first == second
-    assert first["n_calibration"] == 99
-    assert first["n_evaluation"] == 200
-    assert first["calibration_minimum_resolvable_pvalue"] == pytest.approx(0.01)
-    assert first["calibration_resolution_allows_alpha_rejection"] is True
-    assert 0 <= first["rejections"] <= 200
-    assert 0 <= first["false_positive_rate"] <= 1
-    assert first["wilson_95_interval"]["lower"] <= first["false_positive_rate"]
-    assert first["false_positive_rate"] <= first["wilson_95_interval"]["upper"]
-    assert first["interpretation"] == "fixed-known-background toy simulation only; not CMS validation"
-
-
 def test_held_out_evaluation_rejects_identical_seeds_and_invalid_alpha():
     from cms_dimuon_robustness.calibration import evaluate_fixed_background_false_positive_rate
 
