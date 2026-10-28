@@ -72,6 +72,20 @@ def test_csv_rejects_empty_or_noncontiguous_bins(tmp_path, contents):
         histogram_csv_summary(p)
 
 
+def test_csv_rejects_contiguous_but_nonuniform_grid_when_metadata_is_supplied(tmp_path):
+    p = tmp_path / "nonuniform.csv"
+    p.write_text(
+        "mass_low_GeV,mass_high_GeV,pair_count\\n"
+        "0.25,100,2\\n"
+        "100,300,3\\n",
+        encoding="utf-8",
+    )
+    # The file is contiguous and spans the configured range, but it is not
+    # the two-bin uniform grid implied by the metadata.
+    with pytest.raises(ValueError, match="configured uniform grid"):
+        histogram_csv_summary(p, expected_bins=2, expected_range=(0.25, 300.0))
+
+
 def test_csv_sha256_must_match_metadata_even_when_summary_matches(tmp_path):
     cand, ref = candidate_metadata(), reference_metadata()
     cand["bins"] = ref["bins"] = 2
