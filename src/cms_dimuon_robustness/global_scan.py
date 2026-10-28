@@ -68,11 +68,14 @@ def scan_poisson_excess(
         if int(width) not in widths:
             widths.append(int(width))
 
+    # Initialize metadata from a real scanned window. If every q0 is zero,
+    # the result still reports a valid window rather than a synthetic (0, 0)
+    # observed/expected count pair.
     best_q = 0.0
     best_start = 0
     best_width = widths[0]
-    best_n = 0
-    best_b = 0.0
+    best_n = int(np.sum(observed[:best_width]))
+    best_b = float(np.sum(expected[:best_width]))
     scanned = 0
     for width in widths:
         obs_sum = np.convolve(observed, np.ones(width, dtype=np.int64), mode="valid")
