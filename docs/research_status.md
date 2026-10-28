@@ -429,3 +429,9 @@ The revised bounded baseline/parity workflow has not run. A dispatch-path audit 
 - This is an important step toward calibrating the statistic after background refitting, but it is **not yet a complete inference pipeline**: the null-generating mean vector is assumed, background-model misspecification and order selection are not handled, and no CMS data validation is implied. The observed spectrum must be processed with the same fit, scan, and failure policy; empirical calibration/evaluation must remain independent and predeclared.
 - Commits: `599dbc3487194a71ab0b8932d6a7f3691521bbe5` (generator), `7fb13938fec488ebc5b45e4f0b7cc25aeca34330` (tests).
 - CI investigation found a failed run on the earlier `be547325...` commit because its first version imported nonexistent `scan_for_excess`; that was corrected in `ecb6a083...`. Do not conflate that earlier failure with results for the corrected or newest commits; newest CI remains pending until its final conclusions are reported.
+
+## CI failure diagnosis and correction — 2026-10-28
+
+- The failed test workflow for commit `599dbc3487194a71ab0b8932d6a7f3691521bbe5` exposed a Ruff F811 error: a held-out false-positive test had been defined twice in `tests/test_calibration.py`. The test run did not reach a trustworthy full-suite result.
+- Removed the duplicate function definition in commit `2eda30ca237b8b76e3008c5284264e7c506fbdfd`. This is a test-maintenance correction, not evidence that the statistical method is validated.
+- New test and ROOT integration workflows for the correction were queued at the last check; pass/fail is still pending.
