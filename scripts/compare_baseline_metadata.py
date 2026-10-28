@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import re
 from pathlib import Path
 from typing import Any
 
@@ -44,6 +45,54 @@ def compare(candidate: dict[str, Any], reference: dict[str, Any]) -> dict[str, A
             "reference": reference_value,
             "passed": candidate_value == reference_value,
         })
+
+    # Do not compare cut flows unless both outputs identify the same input bytes.
+    sha_pattern = re.compile(r"^[0-9a-fA-F]{64}$")
+    candidate_sha = candidate.get("input_sha256")
+    reference_sha = reference.get("input_sha256")
+    candidate_sha_valid = isinstance(candidate_sha, str) and sha_pattern.fullmatch(candidate_sha) is not None
+    reference_sha_valid = isinstance(reference_sha, str) and sha_pattern.fullmatch(reference_sha) is not None
+    checks.append({
+        "check": "candidate_input_sha256_present_and_valid",
+        "candidate": candidate_sha,
+        "reference": "64 hexadecimal SHA-256 characters required",
+        "passed": candidate_sha_valid,
+    })
+    checks.append({
+        "check": "reference_input_sha256_present_and_valid",
+        "candidate": reference_sha,
+        "reference": "64 hexadecimal SHA-256 characters required",
+        "passed": reference_sha_valid,
+    })
+    checks.append({
+        "check": "input_sha256_matches",
+        "candidate": candidate_sha.lower() if candidate_sha_valid else candidate_sha,
+        "reference": reference_sha.lower() if reference_sha_valid else reference_sha,
+        "passed": bool(candidate_sha_valid and reference_sha_valid and candidate_sha.lower() == reference_sha.lower()),
+    })
+
+    candidate_bytes = candidate.get("input_bytes")
+    reference_bytes = reference.get("input_bytes")
+    candidate_bytes_valid = isinstance(candidate_bytes, int) and not isinstance(candidate_bytes, bool) and candidate_bytes > 0
+    reference_bytes_valid = isinstance(reference_bytes, int) and not isinstance(reference_bytes, bool) and reference_bytes > 0
+    checks.append({
+        "check": "candidate_input_bytes_present_and_valid",
+        "candidate": candidate_bytes,
+        "reference": "positive integer byte count required",
+        "passed": candidate_bytes_valid,
+    })
+    checks.append({
+        "check": "reference_input_bytes_present_and_valid",
+        "candidate": reference_bytes,
+        "reference": "positive integer byte count required",
+        "passed": reference_bytes_valid,
+    })
+    checks.append({
+        "check": "input_byte_count_matches",
+        "candidate": candidate_bytes,
+        "reference": reference_bytes,
+        "passed": bool(candidate_bytes_valid and reference_bytes_valid and candidate_bytes == reference_bytes),
+    })
 
     mappings = [
         ("events_read_vs_events_total", "events_read", "events_total"),
@@ -138,7 +187,7 @@ def compare(candidate: dict[str, Any], reference: dict[str, Any]) -> dict[str, A
         "reference_metadata": "reference",
         "check_count": len(checks),
         "failed_check_count": sum(not item["passed"] for item in checks),
-        "cutflow_and_configuration_agree": passed,
+        "cutflow_and_configuration_agree": passed,\n        "input_provenance_agrees": all(\n            item["passed"] for item in checks\n            if item["check"].startswith(("candidate_input_", "reference_input_", "input_sha256_", "input_byte_count_"))\n        ),
         "checks": checks,
         "interpretation": (
             "Event cut flow, histogram configuration, regular-bin totals, and flow-bin "
