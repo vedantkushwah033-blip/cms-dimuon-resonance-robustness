@@ -23,6 +23,25 @@ def _checks(report):
     return {c["check"]: c["passed"] for c in report["checks"]}
 
 
+def test_csv_summary_hashes_the_same_byte_snapshot_it_parses(tmp_path, monkeypatch):
+    p = tmp_path / "mutable.csv"
+    original = b"mass_low_GeV,mass_high_GeV,pair_count\\n0.25,300,2\\n"
+    changed = b"mass_low_GeV,mass_high_GeV,pair_count\\n0.25,300,9\\n"
+    p.write_bytes(original)
+
+    def changing_read_bytes(path):
+        assert path == p
+        p.write_bytes(changed)
+        return changed
+
+    # Simulate a file changing at read time. Parsing and hashing must both use
+    # the returned snapshot rather than parsing one version and hashing another.
+    monkeypatch.setattr(Path, "read_bytes", changing_read_bytes)
+    summary = histogram_csv_summary(p)
+    assert summary["total"] == 9
+    assert summary["sha256"] == hashlib.sha256(changed).hexdigest()
+
+
 def test_csv_summary_uses_exact_integers(tmp_path):
     p = tmp_path / "h.csv"
     write_csv(p, [2**60 + 1, 3])
