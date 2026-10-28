@@ -17,7 +17,7 @@
 | Select a background model/order from each observed spectrum | No candidate-family fitting or selection algorithm identified | Not implemented |
 | Calibrate a global rejection threshold on separate pseudoexperiments | The YAML protocol describes intended fields, but there is no end-to-end calibration runner identified | Not implemented |
 | Evaluate rejection frequency on disjoint held-out generators | Protocol template only; no generator/partition runner identified | Not implemented |
-| Estimate false-positive rate with confidence intervals and explicit fit-failure accounting | An exact binomial interval utility exists, but no global bump-hunt calibration pipeline feeds it | Utility exists; proposed estimand workflow not implemented |
+| Estimate false-positive rate with confidence intervals and explicit fit-failure accounting | A Wilson score interval utility exists, but no end-to-end global bump-hunt calibration pipeline feeds it | Utility exists; proposed estimand workflow not implemented |
 | Claim a novel statistical result from CMS data | Baseline parity and scientific gates are explicitly pending | Not supported |
 
 ## 2. What the existing software actually answers
