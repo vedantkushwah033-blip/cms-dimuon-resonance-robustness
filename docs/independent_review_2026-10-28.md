@@ -32,7 +32,7 @@ Both candidate and reference are expected to process the same input file and exa
 
 The latest inspected draft, PR #6, adds per-bin comparison against the configured uniform histogram grid and corrects the synthetic sensitivity audit's conditional denominator. The Python tests/compileall/Ruff workflow and synthetic ROOT reference-exporter integration both passed on commit `086d7e16a58dc0114ba51f91c9922e528ee2b7b2` (workflow runs `40646864601` and `40646864756`). These are software checks only; the integration uses a synthetic fixture and does not establish numerical parity on CERN data. PR #6 remains draft/open/unmerged.
 
-The current CSV integrity checks bind file bytes to exporter metadata, but they do not independently authenticate the CSV's scientific correctness. Likewise, matching locally computed input checksums across exporters is not an external provenance anchor. The workflow should continue to fail closed on missing/malformed metadata and report each validation layer separately.
+The comparator now parses and hashes the same single byte snapshot of each CSV, avoiding a time-of-check/time-of-use mismatch if a file changes between separate reads. This is covered by a regression test, but latest-head CI has not yet been confirmed. The CSV digest still does not independently authenticate the exporter’s scientific correctness. Likewise, matching locally computed input checksums across exporters is not an external provenance anchor. The workflow should continue to fail closed on missing/malformed metadata and report each validation layer separately.
 
 ## Synthetic numerical sensitivity
 
