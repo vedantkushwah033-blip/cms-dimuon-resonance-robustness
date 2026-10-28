@@ -281,3 +281,24 @@ def test_refitted_background_held_out_evaluation_rejects_identical_seeds():
             seed_evaluation=7,
             background_order=0,
         )
+
+
+def test_empirical_rank_test_resolution_reports_discrete_size_grid():
+    from cms_dimuon_robustness.calibration import empirical_rank_test_resolution
+
+    result = empirical_rank_test_resolution(99, 0.05)
+    assert result["minimum_resolvable_pvalue"] == 0.01
+    assert result["max_null_exceedances_to_reject"] == 4
+    assert result["unconditional_rejection_probability_under_iid_continuous_null"] == 0.05
+
+    non_grid_aligned = empirical_rank_test_resolution(100, 0.05)
+    assert non_grid_aligned["max_null_exceedances_to_reject"] == 4
+    assert non_grid_aligned["unconditional_rejection_probability_under_iid_continuous_null"] == 5 / 101
+
+
+@pytest.mark.parametrize("n_calibration,alpha", [(0, 0.05), (True, 0.05), (100, 0.0), (100, 1.0)])
+def test_empirical_rank_test_resolution_rejects_invalid_inputs(n_calibration, alpha):
+    from cms_dimuon_robustness.calibration import empirical_rank_test_resolution
+
+    with pytest.raises(ValueError):
+        empirical_rank_test_resolution(n_calibration, alpha)
