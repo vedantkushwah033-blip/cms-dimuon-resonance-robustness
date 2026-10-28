@@ -27,10 +27,11 @@ def evaluate_null_scenarios(
     """Evaluate each named mean vector using independent calibration/evaluation seeds.
 
     Every scenario must have an explicit non-empty name, positive finite means,
-    and a pair of distinct non-negative integer seeds. Seeds must be unique
-    across all scenario roles to reduce accidental stream reuse. This function
-    does not choose scenario parameters, claim the scenarios are physically
-    realistic, or decide whether observed rejection rates are acceptable.
+    the same number of bins, and a pair of distinct non-negative integer seeds.
+    Seeds must be unique across all scenario roles to reduce accidental stream
+    reuse. Common binning is required because changing the number of bins also
+    changes the scan's number of candidate windows and therefore its null law.
+    This function does not choose scenario parameters or imply physical realism.
     """
     if not isinstance(scenario_means, Mapping) or not scenario_means:
         raise ValueError("scenario_means must be a non-empty mapping")
@@ -62,6 +63,10 @@ def evaluate_null_scenarios(
         if int(seeds[0]) == int(seeds[1]):
             raise ValueError(f"{name}: calibration and evaluation seeds must differ")
         validated_means[name] = means.tolist()
+
+    bin_counts = {len(means) for means in validated_means.values()}
+    if len(bin_counts) != 1:
+        raise ValueError("all scenarios must use the same number of bins for comparable scans")
     if len(set(all_seeds)) != len(all_seeds):
         raise ValueError("all calibration/evaluation seeds must be unique across scenarios")
 
@@ -95,6 +100,7 @@ def evaluate_null_scenarios(
             "alpha": float(alpha),
             "background_order": int(background_order),
             "scenario_count": len(names),
+            "n_bins": next(iter(bin_counts)),
             "interpretation": (
                 "per-scenario fixed toy nulls; no guarantee of uniform type-I control "
                 "or CMS validity"
