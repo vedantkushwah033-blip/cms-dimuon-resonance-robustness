@@ -58,6 +58,10 @@ def simulate_fixed_background_null(
 
     from cms_dimuon_robustness.global_scan import scan_poisson_excess
 
+    # Validate the scan configuration once, before allocating simulation work.
+    # The all-zero fixture exercises the same width validation as each replicate.
+    scan_poisson_excess(np.zeros(expected.size, dtype=np.int64), expected, window_widths)
+
     rng = np.random.default_rng(int(seed))
     maxima: list[float] = []
     for _ in range(int(n_experiments)):
