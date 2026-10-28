@@ -20,6 +20,9 @@ The education/outreach sample remains useful for pipeline development only. The 
 - `data_sources.md`, `docs/data_source_assessment.md`, `docs/data_requirements.md` — source provenance and feasibility constraints.
 - `docs/experiment_protocol_template.md` — preregistration checklist for the main simulation.
 - `docs/independent_review_plan.md`, `docs/quality_gates.md` — validation and external-review requirements.
+- `src/cms_dimuon_robustness/global_scan.py` — exploratory maximum one-sided Poisson scan statistic with an externally supplied background; not a fitted bump-hunt pipeline.
+- `src/cms_dimuon_robustness/calibration.py` — empirical upper-tail rank p-value and fixed-background Poisson null pseudoexperiments; does not model fitted-background uncertainty.
+- `docs/fixed_background_null_pseudoexperiments_2026-10-28.md` — scope limits and validation gates for the toy null simulator.
 - `src/cms_dimuon_robustness/invariant_mass.py` — vectorized kinematic calculation.
 - `src/cms_dimuon_robustness/nanoaod.py` — Awkward-array opposite-charge pair-mass calculation.
 - `scripts/reproduce_dimuon_spectrum.py` — chunked ROOT/NanoAOD baseline reconstruction; requires an explicit input path to prevent accidental use of the unvalidated outreach dataset.
