@@ -32,6 +32,40 @@ def empirical_upper_tail_pvalue(observed_statistic: float, null_statistics: Arra
     }
 
 
+
+def empirical_rank_test_resolution(n_calibration: int, alpha: float) -> dict[str, int | float | bool]:
+    """Describe the discrete rejection grid of a plus-one empirical-rank test.
+
+    With M calibration statistics, attainable p-values are multiples of
+    1/(M+1). Under an iid continuous null, the unconditional rejection
+    probability is floor(alpha*(M+1))/(M+1); ties can make the test more
+    conservative. This is a property of the rank rule, not a guarantee about
+    the scientific adequacy of the null model or conditional size for a fixed
+    calibration sample.
+    """
+    if isinstance(n_calibration, bool) or not isinstance(n_calibration, (int, np.integer)) or n_calibration <= 0:
+        raise ValueError("n_calibration must be a positive integer")
+    if isinstance(alpha, bool) or not isinstance(alpha, (int, float, np.integer, np.floating)):
+        raise ValueError("alpha must be finite and strictly between 0 and 1")
+    if not np.isfinite(alpha) or not 0 < alpha < 1:
+        raise ValueError("alpha must be finite and strictly between 0 and 1")
+
+    rank_slots = int(math.floor(float(alpha) * (int(n_calibration) + 1)))
+    return {
+        "n_calibration": int(n_calibration),
+        "alpha": float(alpha),
+        "minimum_resolvable_pvalue": float(1 / (int(n_calibration) + 1)),
+        "calibration_resolution_allows_alpha_rejection": bool(
+            1 / (int(n_calibration) + 1) <= alpha
+        ),
+        "max_null_exceedances_to_reject": rank_slots - 1,
+        "unconditional_rejection_probability_under_iid_continuous_null": float(
+            rank_slots / (int(n_calibration) + 1)
+        ),
+    }
+
+
+
 def simulate_fixed_background_null(
     expected_background: ArrayLike,
     window_widths: tuple[int, ...] | list[int],
@@ -204,8 +238,7 @@ def evaluate_refitted_background_false_positive_rate(
         "rejections": rejected,
         "false_positive_rate": float(rejected / int(n_evaluation)),
         "wilson_95_interval": interval,
-        "calibration_minimum_resolvable_pvalue": float(1 / (int(n_calibration) + 1)),
-        "calibration_resolution_allows_alpha_rejection": bool(1 / (int(n_calibration) + 1) <= alpha),
+        **empirical_rank_test_resolution(int(n_calibration), float(alpha)),
         "interpretation": "refitted fixed-order toy null only; not CMS validation",
     }
 
@@ -311,7 +344,6 @@ def evaluate_fixed_background_false_positive_rate(
         "rejections": rejected,
         "false_positive_rate": float(rejected / int(n_evaluation)),
         "wilson_95_interval": interval,
-        "calibration_minimum_resolvable_pvalue": float(1 / (int(n_calibration) + 1)),
-        "calibration_resolution_allows_alpha_rejection": bool(1 / (int(n_calibration) + 1) <= alpha),
+        **empirical_rank_test_resolution(int(n_calibration), float(alpha)),
         "interpretation": "fixed-known-background toy simulation only; not CMS validation",
     }
