@@ -77,3 +77,12 @@
 - Removed the unused import and strengthened orchestration assertions in commit `8fea8256d630bef7f53f866f784dd92c031732fa`. The workflow triggered by this repair must finish before declaring the scenario-runner change CI-green.
 - ROOT integration workflow `40732582349` passed, including the synthetic ROOT exporter test. This checks the ROOT pipeline on synthetic data only, not the real CMS dataset or reference-spectrum parity.
 - Confirmatory simulation remains **NO-GO**; PR #6 remains unmerged.
+
+
+## Scenario runner preflight audit — 2026-10-28
+- Code review identified that shared scan/sample settings were validated only when each per-scenario evaluator began. This could start some scenario work before a later scenario exposed a shared configuration problem; duplicate scan widths could also be reported in metadata even though the underlying scan deduplicates them.
+- Updated `scenario_evaluation.py` to validate all shared settings (positive integer calibration/evaluation counts, finite `0 < alpha < 1`, non-negative integer fit order, fit-coefficient/bin compatibility, and valid scan widths) before invoking any scenario evaluator. It now normalizes duplicate widths consistently and records the actual normalized scan design.
+- Added tests for duplicate-width normalization and for invalid shared configurations failing before any evaluator call. Added/updated the scenario-runner documentation.
+- Commits: `ce5f0d9241a2676ed02a7d41fb95a2e1e9314a1b` (preflight implementation), `f0084162fbb3045498b2acedc03166fbac29f662` (tests), `33bf73d203c905f8905ad9b3238d7ec1f162d2fa` (documentation).
+- The new commits triggered CI; at the time of this update, complete test-matrix and ROOT integration conclusions are not yet available. Do not describe this revision as CI-green until the runs for the exact latest commit finish.
+- No Monte Carlo confirmatory study was run, PR #6 remains unmerged, and the scientific decision remains **NO-GO** pending independent review and frozen design choices.
