@@ -387,3 +387,12 @@ The revised bounded baseline/parity workflow has not run. A dispatch-path audit 
 - Added an independent brute-force reference test for the scan maximum in `tests/test_global_scan.py`; the test compares the statistic, winning window metadata, and number of windows with an independently enumerated implementation.
 - Latest known test and ROOT integration workflows were still running after these changes were committed. Do not claim the new tests pass until current-head CI completes.
 - **Next gate:** review optimizer edge cases and residual diagnostics; specify the mass interval, binning, candidate orders, and a blinded/frozen selection rule before connecting this fitter to a global scan. Do not launch confirmatory simulations yet.
+
+
+## Residual-diagnostic implementation — 2026-10-28
+
+- Added `src/cms_dimuon_robustness/residual_diagnostics.py` with signed Pearson and Poisson deviance residuals, descriptive aggregate statistics, input validation, and a nominal residual-degree-of-freedom count.
+- Added `tests/test_residual_diagnostics.py` for exact-fit behavior, residual signs, zero-count handling, and invalid inputs; documented interpretation boundaries in `docs/poisson_residual_diagnostics_2026-10-28.md`.
+- The statistics are descriptive, not calibrated goodness-of-fit p-values. No leverage correction, model-selection correction, or parameter-uncertainty propagation is implemented. This helper must not be treated as a decision rule for selecting a background order.
+- CI status for these newly added files is **not verified**: the commit-workflow lookup returned no runs, and no successful workflow for the current helper has been observed. Previously completed Python 3.10/3.11/3.12 tests and ROOT integration (runs `40712853112` and `40712853294`) cover the preceding background-fit/scan changes, not this newly added diagnostic.
+- Confirmatory simulation remains **NO-GO** pending the frozen analysis procedure, quantitative CMS reference parity, methods/novelty review, and independent protocol review.
