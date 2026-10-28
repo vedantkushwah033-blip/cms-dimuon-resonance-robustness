@@ -164,18 +164,25 @@ def simulate_refitted_background_null(
     )
     rng = np.random.default_rng(int(seed))
     maxima: list[float] = []
-    for _ in range(int(n_experiments)):
+    boundary_fit_indices: list[int] = []
+    for experiment_index in range(int(n_experiments)):
         counts = rng.poisson(expected)
         fit = fit_log_polynomial_background(counts, order=int(background_order))
+        if bool(fit.get("coefficient_boundary_active", False)):
+            boundary_fit_indices.append(experiment_index)
         fitted_means = np.asarray(fit["expected_counts"], dtype=float)
         scan = scan_poisson_excess(counts, fitted_means, window_widths)
         maxima.append(float(scan["global_statistic_q0"]))
 
+    n_boundary_fits = len(boundary_fit_indices)
     return {
         "null_statistics": maxima,
         "n_experiments": int(n_experiments),
         "seed": int(seed),
         "background_order": int(background_order),
+        "n_boundary_fits": n_boundary_fits,
+        "boundary_fit_rate": float(n_boundary_fits / int(n_experiments)),
+        "boundary_fit_indices": boundary_fit_indices,
         "interpretation": "refitted fixed-order toy null; not CMS validation",
     }
 
@@ -212,20 +219,22 @@ def evaluate_refitted_background_false_positive_rate(
     if seed_calibration == seed_evaluation:
         raise ValueError("calibration and evaluation seeds must differ")
 
-    calibration = simulate_refitted_background_null(
+    calibration_result = simulate_refitted_background_null(
         null_generating_means,
         window_widths,
         int(n_calibration),
         int(seed_calibration),
         background_order=int(background_order),
-    )["null_statistics"]
-    evaluation = simulate_refitted_background_null(
+    )
+    evaluation_result = simulate_refitted_background_null(
         null_generating_means,
         window_widths,
         int(n_evaluation),
         int(seed_evaluation),
         background_order=int(background_order),
-    )["null_statistics"]
+    )
+    calibration = calibration_result["null_statistics"]
+    evaluation = evaluation_result["null_statistics"]
 
     sorted_calibration = np.sort(np.asarray(calibration, dtype=float))
     evaluation_array = np.asarray(evaluation, dtype=float)
@@ -242,6 +251,10 @@ def evaluate_refitted_background_false_positive_rate(
         "seed_calibration": int(seed_calibration),
         "seed_evaluation": int(seed_evaluation),
         "background_order": int(background_order),
+        "calibration_n_boundary_fits": int(calibration_result["n_boundary_fits"]),
+        "calibration_boundary_fit_rate": float(calibration_result["boundary_fit_rate"]),
+        "evaluation_n_boundary_fits": int(evaluation_result["n_boundary_fits"]),
+        "evaluation_boundary_fit_rate": float(evaluation_result["boundary_fit_rate"]),
         "rejections": rejected,
         "false_positive_rate": float(rejected / int(n_evaluation)),
         "wilson_95_interval": interval,
