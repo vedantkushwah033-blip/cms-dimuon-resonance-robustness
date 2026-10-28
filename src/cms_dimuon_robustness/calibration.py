@@ -148,8 +148,16 @@ def evaluate_fixed_background_false_positive_rate(
     evaluation_array = np.asarray(evaluation, dtype=float)
 
     # Apply the same plus-one rank convention to every held-out replicate.
-    p_values = (1 + np.sum(calibration_array[None, :] >= evaluation_array[:, None], axis=1)) / (
-        int(n_calibration) + 1
+    # Process one held-out statistic at a time: avoids allocating an
+    # n_evaluation × n_calibration Boolean matrix for larger Monte Carlo runs.
+    p_values = np.fromiter(
+        (
+            (1 + np.count_nonzero(calibration_array >= statistic))
+            / (int(n_calibration) + 1)
+            for statistic in evaluation_array
+        ),
+        dtype=float,
+        count=int(n_evaluation),
     )
     rejected = int(np.count_nonzero(p_values <= alpha))
     interval = wilson_interval(rejected, int(n_evaluation))
