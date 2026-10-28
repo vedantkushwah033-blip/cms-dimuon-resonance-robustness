@@ -132,6 +132,8 @@ jobs:
               if python scripts/compare_baseline_metadata.py \
                 --candidate "$record_dir/baseline/run_metadata.json" \
                 --reference "$record_dir/reference/reference_metadata.json" \
+                --expected-sha256 "$sha256" \
+                --expected-bytes "$bytes" \
                 --output "$record_dir/metadata_comparison.json" > "$record_dir/metadata_comparison.log" 2>&1; then
                 metadata_status=0
               else
