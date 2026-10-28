@@ -2,7 +2,7 @@
 
 ## Changes proposed in this branch
 
-This branch makes three narrowly scoped changes to the bounded CMS data-validation workflow:
+This branch makes four narrowly scoped changes to the bounded CMS data-validation workflow:
 
 1. **Input hash in both exporter metadata files.** The manual workflow passes `--sha256-input` to both the Uproot candidate and ROOT reference exporter. Each metadata output should therefore record the SHA-256 of the same local ROOT input; the workflow also retains the download manifest and checksum verification.
 2. **Per-record failure isolation.** The manual workflow records download, schema, candidate, reference, histogram-comparison, and metadata-comparison exit statuses. A failed download for Run2012B should not prevent an attempt at Run2012C. If either exporter fails, comparison is marked as not run (status 125), not passed. Logs are retained in the artifact.
