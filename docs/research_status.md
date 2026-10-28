@@ -101,3 +101,12 @@
 - Added `docs/exploratory_fit_stability_audit_plan_2026-10-28.md`, specifying per-attempt accounting, primary diagnostic estimands, scenario and seed requirements, interpretation of coefficient-boundary activity, stop conditions, and decision gates before any confirmatory run.
 - The plan explicitly requires failures to be counted and attributed rather than silently dropped, separates boundary activity from fit failure, and limits interpretation to declared synthetic null scenarios. It is a proposed exploratory plan, not preregistered, not externally reviewed, and not run.
 - Commit `cfe744cbd62ab436e2e7344776df42a04f708344` adds the plan. CI has not yet been checked for this documentation-only commit. Confirmatory simulations remain NO-GO; no real-CMS validation or physics conclusion is claimed.
+
+
+
+## Refit-failure attribution — 2026-10-29
+- Updated `simulate_refitted_background_null` to preserve its fail-closed behavior while wrapping a background-fit exception with the zero-based pseudoexperiment index, master RNG seed, and RNG-stream description. The original exception is retained as `__cause__` for diagnosis.
+- No retry or silent omission is introduced: execution stops at the first fit failure and no scan statistic is recorded for that failed draw. The master seed plus index identifies the draw in the deterministic NumPy `default_rng` stream; it is not represented as an independently assigned per-toy seed.
+- Added a regression test that injects a failure on the third fit, checks index/seed attribution, verifies exception chaining, and confirms the routine does not retry.
+- Implementation commit: `6f33ddcaa1f998456019a9a81922f582f167c310`; test commit: `fd9c826366686dc3f0c158b9dfae20ba3dcaa1a0`.
+- This is a traceability improvement, not a new statistical result. CI runs for implementation commit `6f33ddcaa1` were queued at the time of the status check and must pass before the change is considered validated. Confirmatory simulation remains NO-GO pending a frozen and reviewed design; no real-CMS validation is claimed.
