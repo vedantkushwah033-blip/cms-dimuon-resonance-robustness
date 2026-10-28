@@ -454,10 +454,13 @@ def main() -> int:
         args.candidate.resolve(): "--candidate",
         args.reference.resolve(): "--reference",
     }
+    if args.candidate_csv is not None:
+        protected_inputs[args.candidate_csv.resolve()] = "--candidate-csv"
+        protected_inputs[args.reference_csv.resolve()] = "--reference-csv"
     if output_path in protected_inputs:
         parser.error(
             f"--output resolves to the same path as {protected_inputs[output_path]}; "
-            "refusing to overwrite an input metadata file"
+            "refusing to overwrite an input file"
         )
     try:
         candidate_metadata = load_json(args.candidate)
