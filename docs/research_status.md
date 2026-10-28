@@ -3,6 +3,8 @@
 **Last updated:** 2026-10-28
 
 ## Confirmed completed in this repository
+- Added `empirical_rank_test_resolution` to make the plus-one empirical-rank p-value's discrete rejection grid explicit: minimum p-value, maximum exceedance count compatible with rejection, and unconditional rejection probability under iid continuous null statistics. Added unit tests for grid-aligned and non-grid-aligned alpha values and invalid inputs, and documented the distinction between unconditional rank size and conditional behavior for a fixed calibration sample. The commits `6b988c6`, `91bd5ee`, and `1d53495` have fresh PR workflows queued; results are not yet verified.
+
 - Added `docs/independent_statistical_design_audit_2026-10-28.md`, a methodological review memo clarifying the estimand, calibration resolution versus precision, conditional interpretation of Wilson intervals, scan freezing, scenario specification, fit-failure policy, misspecification limits, and the separate CMS-data validation gate. It is explicitly not an external review or preregistration.
 - The audit document's commit `789ceafc59c1bdd8e462c05869e5cede83880d44` passed GitHub Actions tests on Python 3.10, 3.11, and 3.12, including compilation and Ruff lint, and the independent ROOT exporter integration workflow passed on synthetic data. These are software checks only, not CMS-data validation.
 - Confirmatory simulations remain on hold pending fixed numerical scenario choices and independent scientific review.
