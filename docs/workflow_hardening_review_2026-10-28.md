@@ -11,9 +11,9 @@ This branch makes four narrowly scoped changes to the bounded CMS data-validatio
 
 ## Validation of this review branch
 
-- Test-suite run [40615374989](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40615374989) completed successfully. The Python 3.10, 3.11, and 3.12 jobs passed tests, compilation, and Ruff checks.
-- ROOT-reference integration run [40615374994](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40615374994) completed successfully, including the synthetic-data ROOT exporter test.
-- These runs validate the PR's automated tests and synthetic integration only. They do **not** establish parity on CERN's real data.
+- Latest test-suite run for the provenance-validation changes, [40618697275](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40618697275), completed successfully. The Python 3.10, 3.11, and 3.12 jobs passed tests, compilation, and Ruff checks.
+- Latest ROOT-reference integration run, [40618697262](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40618697262), completed successfully, including the synthetic-data ROOT exporter test.
+- These latest runs validate the PR's automated tests—including the new provenance regression cases—and synthetic integration only. They do **not** establish parity on CERN's real data.
 - The manual workflow has **not** been dispatched by this branch, and no multi-gigabyte ROOT files were downloaded by these runs.
 - The real-data comparison for records 31123 and 31129 remains **NOT ESTABLISHED** until the manual workflow is explicitly dispatched, completes, and its actual artifacts are independently inspected.
 
