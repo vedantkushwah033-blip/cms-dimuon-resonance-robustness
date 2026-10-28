@@ -6,7 +6,7 @@ This branch makes three narrowly scoped changes to the bounded CMS data-validati
 
 1. **Input hash in both exporter metadata files.** The manual workflow passes `--sha256-input` to both the Uproot candidate and ROOT reference exporter. Each metadata output should therefore record the SHA-256 of the same local ROOT input; the workflow also retains the download manifest and checksum verification.
 2. **Per-record failure isolation.** The manual workflow records download, schema, candidate, reference, histogram-comparison, and metadata-comparison exit statuses. A failed download for Run2012B should not prevent an attempt at Run2012C. If either exporter fails, comparison is marked as not run (status 125), not passed. Logs are retained in the artifact.
-3. **Pin the PyPI ROOT distribution used by current CI.** Both workflows pin `ROOT==0.1a12` rather than resolving an unspecified latest version.
+3. **Enforce input provenance in metadata comparison.** The candidate and ROOT reference metadata must each contain a valid 64-character hexadecimal SHA-256 and a positive integer input byte count. The checksums and byte counts must match; absent, malformed, or mismatched provenance fails the comparison with a machine-readable report and nonzero exit status. Tests cover matching and failure cases.\n4. **Pin the PyPI ROOT distribution used by current CI.** Both workflows pin `ROOT==0.1a12` rather than resolving an unspecified latest version.
 
 ## Validation of this review branch
 
