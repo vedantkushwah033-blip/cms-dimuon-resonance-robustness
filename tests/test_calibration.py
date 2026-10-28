@@ -385,3 +385,38 @@ def test_refitted_evaluator_reports_boundary_rates_for_both_samples(monkeypatch)
     assert result["calibration_boundary_fit_rate"] == 0.5
     assert result["evaluation_n_boundary_fits"] == 1
     assert result["evaluation_boundary_fit_rate"] == 0.25
+
+
+
+def test_refitted_null_fit_failure_identifies_replicate_and_preserves_cause(monkeypatch):
+    import cms_dimuon_robustness.background_fit as background_fit
+    from cms_dimuon_robustness.calibration import simulate_refitted_background_null
+
+    calls = {"n": 0}
+    original_error = ValueError("injected optimizer failure")
+
+    def fail_on_third_fit(counts, order=1):
+        index = calls["n"]
+        calls["n"] += 1
+        if index == 2:
+            raise original_error
+        return {
+            "expected_counts": np.ones(len(counts), dtype=float),
+            "coefficient_boundary_active": False,
+        }
+
+    monkeypatch.setattr(
+        background_fit, "fit_log_polynomial_background", fail_on_third_fit
+    )
+
+    with pytest.raises(RuntimeError, match=r"index=2 .*master_seed=20261028") as caught:
+        simulate_refitted_background_null(
+            [4.0, 5.0, 6.0, 7.0],
+            [1, 2],
+            n_experiments=5,
+            seed=20261028,
+            background_order=1,
+        )
+
+    assert caught.value.__cause__ is original_error
+    assert calls["n"] == 3  # fail closed; no retry and no silently skipped toy
