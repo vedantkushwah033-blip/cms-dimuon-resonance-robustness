@@ -32,6 +32,11 @@ def test_scan_finds_injected_contiguous_excess_and_reports_number_of_windows():
 def test_scan_statistic_is_zero_when_all_windows_are_downward_fluctuations():
     result = scan_poisson_excess([1, 2, 3], [5, 5, 5], [1, 2])
     assert result["global_statistic_q0"] == 0.0
+    # Metadata must identify a real scanned window even when every q0 is zero.
+    assert result["start_bin"] == 0
+    assert result["window_width_bins"] == 1
+    assert result["observed_in_best_window"] == 1
+    assert result["expected_in_best_window"] == 5.0
 
 
 @pytest.mark.parametrize(
