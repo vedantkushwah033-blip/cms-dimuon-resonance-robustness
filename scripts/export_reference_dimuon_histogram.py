@@ -40,6 +40,15 @@ def repository_commit() -> str | None:
     return commit if result.returncode == 0 and commit else None
 
 
+def sha256_file(path: Path) -> str:
+    """Calculate a streaming SHA-256 checksum for a local output file."""
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for block in iter(lambda: stream.read(8 * 1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", required=True, help="Local CMS ROOT file used by both implementations")
@@ -208,6 +217,7 @@ def main() -> int:
         "input": str(input_path),
         "input_bytes": input_path.stat().st_size,
         "input_sha256": input_sha256,
+        "histogram_csv_sha256": sha256_file(csv_path),
         "tree": args.tree,
         "max_events": args.max_events,
         "root_version": str(ROOT.gROOT.GetVersion()),

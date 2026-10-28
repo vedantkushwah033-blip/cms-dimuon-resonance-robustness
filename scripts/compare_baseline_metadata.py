@@ -8,6 +8,8 @@ non-finite values in histogram flow bins.
 from __future__ import annotations
 
 import argparse
+import csv
+import hashlib
 import json
 import math
 import re
@@ -34,11 +36,53 @@ def exact_nonnegative_int(metadata: dict[str, Any], key: str, source: str) -> in
     return value
 
 
+def histogram_csv_summary(path: Path) -> dict[str, Any]:
+    """Validate histogram CSV structure and return exact totals, edge range, and digest."""
+    with path.open("r", encoding="utf-8", newline="") as stream:
+        reader = csv.DictReader(stream)
+        expected_fields = ["mass_low_GeV", "mass_high_GeV", "pair_count"]
+        if reader.fieldnames != expected_fields:
+            raise ValueError(f"{path}: CSV columns must be exactly {expected_fields}")
+        rows = list(reader)
+    if not rows:
+        raise ValueError(f"{path}: histogram CSV contains no bins")
+
+    total = 0
+    previous_high = None
+    first_low = None
+    last_high = None
+    for line_number, row in enumerate(rows, start=2):
+        if None in row:
+            raise ValueError(f"{path}: line {line_number}: unexpected extra CSV fields")
+        try:
+            low = float(row["mass_low_GeV"])
+            high = float(row["mass_high_GeV"])
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f"{path}: line {line_number}: bin edges must be numeric") from exc
+        if not math.isfinite(low) or not math.isfinite(high) or not low < high:
+            raise ValueError(f"{path}: line {line_number}: bin edges must be finite and increasing")
+        if previous_high is not None and not math.isclose(low, previous_high, rel_tol=0.0, abs_tol=EDGE_ATOL_GEV):
+            raise ValueError(f"{path}: line {line_number}: bins are not contiguous")
+        value = row.get("pair_count")
+        if value is None or re.fullmatch(r"[0-9]+", value) is None:
+            raise ValueError(f"{path}: line {line_number}: pair_count must be an unsigned integer string")
+        total += int(value, 10)
+        if first_low is None:
+            first_low = low
+        previous_high = high
+        last_high = high
+
+    digest = hashlib.sha256(path.read_bytes()).hexdigest()
+    return {"bins": len(rows), "total": total, "sha256": digest, "range_low": first_low, "range_high": last_high}
+
 def compare(
     candidate: dict[str, Any],
     reference: dict[str, Any],
     expected_sha256: str | None = None,
     expected_bytes: int | None = None,
+    candidate_csv: dict[str, Any] | None = None,
+    reference_csv: dict[str, Any] | None = None,
+    expected_max_events: int | None = None,
 ) -> dict[str, Any]:
     """Return explicit checks for cut flow, configuration, and mass accounting."""
     checks: list[dict[str, Any]] = []
@@ -167,6 +211,84 @@ def compare(
         reference_value = exact_nonnegative_int(reference, reference_key, "reference")
         check_equal(name, candidate_value, reference_value)
 
+    # Bind each histogram summary to the metadata from the same exporter.
+    for label, meta, csv_summary, total_key in (
+        ("candidate", candidate, candidate_csv, "pairs_in_histogram_range"),
+        ("reference", reference, reference_csv, "histogram_regular_bin_total"),
+    ):
+        if csv_summary is None:
+            continue
+        meta_bins, meta_total = meta.get("bins"), meta.get(total_key)
+        valid_bins = isinstance(meta_bins, int) and not isinstance(meta_bins, bool) and meta_bins >= 0
+        valid_total = isinstance(meta_total, int) and not isinstance(meta_total, bool) and meta_total >= 0
+        checks.append({
+            "check": f"{label}_csv_bin_count_matches_metadata",
+            "candidate": csv_summary["bins"], "reference": meta_bins,
+            "passed": bool(valid_bins and csv_summary["bins"] == meta_bins),
+        })
+        checks.append({
+            "check": f"{label}_csv_total_matches_metadata_in_range_count",
+            "candidate": csv_summary["total"], "reference": meta_total,
+            "passed": bool(valid_total and csv_summary["total"] == meta_total),
+        })
+
+        metadata_csv_sha = meta.get("histogram_csv_sha256")
+        metadata_csv_sha_valid = isinstance(metadata_csv_sha, str) and re.fullmatch(r"[0-9a-fA-F]{64}", metadata_csv_sha) is not None
+        checks.append({
+            "check": f"{label}_csv_sha256_present_and_valid_in_metadata",
+            "candidate": metadata_csv_sha,
+            "reference": "64 hexadecimal SHA-256 characters required",
+            "passed": metadata_csv_sha_valid,
+        })
+        checks.append({
+            "check": f"{label}_csv_sha256_matches_metadata",
+            "candidate": csv_summary.get("sha256"),
+            "reference": metadata_csv_sha.lower() if metadata_csv_sha_valid else metadata_csv_sha,
+            "passed": bool(metadata_csv_sha_valid and csv_summary.get("sha256") == metadata_csv_sha.lower()),
+        })
+
+        if label == "candidate":
+            configured_range = meta.get("mass_range_GeV")
+            range_valid = (
+                isinstance(configured_range, list) and len(configured_range) == 2
+                and all(isinstance(x, (int, float)) and not isinstance(x, bool) and math.isfinite(x)
+                        for x in configured_range)
+            )
+            expected_low, expected_high = configured_range if range_valid else (None, None)
+        else:
+            expected_low, expected_high = meta.get("mass_min_GeV"), meta.get("mass_max_GeV")
+            range_valid = all(
+                isinstance(x, (int, float)) and not isinstance(x, bool) and math.isfinite(x)
+                for x in (expected_low, expected_high)
+            )
+        observed_low, observed_high = csv_summary.get("range_low"), csv_summary.get("range_high")
+        edge_match = bool(
+            range_valid
+            and isinstance(observed_low, (int, float)) and math.isfinite(observed_low)
+            and isinstance(observed_high, (int, float)) and math.isfinite(observed_high)
+            and math.isclose(observed_low, expected_low, rel_tol=0.0, abs_tol=EDGE_ATOL_GEV)
+            and math.isclose(observed_high, expected_high, rel_tol=0.0, abs_tol=EDGE_ATOL_GEV)
+        )
+        checks.append({
+            "check": f"{label}_csv_range_matches_metadata",
+            "candidate": [observed_low, observed_high],
+            "reference": [expected_low, expected_high],
+            "absolute_tolerance_GeV": EDGE_ATOL_GEV,
+            "passed": edge_match,
+        })
+
+    if expected_max_events is not None:
+        valid_limit = isinstance(expected_max_events, int) and not isinstance(expected_max_events, bool) and expected_max_events > 0
+        for label, meta, read_key in (("candidate", candidate, "events_read"), ("reference", reference, "events_total")):
+            for key in ("max_events", read_key):
+                value = meta.get(key)
+                checks.append({
+                    "check": f"{label}_{key}_equals_expected_event_prefix",
+                    "candidate": value, "reference": expected_max_events,
+                    "passed": bool(valid_limit and isinstance(value, int) and not isinstance(value, bool)
+                                   and value == expected_max_events),
+                })
+
     candidate_total = exact_nonnegative_int(candidate, "opposite_charge_pairs_total", "candidate")
     below = exact_nonnegative_int(candidate, "pairs_below_mass_range", "candidate")
     in_range = exact_nonnegative_int(candidate, "pairs_in_histogram_range", "candidate")
@@ -237,19 +359,27 @@ def compare(
             "reference_input_bytes_match_manifest"
         ))
     ]
-    non_provenance_checks = [item for item in checks if item not in provenance_checks]
+    artifact_checks = [
+        item for item in checks
+        if item["check"].startswith(("candidate_csv_", "reference_csv_"))
+    ]
+    substantive_checks = [
+        item for item in checks
+        if item not in provenance_checks and item not in artifact_checks
+    ]
     passed = all(item["passed"] for item in checks)
     return {
         "candidate_metadata": "candidate",
         "reference_metadata": "reference",
         "check_count": len(checks),
         "failed_check_count": sum(not item["passed"] for item in checks),
-        "cutflow_and_configuration_agree": all(item["passed"] for item in non_provenance_checks),
+        "cutflow_and_configuration_agree": all(item["passed"] for item in substantive_checks),
         "input_provenance_agrees": all(item["passed"] for item in provenance_checks),
+        "artifact_integrity_agrees": all(item["passed"] for item in artifact_checks),
         "comparison_passed": passed,
         "checks": checks,
         "interpretation": (
-            "Cut flow, configuration, mass accounting, and input provenance all agree; "
+            "Cut flow, configuration, input provenance, and CSV artifact integrity all agree; "
             "candidate non-finite mass count is zero."
             if passed else
             "Metadata comparison failed; inspect every failed check before interpreting histogram parity."
@@ -264,7 +394,12 @@ def main() -> int:
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--expected-sha256", help="Expected SHA-256 from the downloaded-input manifest")
     parser.add_argument("--expected-bytes", type=int, help="Expected input byte count from the downloaded-input manifest")
+    parser.add_argument("--candidate-csv", type=Path, help="Candidate histogram CSV to bind to candidate metadata")
+    parser.add_argument("--reference-csv", type=Path, help="Reference histogram CSV to bind to reference metadata")
+    parser.add_argument("--expected-max-events", type=int, help="Intended event prefix; both outputs must have read exactly this many events")
     args = parser.parse_args()
+    if (args.candidate_csv is None) != (args.reference_csv is None):
+        parser.error("--candidate-csv and --reference-csv must be supplied together")
     output_path = args.output.resolve()
     protected_inputs = {
         args.candidate.resolve(): "--candidate",
@@ -281,6 +416,9 @@ def main() -> int:
             load_json(args.reference),
             expected_sha256=args.expected_sha256,
             expected_bytes=args.expected_bytes,
+            candidate_csv=histogram_csv_summary(args.candidate_csv) if args.candidate_csv else None,
+            reference_csv=histogram_csv_summary(args.reference_csv) if args.reference_csv else None,
+            expected_max_events=args.expected_max_events,
         )
     except (OSError, json.JSONDecodeError, ValueError) as exc:
         report = {
