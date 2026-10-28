@@ -75,9 +75,9 @@ def test_csv_rejects_empty_or_noncontiguous_bins(tmp_path, contents):
 def test_csv_rejects_contiguous_but_nonuniform_grid_when_metadata_is_supplied(tmp_path):
     p = tmp_path / "nonuniform.csv"
     p.write_text(
-        "mass_low_GeV,mass_high_GeV,pair_count\\n"
-        "0.25,100,2\\n"
-        "100,300,3\\n",
+        "mass_low_GeV,mass_high_GeV,pair_count\n"
+        "0.25,100,2\n"
+        "100,300,3\n",
         encoding="utf-8",
     )
     # The file is contiguous and spans the configured range, but it is not
