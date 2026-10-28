@@ -38,19 +38,21 @@ def test_csv_summary_rejects_non_integer_counts(tmp_path, bad):
 def test_csv_totals_bound_to_metadata_pass_and_fail():
     cand, ref = candidate_metadata(), reference_metadata()
     cand["bins"] = ref["bins"] = 3
+    cand["histogram_csv_sha256"] = "a" * 64
+    ref["histogram_csv_sha256"] = "b" * 64
     ok = compare(cand, ref,
-                 candidate_csv={"bins": 3, "total": cand["pairs_in_histogram_range"]},
-                 reference_csv={"bins": 3, "total": ref["histogram_regular_bin_total"]})
+                 candidate_csv={"bins": 3, "total": cand["pairs_in_histogram_range"], "sha256": "a" * 64},
+                 reference_csv={"bins": 3, "total": ref["histogram_regular_bin_total"], "sha256": "b" * 64})
     assert ok["comparison_passed"] is True
     stale = compare(cand, ref,
-                    candidate_csv={"bins": 3, "total": cand["pairs_in_histogram_range"] + 1},
-                    reference_csv={"bins": 3, "total": ref["histogram_regular_bin_total"]})
+                    candidate_csv={"bins": 3, "total": cand["pairs_in_histogram_range"] + 1, "sha256": "a" * 64},
+                    reference_csv={"bins": 3, "total": ref["histogram_regular_bin_total"], "sha256": "b" * 64})
     assert stale["comparison_passed"] is False
     assert _checks(stale)["candidate_csv_total_matches_metadata_in_range_count"] is False
     assert _checks(stale)["reference_csv_total_matches_metadata_in_range_count"] is True
     wrong_bins = compare(cand, ref,
-                         candidate_csv={"bins": 2, "total": cand["pairs_in_histogram_range"]},
-                         reference_csv={"bins": 3, "total": ref["histogram_regular_bin_total"]})
+                         candidate_csv={"bins": 2, "total": cand["pairs_in_histogram_range"], "sha256": "a" * 64},
+                         reference_csv={"bins": 3, "total": ref["histogram_regular_bin_total"], "sha256": "b" * 64})
     assert _checks(wrong_bins)["candidate_csv_bin_count_matches_metadata"] is False
 
 
@@ -78,6 +80,11 @@ def test_cli_binds_csvs_and_fails_on_stale_csv(tmp_path):
     (tmp_path / "r.json").write_text(json.dumps(ref), encoding="utf-8")
     write_csv(tmp_path / "c.csv", [20, 7])
     write_csv(tmp_path / "r.csv", [20, 8])
+    import hashlib
+    cand["histogram_csv_sha256"] = hashlib.sha256((tmp_path / "c.csv").read_bytes()).hexdigest()
+    ref["histogram_csv_sha256"] = hashlib.sha256((tmp_path / "r.csv").read_bytes()).hexdigest()
+    (tmp_path / "c.json").write_text(json.dumps(cand), encoding="utf-8")
+    (tmp_path / "r.json").write_text(json.dumps(ref), encoding="utf-8")
     result = subprocess.run(
         [sys.executable, str(COMPARATOR), "--candidate", str(tmp_path / "c.json"), "--reference", str(tmp_path / "r.json"),
          "--candidate-csv", str(tmp_path / "c.csv"), "--reference-csv", str(tmp_path / "r.csv"),
