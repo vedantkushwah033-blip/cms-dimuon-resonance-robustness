@@ -1,75 +1,76 @@
 # Implemented algorithm versus proposed estimand — code audit
 
 **Audit date:** 2026-10-28  
-**Scope:** source-level audit of the current research branch; no real-data execution or new statistical experiment was performed.  
-**Conclusion:** the repository currently implements a dimuon-spectrum reconstruction and validation scaffold. It does **not** yet implement the proposed bump-hunt, adaptive background-model selection, scan-level test statistic, or global false-positive calibration. The protocol remains a design proposal, not an experiment that can currently be run end-to-end.
+**Scope:** source-level audit of the current research branch and its declared tests. No real-data execution, ROOT parity comparison, or new scientific simulation was performed in this audit.  
+**Decision:** bounded exploratory implementation is in place; confirmatory calibration remains **NO-GO**.
 
-## 1. Claim-to-code map
+## 1. The estimand we ultimately want
 
-| Research claim or component | Evidence in current code | Status |
+The proposed research estimand is the rejection probability of a **fully frozen, end-to-end bump-hunt** under a specified null-generating process. Every replicate must apply the same declared preprocessing, background fitting, candidate-model selection (if any), scan, maximization, and threshold rule as the analysis being evaluated. A scan statistic by itself cannot establish this operating characteristic.
+
+## 2. What is implemented now
+
+| Component | Current evidence | Status and limitation |
 |---|---|---|
-| Reconstruct an opposite-charge dimuon mass spectrum from a ROOT/NanoAOD-like file | `scripts/reproduce_dimuon_spectrum.py`, `src/cms_dimuon_robustness/nanoaod.py`, and `src/cms_dimuon_robustness/histogram.py` | Implemented as a baseline pipeline; numerical parity on the research-level Run2012B/C files is not established |
-| Independently calculate a reference histogram using ROOT | `scripts/export_reference_dimuon_histogram.py` | Implemented as an exporter; real-data comparison remains pending |
-| Validate kinematic calculations and data integrity | `src/cms_dimuon_robustness/invariant_mass.py`, `nanoaod.py`, synthetic-data tests | Partially validated by unit/synthetic tests; this is software validation, not detector-level validation |
-| Fit a smooth background likelihood to a mass spectrum | No fit/likelihood implementation identified in the audited analysis scripts | Not implemented |
-| Define and compute a local excess/test statistic over mass windows | No bump-hunt or local-test-statistic implementation identified | Not implemented |
-| Scan mass windows and compute a global statistic such as a maximum over the scan | No scan implementation identified | Not implemented |
-| Select a background model/order from each observed spectrum | No candidate-family fitting or selection algorithm identified | Not implemented |
-| Calibrate a global rejection threshold on separate pseudoexperiments | The YAML protocol describes intended fields, but there is no end-to-end calibration runner identified | Not implemented |
-| Evaluate rejection frequency on disjoint held-out generators | Protocol template only; no generator/partition runner identified | Not implemented |
-| Estimate false-positive rate with confidence intervals and explicit fit-failure accounting | A Wilson score interval utility exists, but no end-to-end global bump-hunt calibration pipeline feeds it | Utility exists; proposed estimand workflow not implemented |
-| Claim a novel statistical result from CMS data | Baseline parity and scientific gates are explicitly pending | Not supported |
+| Reconstruct opposite-charge dimuon mass spectrum from ROOT/NanoAOD-like data | `scripts/reproduce_dimuon_spectrum.py`, `src/cms_dimuon_robustness/nanoaod.py`, `src/cms_dimuon_robustness/histogram.py` | Baseline pipeline exists; numerical parity on the research-level Run2012B/C files is not established |
+| Independent ROOT histogram export | `scripts/export_reference_dimuon_histogram.py` | Exporter exists; real-data bin-by-bin comparison remains pending |
+| Invariant-mass and event/pair validation | `src/cms_dimuon_robustness/invariant_mass.py`, `nanoaod.py`, synthetic tests | Software checks only; not detector-level validation |
+| One-sided Poisson excess statistic over contiguous windows | `src/cms_dimuon_robustness/global_scan.py` | Implemented for externally supplied expected counts; does not fit a background |
+| Maximum scan statistic over declared widths | `scan_poisson_excess` | Implemented as exploratory statistic; global significance requires calibration under the same frozen scan |
+| Plus-one empirical upper-tail rank p-value | `src/cms_dimuon_robustness/calibration.py` | Utility implemented; validity depends on exchangeable, correctly generated null statistics |
+| Fixed-known-background Poisson null simulation | `simulate_fixed_background_null` | Implemented for independent Poisson bins with fixed means; omits fit uncertainty, model selection, detector effects and real-data validation |
+| Held-out toy rejection-rate estimate | `evaluate_fixed_background_false_positive_rate` | Implemented with separate seeds and a Wilson score interval; evaluates only the fixed-known-background toy setup |
+| Background likelihood fit and fitting-failure policy | No complete fit module in the audited path | Not implemented end-to-end |
+| Prespecified background family/order selection | No complete selection module in the audited path | Not implemented |
+| Full pipeline from a spectrum through fit, selection, scan, and global decision | No single end-to-end runner implementing the proposed estimand | Not implemented |
+| Established-method comparator with documented matching choices | No completed, validated comparator in the audited path | Not implemented |
+| Confirmatory experiment against misspecified null generators | Protocol draft only; required gates remain open | Not authorized; NO-GO |
 
-## 2. What the existing software actually answers
+## 3. Scan-statistic definition and boundaries
 
-The baseline scripts answer a narrower, useful engineering question: given a chosen ROOT file and a declared selection, can the code compute opposite-charge dimuon masses, account for histogram boundaries and invalid values, preserve provenance, and emit reproducible outputs? Synthetic tests can check the software's internal invariants.
+For a scanned window with observed total (n) and supplied expected background (b>0), the local upward-only Poisson likelihood-ratio statistic is
 
-They do **not** answer whether an adaptive bump-hunt has a calibrated global type-I error, whether background-model selection changes that error, or whether a candidate algorithm is robust to out-of-family background generation. Those require new analysis code and independent validation.
+[
+q_0 =
+\begin{cases}
+2\{n\log(n/b)-(n-b)\}, & n>b,\\
+0, & n\le b.
+\end{cases}
+]
 
-## 3. Why this distinction matters
+The scan returns the maximum (q_0) over every contiguous window of each declared width. Widths are measured in histogram bins; duplicate widths are removed while preserving their first appearance. Ties are resolved by the first maximum encountered in the declared width order and then by increasing start-bin position. The reported start bin is zero-based.
 
-The proposed estimand is the rejection probability of the **complete frozen algorithm** under a specified null generator. To estimate it, each replicate must execute the same end-to-end steps that would be used on an observed spectrum, including any fitting, model choice, mass-window scan, maximization, and threshold comparison. A histogram exporter plus a protocol YAML cannot establish that property.
+This statistic treats the expected background as supplied and known. It is not, by itself, a fitted-background bump hunt, a BumpHunter implementation, a local/global p-value, or evidence of a resonance. The scan maximum must be calibrated using the same scan and the relevant null-generation process.
 
-The current protocol validator is deliberately structural: a completed-looking YAML can satisfy schema checks without proving that the described algorithm exists or matches the specification. Therefore, even a future structural-validator PASS must not be interpreted as implementation evidence or permission to run confirmatory simulations.
+## 4. Validation evidence and its meaning
 
-## 4. Required implementation gates before confirmatory work
+Synthetic unit tests exercise input validation, constructed excesses, all-zero-statistic cases, duplicate widths, and a brute-force reference implementation that independently enumerates candidate windows. Calibration tests exercise empirical-tail conventions, deterministic seeded toys, Wilson interval endpoints, and held-out evaluation invariants.
 
-1. **Baseline parity:** run both implementations on the same pinned, checksum-verified research-level ROOT input and compare bin-by-bin counts, underflow/overflow, selected-event counts, and pair accounting. Define acceptance tolerances before examining the result. Resolve any mismatch rather than normalizing it away.
-2. **Executable algorithm specification:** write a minimal, deterministic bump-hunt implementation with explicit fit range, binning, candidate background forms, optimizer/constraints, local statistic, scan windows, global statistic, and failure behavior.
-3. **Unit-level statistical checks:** test the statistic on analytically tractable or deliberately constructed spectra; test no-signal null cases, numerical failures, boundary conditions, and deterministic reproducibility.
-4. **Reference comparator:** implement or independently reproduce an established scan-level comparator (for example, a BumpHunter-style procedure) and document exactly which choices are comparable. Do not imply equivalence from the name alone.
-5. **Calibration runner:** implement separate development, threshold-calibration, and held-out evaluation partitions; preserve independent random streams; record every attempted replicate and every failure.
-6. **Validator-to-code binding:** make the protocol identify concrete implementation entry points and tests, and add a gate that checks those declared artifacts exist. This is only a traceability check; a human/statistical review is still required to establish that code matches the scientific specification.
-7. **Novelty and independent review:** finish the close-literature comparison and obtain review of the estimand, comparators, and scenario realism before confirmatory execution.
-8. **Authorization:** leave confirmatory execution blocked until the preceding gates pass and the owner explicitly authorizes it.
+CI status must be checked for the latest branch commit rather than inferred from older commits. Even a passing test matrix supports software behavior only; it does not establish physical realism, correct background modeling, type-I error control for an adaptive pipeline, or CMS data parity.
 
-## 5. Current go/no-go decision
+## 5. Remaining gates before confirmatory work
 
-**NO-GO for confirmatory global-calibration simulations.** The main reason is not computational scale: the end-to-end statistical procedure is not yet implemented. Research-level numerical baseline parity, complete literature novelty assessment, and independent protocol review are also unresolved.
+1. **Research-data provenance and baseline parity.** Pin the exact input file and checksum. Compare the analysis and independent ROOT export bin-by-bin, including selected-event counts, pair accounting, underflow/overflow and histogram boundaries. Declare acceptance tolerances before inspecting the comparison.
+2. **Executable algorithm specification.** Freeze binning, fit range, candidate background functions, likelihood, parameter constraints, optimizer, model-selection rule, local statistic, scan windows, global statistic, and all fit-failure handling.
+3. **Fit module with adversarial tests.** Test convergence failures, boundary estimates, sparse bins, numerical pathologies, and null spectra. Failures must be recorded, not silently dropped.
+4. **Independent comparator.** Reproduce or implement a recognized scan-level method and document exactly which choices match and which differ. Do not claim equivalence by naming alone.
+5. **Calibration design.** Keep development, threshold calibration, and held-out evaluation independent. Freeze seeds/streams, record every attempted replicate and failure, and ensure the simulated generator matches the scientific null claim.
+6. **Traceability.** Bind protocol claims to concrete implementation entry points and tests. A structural validator can check that artifacts exist, but cannot certify that the implementation is scientifically correct.
+7. **Novelty and independent review.** Complete the close-literature comparison and obtain review of the estimand, comparator, and scenario realism.
+8. **Explicit authorization.** Do not start a large confirmatory campaign until the preceding gates pass and the project owner explicitly authorizes it.
 
-**GO for bounded implementation work:** first build a small, testable scan/statistic module on synthetic spectra while keeping it clearly labelled exploratory. This can make progress without spending large compute budgets or implying a CMS physics result. Keep synthetic algorithm tests separate from real-data baseline acceptance.
+## 6. Current decision
 
-## 6. Audit limitations
+**NO-GO for confirmatory global-calibration simulations.** The limiting issue is the missing end-to-end fitted-background/model-selection pipeline, with research-level baseline parity, independent comparator validation, novelty review, and protocol review also unresolved.
 
-This is a bounded source-level audit of the named scripts and protocol artifacts, not a proof that no related code exists anywhere in every branch or commit. It does not assess physical realism, provide a systematic literature review, or certify novelty. Before changing the research claim, search the full repository and have the implemented algorithm independently reviewed.
+**GO for bounded implementation and testing.** The current scan and fixed-background calibration helpers are useful exploratory building blocks. They must not be represented as the completed proposed analysis or as a CMS physics result.
 
-## Sources in repository
+## Repository artifacts
 
-- `scripts/reproduce_dimuon_spectrum.py` — baseline histogram reconstruction.
-- `scripts/export_reference_dimuon_histogram.py` — independent ROOT histogram export.
-- `src/cms_dimuon_robustness/invariant_mass.py` and `nanoaod.py` — kinematic and pair-selection helpers.
-- `configs/confirmatory_global_calibration_protocol.yaml` — intentionally unresolved draft.
-- `scripts/validate_confirmatory_protocol.py` — structural protocol validator, not a scientific or implementation validator.
+- `scripts/reproduce_dimuon_spectrum.py` — baseline reconstruction.
+- `scripts/export_reference_dimuon_histogram.py` — independent ROOT export.
+- `src/cms_dimuon_robustness/global_scan.py` — exploratory scan statistic.
+- `src/cms_dimuon_robustness/calibration.py` — fixed-background calibration utilities.
+- `configs/confirmatory_global_calibration_protocol.yaml` — unresolved draft protocol.
+- `scripts/validate_confirmatory_protocol.py` — structural validator, not a scientific validator.
 - `research_question.md` and `analysis_plan.md` — provisional question and staged plan.
-
-## Follow-up implementation status — 2026-10-28
-
-This audit's original inventory above predates the exploratory scan and fixed-background calibration helpers added later on the same research branch. It must not be read as saying those components are still entirely absent. The current branch now includes:
-
-- `src/cms_dimuon_robustness/global_scan.py`: a one-sided Poisson excess statistic scanned over a caller-supplied set of contiguous window widths, using externally supplied expected counts.
-- `src/cms_dimuon_robustness/calibration.py`: plus-one empirical upper-tail p-values, fixed-known-background independent-Poisson null generation, a Wilson score interval, and a separate held-out toy false-positive evaluation helper.
-- Synthetic unit tests for the scan and these utilities.
-
-These are bounded exploratory building blocks. They do **not** complete the proposed end-to-end algorithm: there is still no fitted-background likelihood/uncertainty pipeline, no prespecified candidate-model selection implementation, no complete data-to-global-p-value runner, no matched established-method comparator, and no demonstrated real-data parity. The held-out helper evaluates only the fixed-background toy null, not the proposed misspecification estimand. Consequently, the NO-GO decision for confirmatory global-calibration simulations remains unchanged.
-
-The Python test matrix subsequently passed on Python 3.10, 3.11, and 3.12 for commit `4e171a8a` (CI run `40707114657`). The dedicated PyROOT integration job for that commit was still running at the time of this update; it is not represented as passed here.
