@@ -363,3 +363,10 @@ The revised bounded baseline/parity workflow has not run. A dispatch-path audit 
 - Regression tests were added for reproducibility, interval boundaries, invalid counts, invalid thresholds/seeds, and output invariants.
 - GitHub Actions was still in progress for commit `4fb1f5c` at the last status check; the efficiency follow-up commit `ca6424d` is newer than that run. Therefore, these latest changes are not yet verified by completed CI.
 - Scientific boundary: this is a fixed-known-background, independent-Poisson toy evaluation. It does not validate fitted-background uncertainty, model selection, correlated bins, detector effects, trigger selection, or real CMS data. No physics conclusion is claimed.
+
+## Wilson interval endpoint regression follow-up — 2026-10-28
+
+- CI for commit `394eb420` exposed a floating-point endpoint issue: the Wilson lower bound for zero observed rejections was returned as approximately (3.5\times10^{-18}), while the test correctly expects the mathematical boundary 0. The suite reported 207 passed, 1 failed, and 7 skipped on Python 3.11; ROOT integration passed for that commit.
+- Fixed the all-failure/all-success Wilson endpoints explicitly and changed the reported approximate confidence level to be computed from the supplied normal-score (z), rather than returning NaN for non-default (z). Added validation for nonnumeric/Boolean confidence levels and alpha values, plus regression tests.
+- Fix commits: `d7261b4d` (implementation), `3b671fe8` and `13aae42f` (tests). GitHub Actions for the newest commit must complete before this fix is considered verified. No toy evaluation output is being reported as a scientific result.
+- The scope remains fixed-known-background independent-Poisson toys only. Real-data parity, background fitting/model uncertainty, detector/trigger effects, methods comparison, and novelty review remain unresolved; confirmatory CMS claims remain NO-GO.
