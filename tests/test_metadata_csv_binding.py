@@ -14,7 +14,8 @@ COMPARATOR = Path(__file__).resolve().parents[1] / "scripts" / "compare_baseline
 
 def write_csv(path, counts):
     lines = ["mass_low_GeV,mass_high_GeV,pair_count"]
-    lines += [f"{i},{i + 1},{c}" for i, c in enumerate(counts)]
+    width = (300.0 - 0.25) / len(counts)
+    lines += [f"{0.25 + i * width:.17g},{0.25 + (i + 1) * width:.17g},{c}" for i, c in enumerate(counts)]
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
@@ -45,19 +46,30 @@ def test_csv_totals_bound_to_metadata_pass_and_fail():
     cand["histogram_csv_sha256"] = "a" * 64
     ref["histogram_csv_sha256"] = "b" * 64
     ok = compare(cand, ref,
-                 candidate_csv={"bins": 3, "total": cand["pairs_in_histogram_range"], "sha256": "a" * 64},
-                 reference_csv={"bins": 3, "total": ref["histogram_regular_bin_total"], "sha256": "b" * 64})
+                 candidate_csv={"bins": 3, "total": cand["pairs_in_histogram_range"], "sha256": "a" * 64, "range_low": 0.25, "range_high": 300.0},
+                 reference_csv={"bins": 3, "total": ref["histogram_regular_bin_total"], "sha256": "b" * 64, "range_low": 0.25, "range_high": 300.0})
     assert ok["comparison_passed"] is True
     stale = compare(cand, ref,
-                    candidate_csv={"bins": 3, "total": cand["pairs_in_histogram_range"] + 1, "sha256": "a" * 64},
-                    reference_csv={"bins": 3, "total": ref["histogram_regular_bin_total"], "sha256": "b" * 64})
+                    candidate_csv={"bins": 3, "total": cand["pairs_in_histogram_range"] + 1, "sha256": "a" * 64, "range_low": 0.25, "range_high": 300.0},
+                    reference_csv={"bins": 3, "total": ref["histogram_regular_bin_total"], "sha256": "b" * 64, "range_low": 0.25, "range_high": 300.0})
     assert stale["comparison_passed"] is False
     assert _checks(stale)["candidate_csv_total_matches_metadata_in_range_count"] is False
     assert _checks(stale)["reference_csv_total_matches_metadata_in_range_count"] is True
     wrong_bins = compare(cand, ref,
-                         candidate_csv={"bins": 2, "total": cand["pairs_in_histogram_range"], "sha256": "a" * 64},
+                         candidate_csv={"bins": 2, "total": cand["pairs_in_histogram_range"], "sha256": "a" * 64, "range_low": 0.25, "range_high": 300.0},
                          reference_csv={"bins": 3, "total": ref["histogram_regular_bin_total"], "sha256": "b" * 64})
     assert _checks(wrong_bins)["candidate_csv_bin_count_matches_metadata"] is False
+
+
+@pytest.mark.parametrize("contents", [
+    "mass_low_GeV,mass_high_GeV,pair_count\n",
+    "mass_low_GeV,mass_high_GeV,pair_count\n0.25,1,2\n1.1,300,3\n",
+])
+def test_csv_rejects_empty_or_noncontiguous_bins(tmp_path, contents):
+    p = tmp_path / "bad.csv"
+    p.write_text(contents, encoding="utf-8")
+    with pytest.raises(ValueError):
+        histogram_csv_summary(p)
 
 
 def test_csv_sha256_must_match_metadata_even_when_summary_matches(tmp_path):
