@@ -28,3 +28,48 @@ def test_local_shoulder_is_additive_and_centered_on_nearest_bin():
     assert actual[4] == pytest.approx(baseline[4] + 3.0)
     assert actual[0] > baseline[0]
     assert np.all(actual >= baseline)
+
+
+def test_zero_amplitude_returns_baseline():
+    baseline = log_polynomial_null_means([1.0, -0.2], 7)
+    actual = local_shoulder_null_means([1.0, -0.2], 7, 0.0, 0.3, 0.1)
+    np.testing.assert_allclose(actual, baseline, rtol=1e-14, atol=0.0)
+
+
+@pytest.mark.parametrize(
+    "coefficients,n_bins",
+    [
+        ([], 5),
+        ([1.0, float("nan")], 5),
+        ([1.0, 2.0, 3.0], 3),
+        ([1000.0], 5),
+        ([-1000.0], 5),
+        ([1.0], 0),
+        ([1.0], True),
+    ],
+)
+def test_log_polynomial_generator_rejects_invalid_inputs(coefficients, n_bins):
+    with pytest.raises(ValueError):
+        log_polynomial_null_means(coefficients, n_bins)
+
+
+@pytest.mark.parametrize(
+    "amplitude,center,width",
+    [
+        (-1.0, 0.0, 0.2),
+        (1.0, float("nan"), 0.2),
+        (1.0, 0.0, 0.0),
+        (1.0, 0.0, -0.1),
+        (True, 0.0, 0.2),
+    ],
+)
+def test_local_shoulder_generator_rejects_invalid_shape_parameters(amplitude, center, width):
+    with pytest.raises(ValueError):
+        local_shoulder_null_means([1.0, 0.0], 9, amplitude, center, width)
+
+
+def test_local_shoulder_generator_rejects_invalid_base_configuration():
+    with pytest.raises(ValueError):
+        local_shoulder_null_means([1.0, float("inf")], 9, 1.0, 0.0, 0.2)
+    with pytest.raises(ValueError):
+        local_shoulder_null_means([1.0, 0.0], 2, 1.0, 0.0, 0.2)
