@@ -346,3 +346,10 @@ The revised bounded baseline/parity workflow has not run. A dispatch-path audit 
 
 
 - **2026-10-28 exploratory scan-statistic implementation:** added `src/cms_dimuon_robustness/global_scan.py`, synthetic unit tests in `tests/test_global_scan.py`, and `docs/exploratory_scan_statistic_implementation_2026-10-28.md`. The function scans a declared set of contiguous bin widths using a one-sided Poisson likelihood-ratio statistic with an externally supplied background expectation. It is a deliberately limited first algorithmic component: no background fitting/model selection, calibrated global p-value, BumpHunter equivalence, CMS validation, or physics result is claimed. The test workflow must pass before this component is treated as validated software.
+
+
+## Null-simulation input-validation follow-up — 2026-10-28
+
+- The fixed-background Poisson null simulator now validates the scan-window configuration before beginning the replicate loop, so invalid widths fail before any random experiments are generated.
+- Added regression cases for empty/non-finite/non-positive expected backgrounds, empty or out-of-range scan widths, negative seeds, and Boolean experiment counts.
+- These are source/test changes only. The latest test suite has not been executed in this session and CI for these commits is unverified. The simulator remains a fixed-known-background toy model; it does not establish calibration under fitted-background uncertainty, model selection, detector effects, or real CMS conditions.
