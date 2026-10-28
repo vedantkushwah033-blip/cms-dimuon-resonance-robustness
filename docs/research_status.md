@@ -4,7 +4,7 @@
 
 ## Confirmed completed in this repository
 - Added `docs/independent_statistical_design_audit_2026-10-28.md`, a methodological review memo clarifying the estimand, calibration resolution versus precision, conditional interpretation of Wilson intervals, scan freezing, scenario specification, fit-failure policy, misspecification limits, and the separate CMS-data validation gate. It is explicitly not an external review or preregistration.
-- The audit document's commit `789ceafc59c1bdd8e462c05869e5cede83880d44` triggered fresh GitHub Actions tests and ROOT integration checks; at the time of this update those workflows were still running, so the new commit is not yet declared CI-green.
+- The audit document's commit `789ceafc59c1bdd8e462c05869e5cede83880d44` passed GitHub Actions tests on Python 3.10, 3.11, and 3.12, including compilation and Ruff lint, and the independent ROOT exporter integration workflow passed on synthetic data. These are software checks only, not CMS-data validation.
 - Confirmatory simulations remain on hold pending fixed numerical scenario choices and independent scientific review.
 - Audited the official CMS outreach Python source and documented a component-by-component parity checklist in `docs/reference_implementation_audit.md`.
 - Tightened opposite-sign selection semantics: the NanoAOD pair function now rejects charge values outside {-1,+1}, because `q1*q2 < 0` matches the reference's charge-inequality test only under that domain assumption.
