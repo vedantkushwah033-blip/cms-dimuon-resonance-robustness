@@ -61,3 +61,15 @@ This is a bounded source-level audit of the named scripts and protocol artifacts
 - `configs/confirmatory_global_calibration_protocol.yaml` — intentionally unresolved draft.
 - `scripts/validate_confirmatory_protocol.py` — structural protocol validator, not a scientific or implementation validator.
 - `research_question.md` and `analysis_plan.md` — provisional question and staged plan.
+
+## Follow-up implementation status — 2026-10-28
+
+This audit's original inventory above predates the exploratory scan and fixed-background calibration helpers added later on the same research branch. It must not be read as saying those components are still entirely absent. The current branch now includes:
+
+- `src/cms_dimuon_robustness/global_scan.py`: a one-sided Poisson excess statistic scanned over a caller-supplied set of contiguous window widths, using externally supplied expected counts.
+- `src/cms_dimuon_robustness/calibration.py`: plus-one empirical upper-tail p-values, fixed-known-background independent-Poisson null generation, a Wilson score interval, and a separate held-out toy false-positive evaluation helper.
+- Synthetic unit tests for the scan and these utilities.
+
+These are bounded exploratory building blocks. They do **not** complete the proposed end-to-end algorithm: there is still no fitted-background likelihood/uncertainty pipeline, no prespecified candidate-model selection implementation, no complete data-to-global-p-value runner, no matched established-method comparator, and no demonstrated real-data parity. The held-out helper evaluates only the fixed-background toy null, not the proposed misspecification estimand. Consequently, the NO-GO decision for confirmatory global-calibration simulations remains unchanged.
+
+The Python test matrix subsequently passed on Python 3.10, 3.11, and 3.12 for commit `4e171a8a` (CI run `40707114657`). The dedicated PyROOT integration job for that commit was still running at the time of this update; it is not represented as passed here.
