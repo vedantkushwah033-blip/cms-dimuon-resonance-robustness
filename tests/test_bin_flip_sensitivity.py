@@ -16,5 +16,13 @@ def test_small_run_is_deterministic_and_reports_both_kinds():
     r1, r2 = run(50_000, 2, seed=1), run(50_000, 2, seed=1)
     assert r1 == r2 and set(r1["kinds"]) == {"generic", "collinear"}
     for item in r1["kinds"].values():
-        assert item["pairs_in_range"] > 0
+        assert item["pairs_in_range_stable_formula"] > 0
+        assert item["pairs_in_range_for_both_formulas"] > 0
         assert item["bin_disagreements_stable_vs_direct"] >= 0
+        bound = item["upper_95pct_conditional_bin_flip_rate_if_zero_observed_rule_of_three"]
+        if item["bin_disagreements_stable_vs_direct"] == 0:
+            assert np.isclose(
+                bound, 3.0 / item["pairs_in_range_for_both_formulas"]
+            )
+        else:
+            assert bound is None
