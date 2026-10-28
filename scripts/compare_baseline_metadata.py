@@ -359,19 +359,27 @@ def compare(
             "reference_input_bytes_match_manifest"
         ))
     ]
-    non_provenance_checks = [item for item in checks if item not in provenance_checks]
+    artifact_checks = [
+        item for item in checks
+        if item["check"].startswith(("candidate_csv_", "reference_csv_"))
+    ]
+    substantive_checks = [
+        item for item in checks
+        if item not in provenance_checks and item not in artifact_checks
+    ]
     passed = all(item["passed"] for item in checks)
     return {
         "candidate_metadata": "candidate",
         "reference_metadata": "reference",
         "check_count": len(checks),
         "failed_check_count": sum(not item["passed"] for item in checks),
-        "cutflow_and_configuration_agree": all(item["passed"] for item in non_provenance_checks),
+        "cutflow_and_configuration_agree": all(item["passed"] for item in substantive_checks),
         "input_provenance_agrees": all(item["passed"] for item in provenance_checks),
+        "artifact_integrity_agrees": all(item["passed"] for item in artifact_checks),
         "comparison_passed": passed,
         "checks": checks,
         "interpretation": (
-            "Cut flow, configuration, mass accounting, and input provenance all agree; "
+            "Cut flow, configuration, input provenance, and CSV artifact integrity all agree; "
             "candidate non-finite mass count is zero."
             if passed else
             "Metadata comparison failed; inspect every failed check before interpreting histogram parity."
