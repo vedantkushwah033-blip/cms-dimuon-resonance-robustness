@@ -21,7 +21,7 @@ p_{\mathrm{global}}=P_{H_0}(T_{\max}\ge c),
 
 where each pseudo-experiment repeats the complete fitting, background-model selection, mass-window scan, and maximum-statistic calculation. The threshold \(c\) must be determined using a separate calibration sample and then frozen before evaluation on held-out generators.
 
-Report the empirical rate, a two-sided 95% Wilson interval, number of generated pseudo-experiments, number and fraction of failed fits, and the exact rule used to handle failures. Never silently drop failures.
+Report the empirical rate, a two-sided 95% Clopper–Pearson exact binomial interval, number of generated pseudo-experiments, number and fraction of failed fits, and the exact rule used to handle failures. Never silently drop failures.
 
 ## 3. Analysis procedures to compare
 
@@ -63,7 +63,7 @@ The entire selection and scan must be repeated inside each replicate. A collecti
 
 Use independent random streams and recorded seeds for development, calibration, and evaluation. Determine the critical threshold from the calibration distribution of the global statistic using a quantile convention specified in advance. Freeze that threshold before evaluating held-out pseudo-experiments.
 
-For a target global false-positive rate of 0.05, 10,000 independent held-out replicates yield an approximate standard error of 0.00218 and a rough 95% normal margin of 0.0043 when the true rate is near 0.05. Use Wilson intervals for reporting; this planning approximation does not account for multiplicity across scenarios or paired contrasts.
+For a target global false-positive rate of 0.05, 10,000 independent held-out replicates yield an approximate standard error of 0.00218 and a rough 95% normal margin of 0.0043 when the true rate is near 0.05. Use the repository's declared two-sided Clopper–Pearson exact binomial interval for the protocol's primary rate reporting; this planning approximation does not account for multiplicity across scenarios or paired contrasts.
 
 The primary unit is a complete pseudo-experiment, not a mass bin or scan window. Do not treat windows from the same spectrum as independent observations.
 
@@ -94,7 +94,7 @@ Retain:
 - summary tables and interval calculations;
 - deterministic reconstruction checks and hashes for generated artifacts.
 
-Use small deterministic tests to verify the statistic, scan boundaries, quantile convention, Wilson interval implementation, and failure accounting before large runs.
+Use small deterministic tests to verify the statistic, scan boundaries, quantile convention, Clopper–Pearson interval implementation, and failure accounting before large runs.
 
 ## 10. Go/no-go gates
 
