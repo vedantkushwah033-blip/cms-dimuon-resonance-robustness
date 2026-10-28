@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 import math
 import re
@@ -35,7 +36,7 @@ def exact_nonnegative_int(metadata: dict[str, Any], key: str, source: str) -> in
     return value
 
 
-def histogram_csv_summary(path: Path) -> dict[str, int]:
+def histogram_csv_summary(path: Path) -> dict[str, Any]:
     """Return the bin count and exact integer total of a histogram CSV."""
     with path.open("r", encoding="utf-8", newline="") as stream:
         reader = csv.DictReader(stream)
@@ -49,7 +50,8 @@ def histogram_csv_summary(path: Path) -> dict[str, int]:
         if value is None or re.fullmatch(r"[0-9]+", value) is None:
             raise ValueError(f"{path}: line {line_number}: pair_count must be an unsigned integer string")
         total += int(value, 10)
-    return {"bins": len(rows), "total": total}
+    digest = hashlib.sha256(path.read_bytes()).hexdigest()
+    return {"bins": len(rows), "total": total, "sha256": digest}
 
 
 def compare(
@@ -57,8 +59,8 @@ def compare(
     reference: dict[str, Any],
     expected_sha256: str | None = None,
     expected_bytes: int | None = None,
-    candidate_csv: dict[str, int] | None = None,
-    reference_csv: dict[str, int] | None = None,
+    candidate_csv: dict[str, Any] | None = None,
+    reference_csv: dict[str, Any] | None = None,
     expected_max_events: int | None = None,
 ) -> dict[str, Any]:
     """Return explicit checks for cut flow, configuration, and mass accounting."""
@@ -207,6 +209,21 @@ def compare(
             "check": f"{label}_csv_total_matches_metadata_in_range_count",
             "candidate": csv_summary["total"], "reference": meta_total,
             "passed": bool(valid_total and csv_summary["total"] == meta_total),
+        })
+
+        metadata_csv_sha = meta.get("histogram_csv_sha256")
+        metadata_csv_sha_valid = isinstance(metadata_csv_sha, str) and re.fullmatch(r"[0-9a-fA-F]{64}", metadata_csv_sha) is not None
+        checks.append({
+            "check": f"{label}_csv_sha256_present_and_valid_in_metadata",
+            "candidate": metadata_csv_sha,
+            "reference": "64 hexadecimal SHA-256 characters required",
+            "passed": metadata_csv_sha_valid,
+        })
+        checks.append({
+            "check": f"{label}_csv_sha256_matches_metadata",
+            "candidate": csv_summary.get("sha256"),
+            "reference": metadata_csv_sha.lower() if metadata_csv_sha_valid else metadata_csv_sha,
+            "passed": bool(metadata_csv_sha_valid and csv_summary.get("sha256") == metadata_csv_sha.lower()),
         })
 
     if expected_max_events is not None:
