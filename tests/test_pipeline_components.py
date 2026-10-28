@@ -6,7 +6,7 @@ background family, fit uncertainty, global p-values, or CMS data compatibility.
 import numpy as np
 
 from cms_dimuon_robustness.background_fit import fit_log_polynomial_background
-from cms_dimuon_robustness.global_scan import scan_for_excess
+from cms_dimuon_robustness.global_scan import scan_poisson_excess
 from cms_dimuon_robustness.residual_diagnostics import poisson_fit_residual_diagnostics
 
 
@@ -22,7 +22,7 @@ def test_fit_residual_diagnostics_and_scan_share_same_bins_and_finite_values():
     diagnostics = poisson_fit_residual_diagnostics(
         observed, expected, n_fitted_parameters=fit["n_parameters"]
     )
-    scan = scan_for_excess(observed, expected, window_widths=[1, 2, 3, 4])
+    scan = scan_poisson_excess(observed, expected, window_widths=[1, 2, 3, 4])
 
     assert fit["optimizer_success"] is True
     assert expected.shape == observed.shape
@@ -42,6 +42,6 @@ def test_no_excess_fixture_does_not_create_negative_scan_statistic():
     observed = np.full(24, 10, dtype=int)
     fit = fit_log_polynomial_background(observed, order=0)
     expected = np.asarray(fit["expected_counts"], dtype=float)
-    scan = scan_for_excess(observed, expected, window_widths=[1, 2, 3])
+    scan = scan_poisson_excess(observed, expected, window_widths=[1, 2, 3])
     assert scan["global_statistic_q0"] >= 0
     assert scan["windows_scanned"] == (24 + 23 + 22)
