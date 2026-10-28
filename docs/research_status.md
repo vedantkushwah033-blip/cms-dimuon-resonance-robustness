@@ -377,3 +377,13 @@ The revised bounded baseline/parity workflow has not run. A dispatch-path audit 
 - The dedicated PyROOT integration workflow for the same commit was still in progress at the last check; it must not be described as passing until its result is complete.
 - Reconciled the older algorithm-vs-estimand audit with later commits: an exploratory scan and fixed-background calibration/evaluation helpers now exist, but the end-to-end fitted-background, model-selection, global-calibration research pipeline still does not. The NO-GO decision for confirmatory simulation is unchanged.
 - No confirmatory simulations, real-data spectrum comparison, or physics inference were performed in this update.
+
+
+## Fixed-order background-fit prototype — 2026-10-28
+
+- Added `src/cms_dimuon_robustness/background_fit.py`, a fixed-order log-polynomial Poisson mean fit with a bounded L-BFGS-B optimizer, explicit input checks, returned fitted means/coefficients/objective/gradient diagnostic, and fail-closed handling when the optimizer reports failure or non-finite output.
+- Added `tests/test_background_fit.py` with constant-mean recovery, a monotonic synthetic log-linear fixture, invalid-input cases, and an all-zero spectrum fixture.
+- This is deliberately a **modelling primitive only**: it performs no background-family selection, does not fit signal-plus-background hypotheses, does not propagate parameter uncertainty into the scan, and is not validated against the CMS reference or any physical sideband definition. The polynomial order and fit range are supplied externally; their scientific choice remains unresolved.
+- Added an independent brute-force reference test for the scan maximum in `tests/test_global_scan.py`; the test compares the statistic, winning window metadata, and number of windows with an independently enumerated implementation.
+- Latest known test and ROOT integration workflows were still running after these changes were committed. Do not claim the new tests pass until current-head CI completes.
+- **Next gate:** review optimizer edge cases and residual diagnostics; specify the mass interval, binning, candidate orders, and a blinded/frozen selection rule before connecting this fitter to a global scan. Do not launch confirmatory simulations yet.
