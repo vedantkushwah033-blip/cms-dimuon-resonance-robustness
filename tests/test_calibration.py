@@ -295,6 +295,13 @@ def test_empirical_rank_test_resolution_reports_discrete_size_grid():
     assert non_grid_aligned["max_null_exceedances_to_reject"] == 4
     assert non_grid_aligned["unconditional_rejection_probability_under_iid_continuous_null"] == 5 / 101
 
+    # This boundary is vulnerable to binary-float multiplication:
+    # 0.29 * 100 can evaluate just below 29. The decimal input means
+    # 29 of 100 rank slots are allowed at alpha=0.29.
+    boundary = empirical_rank_test_resolution(99, 0.29)
+    assert boundary["max_null_exceedances_to_reject"] == 28
+    assert boundary["unconditional_rejection_probability_under_iid_continuous_null"] == 0.29
+
 
 @pytest.mark.parametrize("n_calibration,alpha", [(0, 0.05), (True, 0.05), (100, 0.0), (100, 1.0)])
 def test_empirical_rank_test_resolution_rejects_invalid_inputs(n_calibration, alpha):
