@@ -134,6 +134,27 @@ def main() -> int:
             }
             return false;
         }
+
+        bool hasNonfiniteKinematics(
+            const ROOT::VecOps::RVec<float>& pt,
+            const ROOT::VecOps::RVec<float>& eta,
+            const ROOT::VecOps::RVec<float>& phi,
+            const ROOT::VecOps::RVec<float>& mass
+        ) {
+            for (float value : pt) {
+                if (!std::isfinite(value)) return true;
+            }
+            for (float value : eta) {
+                if (!std::isfinite(value)) return true;
+            }
+            for (float value : phi) {
+                if (!std::isfinite(value)) return true;
+            }
+            for (float value : mass) {
+                if (!std::isfinite(value)) return true;
+            }
+            return false;
+        }
         """
     )
 
@@ -165,7 +186,8 @@ def main() -> int:
         "Muon_pt.size() != Muon_mass.size() || "
         "Muon_pt.size() != Muon_charge.size() || "
         "(nMuon == 2 && (hasInvalidMuonCharge(Muon_charge) || "
-        "hasNegativeFiniteKinematics(Muon_pt, Muon_mass)))",
+        "hasNegativeFiniteKinematics(Muon_pt, Muon_mass) || "
+        "hasNonfiniteKinematics(Muon_pt, Muon_eta, Muon_phi, Muon_mass)))",
         "Events with invalid muon collection lengths, charge, or kinematics",
     )
     invalid_collection_count = int(invalid_collections.Count().GetValue())
@@ -173,7 +195,8 @@ def main() -> int:
         raise ValueError(
             "Input ROOT tree contains "
             f"{invalid_collection_count} events with inconsistent nMuon or muon "
-            "collection lengths, invalid charge values, or negative finite kinematics; "
+            "collection lengths, invalid charge values, negative finite kinematics, "
+            "or non-finite kinematics; "
             "refusing to index muon vectors"
         )
 
