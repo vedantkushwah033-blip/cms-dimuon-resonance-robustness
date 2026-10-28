@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import math
+from decimal import Decimal, ROUND_FLOOR
 
 import numpy as np
 from numpy.typing import ArrayLike
@@ -50,7 +51,13 @@ def empirical_rank_test_resolution(n_calibration: int, alpha: float) -> dict[str
     if not np.isfinite(alpha) or not 0 < alpha < 1:
         raise ValueError("alpha must be finite and strictly between 0 and 1")
 
-    rank_slots = int(math.floor(float(alpha) * (int(n_calibration) + 1)))
+    # Decimal(str(alpha)) avoids a binary-float multiplication edge case
+    # (for example, 0.29 * 100 may round just below 29 and lose a valid rank).
+    rank_slots = int(
+        (Decimal(str(float(alpha))) * Decimal(int(n_calibration) + 1)).to_integral_value(
+            rounding=ROUND_FLOOR
+        )
+    )
     return {
         "n_calibration": int(n_calibration),
         "alpha": float(alpha),
