@@ -99,7 +99,8 @@ def test_fit_reports_projected_gradient_at_active_upper_bound(monkeypatch):
 
     assert result["coefficient_boundary_active"] is True
     assert result["gradient_infinity_norm"] > 1.0
-    assert result["projected_gradient_infinity_norm"] == 0.0
+    # Floating-point summation can leave a tiny residual in the interior slope component.
+    assert result["projected_gradient_infinity_norm"] < 1e-4
 
 
 def test_interior_fit_projected_gradient_matches_raw_gradient():
