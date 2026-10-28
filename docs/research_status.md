@@ -110,3 +110,11 @@
 - Added a regression test that injects a failure on the third fit, checks index/seed attribution, verifies exception chaining, and confirms the routine does not retry.
 - Implementation commit: `6f33ddcaa1f998456019a9a81922f582f167c310`; test commit: `fd9c826366686dc3f0c158b9dfae20ba3dcaa1a0`.
 - This is a traceability improvement, not a new statistical result. CI runs for implementation commit `6f33ddcaa1` were queued at the time of the status check and must pass before the change is considered validated. Confirmatory simulation remains NO-GO pending a frozen and reviewed design; no real-CMS validation is claimed.
+
+
+## Constrained-gradient diagnostic — 2026-10-29
+- Code review found that the reported `gradient_infinity_norm` is the raw objective gradient. At a coefficient bound, a nonzero raw gradient can be consistent with a constrained optimum, so interpreting it alone as optimizer non-convergence would be misleading.
+- Added `projected_gradient_infinity_norm`, using the box constraints and existing boundary tolerance to zero gradient components that point outward from an active bound. The original raw-gradient field remains unchanged for transparency. This is a local KKT-style diagnostic, not proof of global optimality or model adequacy.
+- Added deterministic tests for an active upper-bound fixture with outward-pointing gradient and for an interior fit where projected and raw gradients coincide.
+- Code commit: `c8bc11ba2328f15fbd163beb369690f21402bca3`; test commit: `1db56417308ebd7358d05d745a820e68bac10523`. CI is pending for these exact changes and must be checked before considering the diagnostic validated.
+- No simulations were run. The confirmatory study remains **NO-GO** pending independent review and frozen design; no CMS-data validation or resonance claim is supported.
