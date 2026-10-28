@@ -61,3 +61,39 @@ def test_scan_rejects_invalid_inputs(counts, background, widths):
 def test_duplicate_window_widths_do_not_duplicate_scan():
     result = scan_poisson_excess([1, 20, 1], [2, 2, 2], [1, 2, 1])
     assert result["windows_scanned"] == 5
+
+
+
+@pytest.mark.parametrize(
+    "counts,background,widths",
+    [
+        ([0, 1, 0, 4], [0.5, 1.5, 2.0, 1.0], [1, 2]),
+        ([8, 0, 2, 7, 1], [2.0, 1.0, 2.0, 2.0, 1.0], [3, 1, 2]),
+        ([3, 3, 3], [3.0, 3.0, 3.0], [1, 2, 3]),
+    ],
+)
+def test_scan_matches_independent_brute_force_reference(counts, background, widths):
+    """Cross-check the optimized scan against a simple, independent loop."""
+    observed = np.asarray(counts, dtype=int)
+    expected = np.asarray(background, dtype=float)
+    unique_widths = list(dict.fromkeys(widths))
+    candidates = []
+    for width in unique_widths:
+        for start in range(len(observed) - width + 1):
+            n = int(sum(int(x) for x in observed[start : start + width]))
+            b = float(sum(float(x) for x in expected[start : start + width]))
+            q = 0.0 if n <= b else 2.0 * (n * np.log(n / b) - (n - b))
+            candidates.append((q, start, width, n, b))
+
+    # Python max with the explicit scan-order key reproduces the documented
+    # first-encountered tie rule without calling the production statistic.
+    best_q = max(candidate[0] for candidate in candidates)
+    best = next(candidate for candidate in candidates if candidate[0] == best_q)
+    result = scan_poisson_excess(counts, background, widths)
+
+    assert result["global_statistic_q0"] == pytest.approx(best[0])
+    assert result["start_bin"] == best[1]
+    assert result["window_width_bins"] == best[2]
+    assert result["observed_in_best_window"] == best[3]
+    assert result["expected_in_best_window"] == pytest.approx(best[4])
+    assert result["windows_scanned"] == len(candidates)
