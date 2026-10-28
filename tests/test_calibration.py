@@ -223,3 +223,41 @@ def test_held_out_evaluation_reports_when_calibration_resolution_is_too_coarse()
     assert result["calibration_minimum_resolvable_pvalue"] == pytest.approx(0.1)
     assert result["calibration_resolution_allows_alpha_rejection"] is False
     assert result["rejections"] == 0
+
+def test_refitted_background_null_simulation_is_reproducible():
+    from cms_dimuon_robustness.calibration import simulate_refitted_background_null
+
+    means = [18.0, 16.0, 14.0, 12.0, 11.0, 10.0, 9.0, 8.0]
+    first = simulate_refitted_background_null(
+        means, [1, 2, 3], n_experiments=12, seed=20261028, background_order=1
+    )
+    second = simulate_refitted_background_null(
+        means, [1, 2, 3], n_experiments=12, seed=20261028, background_order=1
+    )
+    assert first == second
+    assert first["n_experiments"] == 12
+    assert first["background_order"] == 1
+    assert len(first["null_statistics"]) == 12
+    assert all(value >= 0 for value in first["null_statistics"])
+    assert "not CMS validation" in first["interpretation"]
+
+
+@pytest.mark.parametrize(
+    "means,widths,n_experiments,seed,order",
+    [
+        ([], [1], 2, 1, 0),
+        ([1.0, 0.0, 2.0], [1], 2, 1, 0),
+        ([1.0, float("nan"), 2.0], [1], 2, 1, 0),
+        ([1.0, 2.0], [1], 0, 1, 0),
+        ([1.0, 2.0], [1], 2, -1, 0),
+        ([1.0, 2.0], [1], 2, 1, True),
+        ([1.0, 2.0], [1], 2, 1, 1),
+    ],
+)
+def test_refitted_background_null_simulation_rejects_invalid_configuration(
+    means, widths, n_experiments, seed, order
+):
+    from cms_dimuon_robustness.calibration import simulate_refitted_background_null
+
+    with pytest.raises(ValueError):
+        simulate_refitted_background_null(means, widths, n_experiments, seed, order)
