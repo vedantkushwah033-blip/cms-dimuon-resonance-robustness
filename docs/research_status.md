@@ -370,3 +370,10 @@ The revised bounded baseline/parity workflow has not run. A dispatch-path audit 
 - Fixed the all-failure/all-success Wilson endpoints explicitly and changed the reported approximate confidence level to be computed from the supplied normal-score (z), rather than returning NaN for non-default (z). Added validation for nonnumeric/Boolean confidence levels and alpha values, plus regression tests.
 - Fix commits: `d7261b4d` (implementation), `3b671fe8` and `13aae42f` (tests). GitHub Actions for the newest commit must complete before this fix is considered verified. No toy evaluation output is being reported as a scientific result.
 - The scope remains fixed-known-background independent-Poisson toys only. Real-data parity, background fitting/model uncertainty, detector/trigger effects, methods comparison, and novelty review remain unresolved; confirmatory CMS claims remain NO-GO.
+
+## Latest CI and audit reconciliation — 2026-10-28
+
+- The Python test workflow for commit `4e171a8aa31a7160c55909509a5da00b91fd9bb9` completed successfully on Python 3.10, 3.11, and 3.12 (run `40707114657`). This includes the Wilson endpoint regression and invalid-confidence/alpha tests. This is software test evidence only.
+- The dedicated PyROOT integration workflow for the same commit was still in progress at the last check; it must not be described as passing until its result is complete.
+- Reconciled the older algorithm-vs-estimand audit with later commits: an exploratory scan and fixed-background calibration/evaluation helpers now exist, but the end-to-end fitted-background, model-selection, global-calibration research pipeline still does not. The NO-GO decision for confirmatory simulation is unchanged.
+- No confirmatory simulations, real-data spectrum comparison, or physics inference were performed in this update.
