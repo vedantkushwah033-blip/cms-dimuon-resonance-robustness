@@ -9,7 +9,7 @@ COMPARATOR = REPO_ROOT / "scripts" / "compare_baseline_metadata.py"
 
 def candidate_metadata():
     return {
-        "input_sha256": "a".repeat(64),
+        "input_sha256": "a" * 64,
         "input_bytes": 123456,
         "events_read": 100,
         "events_selected": 40,
@@ -28,7 +28,7 @@ def candidate_metadata():
 
 def reference_metadata():
     return {
-        "input_sha256": "a".repeat(64),
+        "input_sha256": "a" * 64,
         "input_bytes": 123456,
         "events_total": 100,
         "events_exactly_two_muons": 40,
