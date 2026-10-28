@@ -47,6 +47,7 @@ The education/outreach sample remains useful for pipeline development only. The 
 - `configs/confirmatory_global_calibration_protocol.yaml` and `scripts/validate_confirmatory_protocol.py` — machine-readable draft and fail-closed structural gate for confirmatory global-calibration runs; the current draft is intentionally blocked until data parity, literature review, and protocol review are complete. Tests live in `tests/test_protocol_validator.py`.
 - `docs/expanded_literature_matrix_2026-10-28.md` — an expanded, explicitly preliminary literature matrix covering model-selection uncertainty, look-elsewhere calibration, BumpHunter, CMS Open Data dimuon searches, data-directed searches, Gaussian-process backgrounds, and background sculpting; it states the unresolved research gap and current no-go gates.
 - `docs/estimand_comparator_design_memo_2026-10-28.md` — a non-confirmatory design memo defining the candidate global type-I-error estimand, development/calibration/held-out separation, fair comparators, illustrative Monte Carlo precision planning, algorithm-freeze fields, and go/no-go rules.
+- `docs/implemented_algorithm_vs_proposed_estimand_audit_2026-10-28.md` — source-level audit showing the current repository is a histogram-reconstruction scaffold; bump-hunt fitting, model selection, scan statistics, and global calibration are not yet implemented.
 
 ## Setup
 Python 3.10 or newer:
