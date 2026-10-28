@@ -138,6 +138,77 @@ def simulate_refitted_background_null(
         "interpretation": "refitted fixed-order toy null; not CMS validation",
     }
 
+
+def evaluate_refitted_background_false_positive_rate(
+    null_generating_means: ArrayLike,
+    window_widths: tuple[int, ...] | list[int],
+    n_calibration: int,
+    n_evaluation: int,
+    alpha: float,
+    seed_calibration: int,
+    seed_evaluation: int,
+    background_order: int = 1,
+) -> dict[str, int | float | bool | dict[str, float]]:
+    """Evaluate held-out type-I error for the refitted fixed-order toy procedure.
+
+    Calibration and evaluation samples are independent, use distinct seeds,
+    and both refit the background separately in every pseudoexperiment. The
+    null-generating mean vector is fixed and supplied by the caller. Thus this
+    estimates operating behavior only for that explicit toy null and fixed
+    background order; it does not establish robustness to nuisance estimation,
+    background misspecification, model selection, detector effects, or CMS data.
+    """
+    for value, name in ((n_calibration, "n_calibration"), (n_evaluation, "n_evaluation")):
+        if isinstance(value, bool) or not isinstance(value, (int, np.integer)) or value <= 0:
+            raise ValueError(f"{name} must be a positive integer")
+    if isinstance(alpha, bool) or not isinstance(alpha, (int, float, np.integer, np.floating)):
+        raise ValueError("alpha must be a finite number strictly between 0 and 1")
+    if not np.isfinite(alpha) or not 0 < alpha < 1:
+        raise ValueError("alpha must be finite and strictly between 0 and 1")
+    for seed, name in ((seed_calibration, "seed_calibration"), (seed_evaluation, "seed_evaluation")):
+        if isinstance(seed, bool) or not isinstance(seed, (int, np.integer)) or seed < 0:
+            raise ValueError(f"{name} must be a non-negative integer")
+    if seed_calibration == seed_evaluation:
+        raise ValueError("calibration and evaluation seeds must differ")
+
+    calibration = simulate_refitted_background_null(
+        null_generating_means,
+        window_widths,
+        int(n_calibration),
+        int(seed_calibration),
+        background_order=int(background_order),
+    )["null_statistics"]
+    evaluation = simulate_refitted_background_null(
+        null_generating_means,
+        window_widths,
+        int(n_evaluation),
+        int(seed_evaluation),
+        background_order=int(background_order),
+    )["null_statistics"]
+
+    sorted_calibration = np.sort(np.asarray(calibration, dtype=float))
+    evaluation_array = np.asarray(evaluation, dtype=float)
+    tail_counts = int(n_calibration) - np.searchsorted(
+        sorted_calibration, evaluation_array, side="left"
+    )
+    p_values = (1 + tail_counts) / (int(n_calibration) + 1)
+    rejected = int(np.count_nonzero(p_values <= alpha))
+    interval = wilson_interval(rejected, int(n_evaluation))
+    return {
+        "alpha": float(alpha),
+        "n_calibration": int(n_calibration),
+        "n_evaluation": int(n_evaluation),
+        "seed_calibration": int(seed_calibration),
+        "seed_evaluation": int(seed_evaluation),
+        "background_order": int(background_order),
+        "rejections": rejected,
+        "false_positive_rate": float(rejected / int(n_evaluation)),
+        "wilson_95_interval": interval,
+        "calibration_minimum_resolvable_pvalue": float(1 / (int(n_calibration) + 1)),
+        "calibration_resolution_allows_alpha_rejection": bool(1 / (int(n_calibration) + 1) <= alpha),
+        "interpretation": "refitted fixed-order toy null only; not CMS validation",
+    }
+
 def wilson_interval(
     successes: int, trials: int, confidence_z: float = 1.959963984540054
 ) -> dict[str, float]:
