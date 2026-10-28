@@ -49,3 +49,24 @@ def test_fixed_background_null_simulation_rejects_invalid_experiment_count():
 
     with pytest.raises(ValueError):
         simulate_fixed_background_null([4.0, 5.0], [1], 0, seed=71)
+
+
+@pytest.mark.parametrize(
+    "expected,widths,n_experiments,seed",
+    [
+        ([], [1], 2, 1),
+        ([1.0, float("nan")], [1], 2, 1),
+        ([1.0, 0.0], [1], 2, 1),
+        ([1.0, 2.0], [], 2, 1),
+        ([1.0, 2.0], [3], 2, 1),
+        ([1.0, 2.0], [1], 2, -1),
+        ([1.0, 2.0], [1], True, 1),
+    ],
+)
+def test_fixed_background_null_simulation_rejects_invalid_configuration(
+    expected, widths, n_experiments, seed
+):
+    from cms_dimuon_robustness.calibration import simulate_fixed_background_null
+
+    with pytest.raises(ValueError):
+        simulate_fixed_background_null(expected, widths, n_experiments, seed)
