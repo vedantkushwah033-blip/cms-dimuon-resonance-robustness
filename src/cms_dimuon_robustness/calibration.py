@@ -139,7 +139,9 @@ def simulate_refitted_background_null(
     The observed-data statistic must be computed with the same fitter, binning,
     scan windows, and fit-failure policy before comparing it with these null
     statistics. This routine raises on any failed fit rather than silently
-    dropping a pseudoexperiment.
+    dropping a pseudoexperiment. A fitting exception is re-raised with the
+    pseudoexperiment index and master RNG seed, preserving the original
+    exception as its cause; no failed toy is retried or omitted.
     """
     expected = np.asarray(null_generating_means, dtype=float)
     if expected.ndim != 1 or expected.size == 0:
@@ -167,7 +169,17 @@ def simulate_refitted_background_null(
     boundary_fit_indices: list[int] = []
     for experiment_index in range(int(n_experiments)):
         counts = rng.poisson(expected)
-        fit = fit_log_polynomial_background(counts, order=int(background_order))
+        try:
+            fit = fit_log_polynomial_background(counts, order=int(background_order))
+        except Exception as exc:
+            # Preserve fail-closed behavior while making the failed draw
+            # reproducible from the master seed and stream position. Do not
+            # skip, retry, or silently reclassify this pseudoexperiment.
+            raise RuntimeError(
+                "Background fit failed for pseudoexperiment "
+                f"index={experiment_index} (master_seed={int(seed)}, "
+                "rng=NumPy default_rng stream); no statistic was recorded."
+            ) from exc
         if bool(fit.get("coefficient_boundary_active", False)):
             boundary_fit_indices.append(experiment_index)
         fitted_means = np.asarray(fit["expected_counts"], dtype=float)
