@@ -48,6 +48,8 @@ The education/outreach sample remains useful for pipeline development only. The 
 - `docs/expanded_literature_matrix_2026-10-28.md` — an expanded, explicitly preliminary literature matrix covering model-selection uncertainty, look-elsewhere calibration, BumpHunter, CMS Open Data dimuon searches, data-directed searches, Gaussian-process backgrounds, and background sculpting; it states the unresolved research gap and current no-go gates.
 - `docs/estimand_comparator_design_memo_2026-10-28.md` — a non-confirmatory design memo defining the candidate global type-I-error estimand, development/calibration/held-out separation, fair comparators, illustrative Monte Carlo precision planning, algorithm-freeze fields, and go/no-go rules.
 - `docs/implemented_algorithm_vs_proposed_estimand_audit_2026-10-28.md` — source-level audit showing the current repository is a histogram-reconstruction scaffold; bump-hunt fitting, model selection, scan statistics, and global calibration are not yet implemented.
+- `src/cms_dimuon_robustness/global_scan.py` and `tests/test_global_scan.py` — exploratory one-sided Poisson excess statistic scanned across declared contiguous bin widths, with synthetic unit tests; no background fitting or calibrated global p-value is provided.
+- `docs/exploratory_scan_statistic_implementation_2026-10-28.md` — equations, scope boundaries, validation limitations, and next tests for the exploratory scan component.
 
 ## Setup
 Python 3.10 or newer:
