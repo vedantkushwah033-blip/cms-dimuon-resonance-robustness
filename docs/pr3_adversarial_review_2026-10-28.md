@@ -6,7 +6,7 @@
 
 ## Changes in this review branch
 
-- Bind each exported histogram CSV's row count and exact integer sum to the corresponding metadata.
+- Bind each exported histogram CSV's row count, exact integer sum, and SHA-256 to the corresponding metadata.
 - Require candidate and reference CSV arguments together.
 - Require candidate max_events and events_read, and reference max_events and events_total, to equal the prespecified 100,000-event prefix in the manual workflow.
 - Add regression tests for exact integer accumulation, malformed counts, stale CSV totals, wrong bin counts, matched truncation, and incomplete CLI argument pairs.
@@ -14,8 +14,8 @@
 
 ## Residual limitations
 
-1. **Summary binding is not cryptographic identity.** Equal row count and total do not prove the CSV is the exact file produced alongside a metadata JSON. A foreign CSV with the same number of rows and sum can pass. A follow-up should have each exporter record the output CSV SHA-256 in its metadata, then compare that digest against the actual CSV bytes.
-2. The current summary parser checks count syntax and required column names, but does not yet validate every bin edge, monotonicity, contiguity, or the CSV's full edge sequence against metadata.
+1. CSV SHA-256 binding is now included: both exporters record the exact output CSV digest, and the comparator verifies the actual CSV bytes against metadata. This protects against post-export substitution, though it cannot independently prove the exporter generated scientifically correct values.
+2. The summary parser checks required column names and integer count syntax but does not yet validate every bin edge, monotonicity, contiguity, or the full edge sequence against the configured metadata range.
 3. The manual workflow still uses the alpha-stage PyPI ROOT distribution ROOT==0.1a12. A supported, versioned conda-forge ROOT reference is preferable before scientific interpretation.
 4. A locally computed SHA-256 compared among shell and exporters is useful for internal consistency, but not an independently published checksum. Record a verified expected digest after validating the downloaded file identity.
 5. cernopendata-client, xrootd, and GitHub Actions tags are not all pinned.
