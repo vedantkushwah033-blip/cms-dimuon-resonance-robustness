@@ -22,6 +22,15 @@
 6. Records 31123/31129 have not been fetched and compared in this review. The CERN Open Data site was not independently inspected here.
 7. The synthetic mass-formula experiment tests numerical sensitivity only. It does not establish trigger efficiency, a resonance, or a physics result.
 
+## Follow-up adversarial fixes — 2026-10-28
+
+A second pass found two concrete validation defects and patched them on the follow-up audit branch:
+
+- **Histogram edge contract:** CSV validation previously checked finite/increasing edges, contiguity, total range, and bin count, but a contiguous nonuniform grid could still match the same endpoints and evade metadata validation if both exporters produced it. The parser now optionally checks every bin's low/high edge against the configured uniform grid and expected bin count, with the existing absolute tolerance. A regression test constructs a contiguous but nonuniform two-bin histogram and requires rejection.
+- **Sensitivity bound denominator:** the synthetic bin-flip script counted bin disagreements only when both mass formulas placed a pair inside the histogram range, but used the stable-formula in-range count as the denominator for the rule-of-three bound. The denominator now explicitly counts pairs in range under both formulas, and the output label states that the bound is conditional on both formulas being in range. A regression test checks the denominator and the zero-observed-disagreement rule.
+
+These are code-level fixes on a separate branch; they are not yet evidence of real-data parity. CI for the final branch commit must complete before describing the fixes as validated. The sensitivity calculation remains a synthetic numerical stress test, not a direct ROOT-vs-NumPy comparison and not a CMS measurement.
+
 ## Protocol gate
 
 The next scientific question should be frozen before large simulation: for a prespecified dimuon mass scan and several background-function selection rules, what is the global false-positive probability under held-out background-only generators outside the fitted family? The full scan and model selection must be repeated inside each pseudo-experiment. Local-window rejection rates cannot support a global false-positive claim.
