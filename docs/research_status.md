@@ -1,6 +1,6 @@
 # Research status ledger
 
-**Last updated:** 2026-10-27
+**Last updated:** 2026-10-28
 
 ## Confirmed completed in this repository
 - Audited the official CMS outreach Python source and documented a component-by-component parity checklist in `docs/reference_implementation_audit.md`.
@@ -353,3 +353,13 @@ The revised bounded baseline/parity workflow has not run. A dispatch-path audit 
 - The fixed-background Poisson null simulator now validates the scan-window configuration before beginning the replicate loop, so invalid widths fail before any random experiments are generated.
 - Added regression cases for empty/non-finite/non-positive expected backgrounds, empty or out-of-range scan widths, negative seeds, and Boolean experiment counts.
 - These are source/test changes only. The latest test suite has not been executed in this session and CI for these commits is unverified. The simulator remains a fixed-known-background toy model; it does not establish calibration under fitted-background uncertainty, model selection, detector effects, or real CMS conditions.
+
+
+## Held-out toy false-positive evaluation helper — 2026-10-28
+
+- Added `wilson_interval`, a Wilson score interval for binomial proportions that remains informative when zero false positives are observed. It is explicitly an approximate interval, not exact Clopper-Pearson.
+- Added `evaluate_fixed_background_false_positive_rate`: it generates separate calibration and evaluation samples using distinct seeds, applies the plus-one empirical upper-tail p-value to held-out scan maxima, evaluates a prespecified alpha threshold, and reports the rejection count, observed false-positive fraction, Wilson interval, and calibration p-value resolution.
+- The evaluation computes tail counts using sorted calibration statistics and binary search, avoiding an evaluation-by-calibration Boolean matrix.
+- Regression tests were added for reproducibility, interval boundaries, invalid counts, invalid thresholds/seeds, and output invariants.
+- GitHub Actions was still in progress for commit `4fb1f5c` at the last status check; the efficiency follow-up commit `ca6424d` is newer than that run. Therefore, these latest changes are not yet verified by completed CI.
+- Scientific boundary: this is a fixed-known-background, independent-Poisson toy evaluation. It does not validate fitted-background uncertainty, model selection, correlated bins, detector effects, trigger selection, or real CMS data. No physics conclusion is claimed.
