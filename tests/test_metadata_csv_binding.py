@@ -25,8 +25,8 @@ def _checks(report):
 
 def test_csv_summary_hashes_the_same_byte_snapshot_it_parses(tmp_path, monkeypatch):
     p = tmp_path / "mutable.csv"
-    original = b"mass_low_GeV,mass_high_GeV,pair_count\\n0.25,300,2\\n"
-    changed = b"mass_low_GeV,mass_high_GeV,pair_count\\n0.25,300,9\\n"
+    original = b"mass_low_GeV,mass_high_GeV,pair_count\n0.25,300,2\n"
+    changed = b"mass_low_GeV,mass_high_GeV,pair_count\n0.25,300,9\n"
     p.write_bytes(original)
 
     def changing_read_bytes(path):
