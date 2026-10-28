@@ -78,6 +78,66 @@ def simulate_fixed_background_null(
     }
 
 
+
+def simulate_refitted_background_null(
+    null_generating_means: ArrayLike,
+    window_widths: tuple[int, ...] | list[int],
+    n_experiments: int,
+    seed: int,
+    background_order: int = 1,
+) -> dict[str, int | list[float]]:
+    """Simulate scan maxima while refitting the background in every toy.
+
+    Each toy is drawn from the supplied fixed null-generating Poisson means,
+    then the same fixed-order log-polynomial background fitter is refit to that
+    toy, and the same scan is evaluated against that toy's fitted means. This
+    captures the mechanical effect of refitting for this specified toy design;
+    it does not establish that the generating means or fitted family describe
+    CMS data, and it does not perform model-order selection or signal injection.
+
+    The observed-data statistic must be computed with the same fitter, binning,
+    scan windows, and fit-failure policy before comparing it with these null
+    statistics. This routine raises on any failed fit rather than silently
+    dropping a pseudoexperiment.
+    """
+    expected = np.asarray(null_generating_means, dtype=float)
+    if expected.ndim != 1 or expected.size == 0:
+        raise ValueError("null_generating_means must be a non-empty 1D array")
+    if not np.all(np.isfinite(expected)) or np.any(expected <= 0):
+        raise ValueError("null_generating_means must be finite and strictly positive")
+    if isinstance(n_experiments, bool) or not isinstance(n_experiments, (int, np.integer)) or n_experiments <= 0:
+        raise ValueError("n_experiments must be a positive integer")
+    if isinstance(seed, bool) or not isinstance(seed, (int, np.integer)) or seed < 0:
+        raise ValueError("seed must be a non-negative integer")
+    if isinstance(background_order, bool) or not isinstance(background_order, (int, np.integer)) or background_order < 0:
+        raise ValueError("background_order must be a non-negative integer")
+    if expected.size <= int(background_order) + 1:
+        raise ValueError("number of bins must exceed the number of fitted coefficients")
+
+    from cms_dimuon_robustness.background_fit import fit_log_polynomial_background
+    from cms_dimuon_robustness.global_scan import scan_poisson_excess
+
+    # Fail early on invalid scan widths before spending time on pseudoexperiments.
+    scan_poisson_excess(
+        np.zeros(expected.size, dtype=np.int64), expected, window_widths
+    )
+    rng = np.random.default_rng(int(seed))
+    maxima: list[float] = []
+    for _ in range(int(n_experiments)):
+        counts = rng.poisson(expected)
+        fit = fit_log_polynomial_background(counts, order=int(background_order))
+        fitted_means = np.asarray(fit["expected_counts"], dtype=float)
+        scan = scan_poisson_excess(counts, fitted_means, window_widths)
+        maxima.append(float(scan["global_statistic_q0"]))
+
+    return {
+        "null_statistics": maxima,
+        "n_experiments": int(n_experiments),
+        "seed": int(seed),
+        "background_order": int(background_order),
+        "interpretation": "refitted fixed-order toy null; not CMS validation",
+    }
+
 def wilson_interval(
     successes: int, trials: int, confidence_z: float = 1.959963984540054
 ) -> dict[str, float]:
