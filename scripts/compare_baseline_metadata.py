@@ -8,6 +8,7 @@ non-finite values in histogram flow bins.
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import math
 import re
@@ -34,11 +35,31 @@ def exact_nonnegative_int(metadata: dict[str, Any], key: str, source: str) -> in
     return value
 
 
+def histogram_csv_summary(path: Path) -> dict[str, int]:
+    """Return the bin count and exact integer total of a histogram CSV."""
+    with path.open("r", encoding="utf-8", newline="") as stream:
+        reader = csv.DictReader(stream)
+        required = {"mass_low_GeV", "mass_high_GeV", "pair_count"}
+        if reader.fieldnames is None or not required.issubset(reader.fieldnames):
+            raise ValueError(f"{path}: required CSV columns are {sorted(required)}")
+        rows = list(reader)
+    total = 0
+    for line_number, row in enumerate(rows, start=2):
+        value = row.get("pair_count")
+        if value is None or re.fullmatch(r"[0-9]+", value) is None:
+            raise ValueError(f"{path}: line {line_number}: pair_count must be an unsigned integer string")
+        total += int(value, 10)
+    return {"bins": len(rows), "total": total}
+
+
 def compare(
     candidate: dict[str, Any],
     reference: dict[str, Any],
     expected_sha256: str | None = None,
     expected_bytes: int | None = None,
+    candidate_csv: dict[str, int] | None = None,
+    reference_csv: dict[str, int] | None = None,
+    expected_max_events: int | None = None,
 ) -> dict[str, Any]:
     """Return explicit checks for cut flow, configuration, and mass accounting."""
     checks: list[dict[str, Any]] = []
@@ -167,6 +188,39 @@ def compare(
         reference_value = exact_nonnegative_int(reference, reference_key, "reference")
         check_equal(name, candidate_value, reference_value)
 
+    # Bind each histogram summary to the metadata from the same exporter.
+    for label, meta, csv_summary, total_key in (
+        ("candidate", candidate, candidate_csv, "pairs_in_histogram_range"),
+        ("reference", reference, reference_csv, "histogram_regular_bin_total"),
+    ):
+        if csv_summary is None:
+            continue
+        meta_bins, meta_total = meta.get("bins"), meta.get(total_key)
+        valid_bins = isinstance(meta_bins, int) and not isinstance(meta_bins, bool) and meta_bins >= 0
+        valid_total = isinstance(meta_total, int) and not isinstance(meta_total, bool) and meta_total >= 0
+        checks.append({
+            "check": f"{label}_csv_bin_count_matches_metadata",
+            "candidate": csv_summary["bins"], "reference": meta_bins,
+            "passed": bool(valid_bins and csv_summary["bins"] == meta_bins),
+        })
+        checks.append({
+            "check": f"{label}_csv_total_matches_metadata_in_range_count",
+            "candidate": csv_summary["total"], "reference": meta_total,
+            "passed": bool(valid_total and csv_summary["total"] == meta_total),
+        })
+
+    if expected_max_events is not None:
+        valid_limit = isinstance(expected_max_events, int) and not isinstance(expected_max_events, bool) and expected_max_events > 0
+        for label, meta, read_key in (("candidate", candidate, "events_read"), ("reference", reference, "events_total")):
+            for key in ("max_events", read_key):
+                value = meta.get(key)
+                checks.append({
+                    "check": f"{label}_{key}_equals_expected_event_prefix",
+                    "candidate": value, "reference": expected_max_events,
+                    "passed": bool(valid_limit and isinstance(value, int) and not isinstance(value, bool)
+                                   and value == expected_max_events),
+                })
+
     candidate_total = exact_nonnegative_int(candidate, "opposite_charge_pairs_total", "candidate")
     below = exact_nonnegative_int(candidate, "pairs_below_mass_range", "candidate")
     in_range = exact_nonnegative_int(candidate, "pairs_in_histogram_range", "candidate")
@@ -264,7 +318,12 @@ def main() -> int:
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--expected-sha256", help="Expected SHA-256 from the downloaded-input manifest")
     parser.add_argument("--expected-bytes", type=int, help="Expected input byte count from the downloaded-input manifest")
+    parser.add_argument("--candidate-csv", type=Path, help="Candidate histogram CSV to bind to candidate metadata")
+    parser.add_argument("--reference-csv", type=Path, help="Reference histogram CSV to bind to reference metadata")
+    parser.add_argument("--expected-max-events", type=int, help="Intended event prefix; both outputs must have read exactly this many events")
     args = parser.parse_args()
+    if (args.candidate_csv is None) != (args.reference_csv is None):
+        parser.error("--candidate-csv and --reference-csv must be supplied together")
     output_path = args.output.resolve()
     protected_inputs = {
         args.candidate.resolve(): "--candidate",
@@ -281,6 +340,9 @@ def main() -> int:
             load_json(args.reference),
             expected_sha256=args.expected_sha256,
             expected_bytes=args.expected_bytes,
+            candidate_csv=histogram_csv_summary(args.candidate_csv) if args.candidate_csv else None,
+            reference_csv=histogram_csv_summary(args.reference_csv) if args.reference_csv else None,
+            expected_max_events=args.expected_max_events,
         )
     except (OSError, json.JSONDecodeError, ValueError) as exc:
         report = {
