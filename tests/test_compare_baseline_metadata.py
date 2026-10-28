@@ -77,6 +77,8 @@ def test_matching_cutflow_configuration_and_mass_accounting_pass(tmp_path):
 
     assert result.returncode == 0, result.stderr
     assert report["cutflow_and_configuration_agree"] is True
+    assert report["input_provenance_agrees"] is True
+    assert report["comparison_passed"] is True
     assert report["failed_check_count"] == 0
     assert report_path.read_bytes().endswith(b"\n")
 
@@ -90,7 +92,9 @@ def test_mismatched_input_hash_fails_even_when_cutflow_matches(tmp_path):
     report = json.loads(report_path.read_text(encoding="utf-8"))
 
     assert result.returncode == 2
+    assert report["cutflow_and_configuration_agree"] is True
     assert report["input_provenance_agrees"] is False
+    assert report["comparison_passed"] is False
     failed = {item["check"] for item in report["checks"] if not item["passed"]}
     assert "input_sha256_matches" in failed
 
