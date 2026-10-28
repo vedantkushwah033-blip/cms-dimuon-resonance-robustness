@@ -34,6 +34,8 @@ def test_residual_signs_and_zero_observation_deviance_are_correct():
         ([1.5, 2], [1, 2], 0),
         ([1, 2], [1, 0], 0),
         ([1, 2], [1, np.inf], 0),
+        (["not-a-count", 2], [1, 2], 0),
+        ([1, 2], [1, "not-a-mean"], 0),
         ([1, 2], [1, 2], -1),
         ([1, 2], [1, 2], 2),
         ([1, 2], [1, 2], True),
