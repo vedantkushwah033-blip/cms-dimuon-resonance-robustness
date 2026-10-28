@@ -1,4 +1,3 @@
-import numpy as np
 import pytest
 
 import cms_dimuon_robustness.scenario_evaluation as module
@@ -27,9 +26,12 @@ def test_scenario_runner_returns_declared_scenarios_in_input_order(monkeypatch):
     )
     assert [row["scenario"] for row in result["results"]] == ["matched", "shoulder"]
     assert result["design"]["scenario_count"] == 2
+    assert result["design"]["interpretation"].startswith("per-scenario fixed toy nulls")
     assert calls[0]["seed_calibration"] == 10
     assert calls[1]["seed_evaluation"] == 13
-    assert all(row["interpretation"] if "interpretation" in row else True for row in result["results"])
+    assert calls[0]["window_widths"] == [1, 2]
+    assert calls[1]["background_order"] == 1
+    assert result["results"][0]["false_positive_rate"] == 0.04
 
 
 @pytest.mark.parametrize(
