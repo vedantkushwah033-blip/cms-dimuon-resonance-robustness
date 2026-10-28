@@ -36,8 +36,13 @@ def exact_nonnegative_int(metadata: dict[str, Any], key: str, source: str) -> in
     return value
 
 
-def histogram_csv_summary(path: Path) -> dict[str, Any]:
-    """Validate histogram CSV structure and return exact totals, edge range, and digest."""
+def histogram_csv_summary(
+    path: Path,
+    *,
+    expected_bins: int | None = None,
+    expected_range: tuple[float, float] | list[float] | None = None,
+) -> dict[str, Any]:
+    """Validate CSV structure, exact totals, and optionally every configured bin edge."""
     with path.open("r", encoding="utf-8", newline="") as stream:
         reader = csv.DictReader(stream)
         expected_fields = ["mass_low_GeV", "mass_high_GeV", "pair_count"]
@@ -46,6 +51,29 @@ def histogram_csv_summary(path: Path) -> dict[str, Any]:
         rows = list(reader)
     if not rows:
         raise ValueError(f"{path}: histogram CSV contains no bins")
+    if (expected_bins is None) != (expected_range is None):
+        raise ValueError("expected_bins and expected_range must be supplied together")
+    if expected_bins is not None:
+        if isinstance(expected_bins, bool) or not isinstance(expected_bins, int) or expected_bins <= 0:
+            raise ValueError("expected_bins must be a positive integer")
+        if len(rows) != expected_bins:
+            raise ValueError(
+                f"{path}: found {len(rows)} bins, expected exactly {expected_bins}"
+            )
+        if (
+            not isinstance(expected_range, (list, tuple))
+            or len(expected_range) != 2
+            or any(
+                isinstance(x, bool) or not isinstance(x, (int, float)) or not math.isfinite(x)
+                for x in expected_range
+            )
+            or not 0 < expected_range[0] < expected_range[1]
+        ):
+            raise ValueError("expected_range must contain finite numeric bounds with 0 < low < high")
+        expected_low, expected_high = float(expected_range[0]), float(expected_range[1])
+        expected_width = (expected_high - expected_low) / expected_bins
+    else:
+        expected_low = expected_high = expected_width = None
 
     total = 0
     previous_high = None
@@ -63,6 +91,19 @@ def histogram_csv_summary(path: Path) -> dict[str, Any]:
             raise ValueError(f"{path}: line {line_number}: bin edges must be finite and increasing")
         if previous_high is not None and not math.isclose(low, previous_high, rel_tol=0.0, abs_tol=EDGE_ATOL_GEV):
             raise ValueError(f"{path}: line {line_number}: bins are not contiguous")
+        if expected_bins is not None:
+            index = line_number - 2
+            bin_low = expected_low + index * expected_width
+            bin_high = expected_high if index == expected_bins - 1 else expected_low + (index + 1) * expected_width
+            if not (
+                math.isclose(low, bin_low, rel_tol=0.0, abs_tol=EDGE_ATOL_GEV)
+                and math.isclose(high, bin_high, rel_tol=0.0, abs_tol=EDGE_ATOL_GEV)
+            ):
+                raise ValueError(
+                    f"{path}: line {line_number}: bin edges differ from the configured "
+                    f"uniform grid at bin {index}; observed=({low:.17g}, {high:.17g}), "
+                    f"expected=({bin_low:.17g}, {bin_high:.17g})"
+                )
         value = row.get("pair_count")
         if value is None or re.fullmatch(r"[0-9]+", value) is None:
             raise ValueError(f"{path}: line {line_number}: pair_count must be an unsigned integer string")
@@ -411,13 +452,31 @@ def main() -> int:
             "refusing to overwrite an input metadata file"
         )
     try:
+        candidate_metadata = load_json(args.candidate)
+        reference_metadata = load_json(args.reference)
+        candidate_csv = None
+        reference_csv = None
+        if args.candidate_csv is not None:
+            candidate_csv = histogram_csv_summary(
+                args.candidate_csv,
+                expected_bins=candidate_metadata.get("bins"),
+                expected_range=candidate_metadata.get("mass_range_GeV"),
+            )
+            reference_csv = histogram_csv_summary(
+                args.reference_csv,
+                expected_bins=reference_metadata.get("bins"),
+                expected_range=(
+                    reference_metadata.get("mass_min_GeV"),
+                    reference_metadata.get("mass_max_GeV"),
+                ),
+            )
         report = compare(
-            load_json(args.candidate),
-            load_json(args.reference),
+            candidate_metadata,
+            reference_metadata,
             expected_sha256=args.expected_sha256,
             expected_bytes=args.expected_bytes,
-            candidate_csv=histogram_csv_summary(args.candidate_csv) if args.candidate_csv else None,
-            reference_csv=histogram_csv_summary(args.reference_csv) if args.reference_csv else None,
+            candidate_csv=candidate_csv,
+            reference_csv=reference_csv,
             expected_max_events=args.expected_max_events,
         )
     except (OSError, json.JSONDecodeError, ValueError) as exc:
