@@ -32,6 +32,17 @@ This is a methodological simulation question. It is not, by itself, a claim abou
 6. **Separate null calibration from power.** Evaluate false-positive control using background-only pseudo-data. Assess signal-injection power separately, over prespecified signal masses and yields.
 7. **Do not overstate scope.** Synthetic background families are not automatically realistic CMS spectra. Real-data histogram parity does not establish a valid trigger model, and neither establishes discovery significance.
 
+## Focused comparison: the closest calibration overlap
+
+The 2025 Barr & Liu paper is especially important to the proposed direction. Its published methods describe background-only pseudo-experiments, BumpHunter p-value distributions, false-positive assessment, residual background-modelling biases, and separate signal-injection tests. It also studies a Gaussian-process background estimator on a CMS-derived dijet spectrum and projects performance to an HL-LHC scenario. Therefore:
+
+- A project that merely compares background estimators with pseudo-experiments, checks BumpHunter false positives, or adds a Gaussian-process comparator would substantially overlap with established work.
+- The current project should not claim that false-positive calibration under background modelling, pseudo-experiments, or GPR-based bump hunting is new.
+- A possible narrower distinction is the *evaluation design*: freeze the entire adaptive procedure, then test its global type-I error on independently held-out generating processes deliberately outside the fitted candidate family. This is a hypothesis about a possible gap, not a verified gap.
+- The distinction is only meaningful if the proposed procedure actually includes adaptive model selection and the same-data scan, and if its estimand and comparator differ materially from existing BumpHunter/GPR studies. A simple change of dataset or larger replicate count is not enough.
+
+This comparison was checked against the publisher's article page: Barr & Liu, *European Physical Journal C* 85, 846 (2025), DOI 10.1140/epjc/s10052-025-14574-3. The publisher describes background-only pseudo-experiments and BumpHunter-based false-positive testing in the methods. See https://link.springer.com/article/10.1140/epjc/s10052-025-14574-3. The arXiv preprint is https://arxiv.org/abs/2503.07289.
+
 ## Current decision
 
 **GO for literature-informed protocol development; NO-GO for confirmatory simulation or novelty claims.**
