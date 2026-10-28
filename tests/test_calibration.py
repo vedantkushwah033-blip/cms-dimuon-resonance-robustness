@@ -123,6 +123,8 @@ def test_held_out_false_positive_evaluation_is_reproducible_and_reports_resoluti
         {"n_evaluation": 0},
         {"alpha": 0.0},
         {"alpha": 1.0},
+        {"alpha": "0.05"},
+        {"alpha": True},
         {"seed_calibration": 4, "seed_evaluation": 4},
         {"seed_calibration": -1},
     ],
