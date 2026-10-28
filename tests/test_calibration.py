@@ -235,3 +235,49 @@ def test_refitted_background_null_simulation_rejects_invalid_configuration(
 
     with pytest.raises(ValueError):
         simulate_refitted_background_null(means, widths, n_experiments, seed, order)
+
+def test_refitted_background_held_out_false_positive_evaluation_is_reproducible():
+    from cms_dimuon_robustness.calibration import (
+        evaluate_refitted_background_false_positive_rate,
+    )
+
+    kwargs = dict(
+        null_generating_means=[18.0, 16.0, 14.0, 12.0, 11.0, 10.0, 9.0, 8.0],
+        window_widths=[1, 2, 3],
+        n_calibration=19,
+        n_evaluation=25,
+        alpha=0.05,
+        seed_calibration=20261028,
+        seed_evaluation=20261029,
+        background_order=1,
+    )
+    first = evaluate_refitted_background_false_positive_rate(**kwargs)
+    second = evaluate_refitted_background_false_positive_rate(**kwargs)
+    assert first == second
+    assert first["n_calibration"] == 19
+    assert first["n_evaluation"] == 25
+    assert first["background_order"] == 1
+    assert first["calibration_minimum_resolvable_pvalue"] == pytest.approx(0.05)
+    assert first["calibration_resolution_allows_alpha_rejection"] is True
+    assert 0 <= first["false_positive_rate"] <= 1
+    assert first["wilson_95_interval"]["lower"] <= first["false_positive_rate"]
+    assert first["false_positive_rate"] <= first["wilson_95_interval"]["upper"]
+    assert first["interpretation"] == "refitted fixed-order toy null only; not CMS validation"
+
+
+def test_refitted_background_held_out_evaluation_rejects_identical_seeds():
+    from cms_dimuon_robustness.calibration import (
+        evaluate_refitted_background_false_positive_rate,
+    )
+
+    with pytest.raises(ValueError, match="seeds must differ"):
+        evaluate_refitted_background_false_positive_rate(
+            null_generating_means=[5.0, 4.0, 3.0, 2.0],
+            window_widths=[1],
+            n_calibration=5,
+            n_evaluation=5,
+            alpha=0.05,
+            seed_calibration=7,
+            seed_evaluation=7,
+            background_order=0,
+        )
