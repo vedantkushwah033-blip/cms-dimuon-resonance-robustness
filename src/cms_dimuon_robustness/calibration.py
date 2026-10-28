@@ -239,6 +239,7 @@ def evaluate_refitted_background_false_positive_rate(
         "false_positive_rate": float(rejected / int(n_evaluation)),
         "wilson_95_interval": interval,
         **empirical_rank_test_resolution(int(n_calibration), float(alpha)),
+        "calibration_minimum_resolvable_pvalue": float(1 / (int(n_calibration) + 1)),
         "interpretation": "refitted fixed-order toy null only; not CMS validation",
     }
 
@@ -345,5 +346,6 @@ def evaluate_fixed_background_false_positive_rate(
         "false_positive_rate": float(rejected / int(n_evaluation)),
         "wilson_95_interval": interval,
         **empirical_rank_test_resolution(int(n_calibration), float(alpha)),
+        "calibration_minimum_resolvable_pvalue": float(1 / (int(n_calibration) + 1)),
         "interpretation": "fixed-known-background toy simulation only; not CMS validation",
     }
