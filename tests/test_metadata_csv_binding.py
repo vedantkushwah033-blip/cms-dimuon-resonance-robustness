@@ -88,6 +88,8 @@ def test_csv_sha256_must_match_metadata_even_when_summary_matches(tmp_path):
     assert report["comparison_passed"] is False
     assert _checks(report)["candidate_csv_sha256_matches_metadata"] is False
     assert _checks(report)["reference_csv_sha256_matches_metadata"] is True
+    assert report["artifact_integrity_agrees"] is False
+    assert report["cutflow_and_configuration_agree"] is True
 
 
 def test_event_prefix_must_equal_expected_in_both_outputs():
