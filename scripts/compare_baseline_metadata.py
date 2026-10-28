@@ -37,22 +37,43 @@ def exact_nonnegative_int(metadata: dict[str, Any], key: str, source: str) -> in
 
 
 def histogram_csv_summary(path: Path) -> dict[str, Any]:
-    """Return the bin count and exact integer total of a histogram CSV."""
+    """Validate histogram CSV structure and return exact totals, edge range, and digest."""
     with path.open("r", encoding="utf-8", newline="") as stream:
         reader = csv.DictReader(stream)
-        required = {"mass_low_GeV", "mass_high_GeV", "pair_count"}
-        if reader.fieldnames is None or not required.issubset(reader.fieldnames):
-            raise ValueError(f"{path}: required CSV columns are {sorted(required)}")
+        expected_fields = ["mass_low_GeV", "mass_high_GeV", "pair_count"]
+        if reader.fieldnames != expected_fields:
+            raise ValueError(f"{path}: CSV columns must be exactly {expected_fields}")
         rows = list(reader)
+    if not rows:
+        raise ValueError(f"{path}: histogram CSV contains no bins")
+
     total = 0
+    previous_high = None
+    first_low = None
+    last_high = None
     for line_number, row in enumerate(rows, start=2):
+        if None in row:
+            raise ValueError(f"{path}: line {line_number}: unexpected extra CSV fields")
+        try:
+            low = float(row["mass_low_GeV"])
+            high = float(row["mass_high_GeV"])
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f"{path}: line {line_number}: bin edges must be numeric") from exc
+        if not math.isfinite(low) or not math.isfinite(high) or not low < high:
+            raise ValueError(f"{path}: line {line_number}: bin edges must be finite and increasing")
+        if previous_high is not None and not math.isclose(low, previous_high, rel_tol=0.0, abs_tol=EDGE_ATOL_GEV):
+            raise ValueError(f"{path}: line {line_number}: bins are not contiguous")
         value = row.get("pair_count")
         if value is None or re.fullmatch(r"[0-9]+", value) is None:
             raise ValueError(f"{path}: line {line_number}: pair_count must be an unsigned integer string")
         total += int(value, 10)
-    digest = hashlib.sha256(path.read_bytes()).hexdigest()
-    return {"bins": len(rows), "total": total, "sha256": digest}
+        if first_low is None:
+            first_low = low
+        previous_high = high
+        last_high = high
 
+    digest = hashlib.sha256(path.read_bytes()).hexdigest()
+    return {"bins": len(rows), "total": total, "sha256": digest, "range_low": first_low, "range_high": last_high}
 
 def compare(
     candidate: dict[str, Any],
@@ -224,6 +245,36 @@ def compare(
             "candidate": csv_summary.get("sha256"),
             "reference": metadata_csv_sha.lower() if metadata_csv_sha_valid else metadata_csv_sha,
             "passed": bool(metadata_csv_sha_valid and csv_summary.get("sha256") == metadata_csv_sha.lower()),
+        })
+
+        if label == "candidate":
+            configured_range = meta.get("mass_range_GeV")
+            range_valid = (
+                isinstance(configured_range, list) and len(configured_range) == 2
+                and all(isinstance(x, (int, float)) and not isinstance(x, bool) and math.isfinite(x)
+                        for x in configured_range)
+            )
+            expected_low, expected_high = configured_range if range_valid else (None, None)
+        else:
+            expected_low, expected_high = meta.get("mass_min_GeV"), meta.get("mass_max_GeV")
+            range_valid = all(
+                isinstance(x, (int, float)) and not isinstance(x, bool) and math.isfinite(x)
+                for x in (expected_low, expected_high)
+            )
+        observed_low, observed_high = csv_summary.get("range_low"), csv_summary.get("range_high")
+        edge_match = bool(
+            range_valid
+            and isinstance(observed_low, (int, float)) and math.isfinite(observed_low)
+            and isinstance(observed_high, (int, float)) and math.isfinite(observed_high)
+            and math.isclose(observed_low, expected_low, rel_tol=0.0, abs_tol=EDGE_ATOL_GEV)
+            and math.isclose(observed_high, expected_high, rel_tol=0.0, abs_tol=EDGE_ATOL_GEV)
+        )
+        checks.append({
+            "check": f"{label}_csv_range_matches_metadata",
+            "candidate": [observed_low, observed_high],
+            "reference": [expected_low, expected_high],
+            "absolute_tolerance_GeV": EDGE_ATOL_GEV,
+            "passed": edge_match,
         })
 
     if expected_max_events is not None:
