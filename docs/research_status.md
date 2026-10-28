@@ -413,3 +413,11 @@ The revised bounded baseline/parity workflow has not run. A dispatch-path audit 
 - Test commit: `e02de2b200a48cbc61f79ae3708e80e336aaa341`.
 - CI run for that commit: [40730847349](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40730847349), queued at the time of this entry. Do not claim these new tests pass until the run finishes.
 - These are small deterministic software regression tests, not a confirmatory false-positive study. Their toy data use a fixed, known Poisson background and do not establish fitted-background calibration or CMS validity.
+
+## Deterministic cross-component integration tests — 2026-10-28
+
+- Added `tests/test_pipeline_components.py` to exercise the current fixed-order background fitter, descriptive residual diagnostics, and one-sided scan together on a deterministic synthetic spectrum with a localized excess. It also checks a flat-spectrum scan invariant.
+- This is an integration/plumbing check only. It does not test whether the fitted model is statistically adequate, calibrate a global p-value, propagate fitted-parameter uncertainty, or validate against CMS data.
+- Test added in commit `be54732546517c97e34e98c04c7aba77ca6bdc07`, then corrected to call the actual `scan_poisson_excess` API in commit `ecb6a083fde25a428ba63a46586cd24dac9557a3`.
+- The newest workflow must finish before claiming the integration tests pass. Existing queued/in-progress workflows are not evidence of success.
+- Important limitation: the current scan consumes the same fitted expected counts used by residual diagnostics, but the observed scan statistic is not calibrated under this fitted-background procedure. Do not interpret its value as a p-value or discovery significance.
