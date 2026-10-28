@@ -142,3 +142,23 @@ def test_held_out_false_positive_evaluation_rejects_invalid_configuration(kwargs
     parameters.update(kwargs)
     with pytest.raises(ValueError):
         evaluate_fixed_background_false_positive_rate(**parameters)
+
+@pytest.mark.parametrize("confidence_z", [float("nan"), float("inf"), 0, -1, "1.96", True])
+def test_wilson_interval_rejects_invalid_confidence_z(confidence_z):
+    from cms_dimuon_robustness.calibration import wilson_interval
+
+    with pytest.raises(ValueError):
+        wilson_interval(1, 10, confidence_z=confidence_z)
+
+
+def test_wilson_interval_has_exact_boundary_endpoints_and_reports_requested_level():
+    from cms_dimuon_robustness.calibration import wilson_interval
+
+    all_failures = wilson_interval(0, 100)
+    all_successes = wilson_interval(100, 100)
+    custom = wilson_interval(5, 10, confidence_z=1.0)
+
+    assert all_failures["lower"] == 0.0
+    assert all_successes["upper"] == 1.0
+    assert custom["confidence_level_approx"] == pytest.approx(0.682689492)
+
