@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import csv
 import hashlib
+import io
 import json
 import math
 import re
@@ -43,12 +44,20 @@ def histogram_csv_summary(
     expected_range: tuple[float, float] | list[float] | None = None,
 ) -> dict[str, Any]:
     """Validate CSV structure, exact totals, and optionally every configured bin edge."""
-    with path.open("r", encoding="utf-8", newline="") as stream:
-        reader = csv.DictReader(stream)
-        expected_fields = ["mass_low_GeV", "mass_high_GeV", "pair_count"]
-        if reader.fieldnames != expected_fields:
-            raise ValueError(f"{path}: CSV columns must be exactly {expected_fields}")
-        rows = list(reader)
+    # Parse and hash the same byte snapshot. Reading the path once for parsing
+    # and again for hashing could bind metadata to different file contents if
+    # the CSV changed between those operations.
+    raw_csv = path.read_bytes()
+    digest = hashlib.sha256(raw_csv).hexdigest()
+    try:
+        csv_text = raw_csv.decode("utf-8")
+    except UnicodeDecodeError as exc:
+        raise ValueError(f"{path}: histogram CSV must be valid UTF-8") from exc
+    reader = csv.DictReader(io.StringIO(csv_text, newline=""))
+    expected_fields = ["mass_low_GeV", "mass_high_GeV", "pair_count"]
+    if reader.fieldnames != expected_fields:
+        raise ValueError(f"{path}: CSV columns must be exactly {expected_fields}")
+    rows = list(reader)
     if not rows:
         raise ValueError(f"{path}: histogram CSV contains no bins")
     if (expected_bins is None) != (expected_range is None):
@@ -113,7 +122,6 @@ def histogram_csv_summary(
         previous_high = high
         last_high = high
 
-    digest = hashlib.sha256(path.read_bytes()).hexdigest()
     return {"bins": len(rows), "total": total, "sha256": digest, "range_low": first_low, "range_high": last_high}
 
 def compare(
