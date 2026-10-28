@@ -17,15 +17,22 @@ Both candidate and reference are expected to process the same input file and exa
 
 ## Findings register
 
-| Priority | Finding | Required action |
+| Priority | Finding | Status / required action |
 |---|---|---|
-| High | CSV summaries were not linked to metadata | Add summary and exact CSV SHA-256 checks in exporter metadata |
-| High | Both outputs could be truncated identically | Require exact event-prefix count in both metadata files |
-| High | Real-data parity is unestablished | Run bounded workflow after validating dependency and provenance choices |
-| Moderate | Reference ROOT distribution is alpha-stage | Prefer a supported, versioned conda-forge ROOT environment for reference validation |
-| Moderate | Dependencies and action versions are not all pinned | Pin or record versions and preserve the runtime manifest |
-| Moderate | Expected input hashes are not independently anchored | Verify file identity and store expected digest per record |
-| Low | Stable mass formula and ROOT's direct four-vector calculation may differ at floating-point edges | Use synthetic sensitivity audit as context; investigate real-data differences rather than dismissing them |
+| High | CSV summaries were not linked to metadata | **Addressed in PR #5:** compare bin count, exact integer total, SHA-256 digest, and range against each exporter's metadata. Digest binding detects post-export substitution but does not prove exporter scientific correctness. |
+| High | Both outputs could be truncated identically | **Addressed in PR #5:** comparator can require exact event-prefix counts independently for both outputs. |
+| High | Real-data parity is unestablished | **Open blocker:** no bounded comparison of the target CERN files has been run by PR #3–#6. Obtain explicit operator approval before any large-data dispatch. |
+| Moderate | Reference ROOT distribution is alpha-stage | **Open environment risk:** PyPI `root==0.1a12` is explicitly marked pre-release and ROOT's own Get ROOT page labels PyPI installation alpha-mode. ROOT's official guidance lists conda-forge `root=6.40.*`, with `6.40.04` available; the ROOT-maintained Docker recipes also list `ghcr.io/root-project/root:6.40.04-ubuntu24.04`. Prefer testing the official image or an exact `root=6.40.04` conda environment against the synthetic exporter before treating either as the scientific reference. Neither replacement has yet been tested in this repository. Sources: [ROOT Get ROOT](https://root.cern.ch/getroot/), [conda-forge ROOT](https://anaconda.org/conda-forge/root/), [ROOT-maintained Docker recipes](https://github.com/root-project/root-docker). |
+| Moderate | Dependencies and action versions are not all pinned | **Open audit item:** inventory workflow actions and runtime dependencies, pin what is operationally appropriate, and preserve environment versions in artifacts. |
+| Moderate | Expected input hashes are not independently anchored | **Open provenance risk:** a digest computed locally by both exporters proves they read identical bytes, not that those bytes match a separately published expected digest. |
+| Low | Stable mass formula and ROOT's direct four-vector calculation may differ at floating-point edges | **Partly characterized synthetically:** PR #6 adds a conditional denominator for the rule-of-three bound and clearer output naming. It remains a synthetic NumPy comparison, not a ROOT-vs-NumPy observation on CMS data. |
+| Moderate | CSV bin edges could be contiguous and span the correct endpoints while being nonuniform | **Addressed in PR #6:** when metadata configuration is supplied, every CSV edge is checked against the configured uniform grid within `1e-12 GeV`; a regression test covers a nonuniform two-bin grid. |
+
+## Follow-up engineering review — PR #5/#6
+
+The latest inspected draft, PR #6, adds per-bin comparison against the configured uniform histogram grid, corrects the synthetic sensitivity audit's conditional denominator, binds parsing and hashing to the same CSV byte snapshot, prevents report-output/input collisions, and rejects non-finite selected-muon kinematics in the ROOT exporter. On head `51faf4b9a5ee1dec286aa651f94b95f0116e3abc`, Python tests, compileall, and Ruff passed on Python 3.10–3.12 (run `40671389441`), and synthetic ROOT exporter integration passed (run `40671389432`). PR #6 remains draft/open/unmerged.
+
+These checks validate code and synthetic fixtures only; they do not establish numerical parity on CERN data. The CSV digest does not independently authenticate the exporter's scientific correctness. Likewise, matching locally computed input checksums across exporters is not an external provenance anchor. The workflow should continue to fail closed on missing/malformed metadata and report each validation layer separately.
 
 ## Synthetic numerical sensitivity
 

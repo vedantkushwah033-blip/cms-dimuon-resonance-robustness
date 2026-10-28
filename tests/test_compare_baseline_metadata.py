@@ -245,7 +245,7 @@ def test_output_cannot_overwrite_candidate_metadata(tmp_path):
     )
 
     assert result.returncode == 2
-    assert "refusing to overwrite an input metadata file" in result.stderr
+    assert "refusing to overwrite an input file" in result.stderr
     assert candidate_path.read_bytes() == original_bytes
 
 

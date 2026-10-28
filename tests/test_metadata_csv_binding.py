@@ -23,6 +23,25 @@ def _checks(report):
     return {c["check"]: c["passed"] for c in report["checks"]}
 
 
+def test_csv_summary_hashes_the_same_byte_snapshot_it_parses(tmp_path, monkeypatch):
+    p = tmp_path / "mutable.csv"
+    original = b"mass_low_GeV,mass_high_GeV,pair_count\n0.25,300,2\n"
+    changed = b"mass_low_GeV,mass_high_GeV,pair_count\n0.25,300,9\n"
+    p.write_bytes(original)
+
+    def changing_read_bytes(path):
+        assert path == p
+        p.write_bytes(changed)
+        return changed
+
+    # Simulate a file changing at read time. Parsing and hashing must both use
+    # the returned snapshot rather than parsing one version and hashing another.
+    monkeypatch.setattr(Path, "read_bytes", changing_read_bytes)
+    summary = histogram_csv_summary(p)
+    assert summary["total"] == 9
+    assert summary["sha256"] == hashlib.sha256(changed).hexdigest()
+
+
 def test_csv_summary_uses_exact_integers(tmp_path):
     p = tmp_path / "h.csv"
     write_csv(p, [2**60 + 1, 3])
@@ -70,6 +89,20 @@ def test_csv_rejects_empty_or_noncontiguous_bins(tmp_path, contents):
     p.write_text(contents, encoding="utf-8")
     with pytest.raises(ValueError):
         histogram_csv_summary(p)
+
+
+def test_csv_rejects_contiguous_but_nonuniform_grid_when_metadata_is_supplied(tmp_path):
+    p = tmp_path / "nonuniform.csv"
+    p.write_text(
+        "mass_low_GeV,mass_high_GeV,pair_count\n"
+        "0.25,100,2\n"
+        "100,300,3\n",
+        encoding="utf-8",
+    )
+    # The file is contiguous and spans the configured range, but it is not
+    # the two-bin uniform grid implied by the metadata.
+    with pytest.raises(ValueError, match="configured uniform grid"):
+        histogram_csv_summary(p, expected_bins=2, expected_range=(0.25, 300.0))
 
 
 def test_csv_sha256_must_match_metadata_even_when_summary_matches(tmp_path):
@@ -130,6 +163,33 @@ def test_cli_binds_csvs_and_fails_on_stale_csv(tmp_path):
     report = json.loads((tmp_path / "out.json").read_text(encoding="utf-8"))
     assert _checks(report)["reference_csv_total_matches_metadata_in_range_count"] is False
     assert _checks(report)["candidate_csv_total_matches_metadata_in_range_count"] is True
+
+
+def test_cli_refuses_to_overwrite_histogram_csv_with_report(tmp_path):
+    cand, ref = candidate_metadata(), reference_metadata()
+    (tmp_path / "c.json").write_text(json.dumps(cand), encoding="utf-8")
+    (tmp_path / "r.json").write_text(json.dumps(ref), encoding="utf-8")
+    candidate_csv = tmp_path / "c.csv"
+    reference_csv = tmp_path / "r.csv"
+    write_csv(candidate_csv, [20, 7])
+    write_csv(reference_csv, [20, 7])
+    original = candidate_csv.read_bytes()
+
+    result = subprocess.run(
+        [
+            sys.executable, str(COMPARATOR),
+            "--candidate", str(tmp_path / "c.json"),
+            "--reference", str(tmp_path / "r.json"),
+            "--candidate-csv", str(candidate_csv),
+            "--reference-csv", str(reference_csv),
+            "--output", str(candidate_csv),
+        ],
+        capture_output=True, text=True, check=False,
+    )
+
+    assert result.returncode == 2
+    assert "refusing to overwrite an input file" in result.stderr
+    assert candidate_csv.read_bytes() == original
 
 
 def test_cli_requires_csv_arguments_as_a_pair(tmp_path):

@@ -50,7 +50,7 @@ def run(n_per_batch: int, batches: int, seed: int, bins: int = 30000, lo: float 
     out = {"seed": seed, "pairs_per_kind": n_per_batch * batches, "bins": bins, "range_GeV": [lo, hi], "kinds": {}}
     rng = np.random.default_rng(seed)
     for kind in ("generic", "collinear"):
-        in_range = flips_numpy = flips_axis_arith = membership = 0
+        in_range = both_in_range = flips_numpy = flips_axis_arith = membership = 0
         max_rel = 0.0
         for _ in range(batches):
             values = sample(kind, n_per_batch, rng)
@@ -59,6 +59,7 @@ def run(n_per_batch: int, batches: int, seed: int, bins: int = 30000, lo: float 
             membership += int(np.count_nonzero(stable_in != direct_in))
             in_range += int(np.count_nonzero(stable_in))
             both = stable_in & direct_in
+            both_in_range += int(np.count_nonzero(both))
             ia = np.searchsorted(edges, stable[both], side="right") - 1
             ib = np.searchsorted(edges, direct[both], side="right") - 1
             flips_numpy += int(np.count_nonzero(ia != ib))
@@ -67,12 +68,15 @@ def run(n_per_batch: int, batches: int, seed: int, bins: int = 30000, lo: float 
             if np.any(both):
                 max_rel = max(max_rel, float(np.max(np.abs(stable[both] - direct[both]) / stable[both])))
         out["kinds"][kind] = {
-            "pairs_in_range": in_range,
+            "pairs_in_range_stable_formula": in_range,
+            "pairs_in_range_for_both_formulas": both_in_range,
             "bin_disagreements_stable_vs_direct": flips_numpy,
             "range_membership_disagreements": membership,
             "disagreements_numpy_edges_vs_root_arithmetic_same_mass": flips_axis_arith,
             "max_relative_mass_difference": max_rel,
-            "upper_95pct_rate_if_zero_observed_rule_of_three": 3.0 / in_range if in_range and not flips_numpy else None,
+            "upper_95pct_conditional_bin_flip_rate_if_zero_observed_rule_of_three": (
+                3.0 / both_in_range if both_in_range and not flips_numpy else None
+            ),
         }
     return out
 

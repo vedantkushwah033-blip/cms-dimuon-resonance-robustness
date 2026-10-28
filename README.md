@@ -20,6 +20,9 @@ The education/outreach sample remains useful for pipeline development only. The 
 - `data_sources.md`, `docs/data_source_assessment.md`, `docs/data_requirements.md` — source provenance and feasibility constraints.
 - `docs/experiment_protocol_template.md` — preregistration checklist for the main simulation.
 - `docs/independent_review_plan.md`, `docs/quality_gates.md` — validation and external-review requirements.
+- `src/cms_dimuon_robustness/global_scan.py` — exploratory maximum one-sided Poisson scan statistic with an externally supplied background; not a fitted bump-hunt pipeline.
+- `src/cms_dimuon_robustness/calibration.py` — empirical upper-tail rank p-value and fixed-background Poisson null pseudoexperiments; does not model fitted-background uncertainty.
+- `docs/fixed_background_null_pseudoexperiments_2026-10-28.md` — scope limits and validation gates for the toy null simulator.
 - `src/cms_dimuon_robustness/invariant_mass.py` — vectorized kinematic calculation.
 - `src/cms_dimuon_robustness/nanoaod.py` — Awkward-array opposite-charge pair-mass calculation.
 - `scripts/reproduce_dimuon_spectrum.py` — chunked ROOT/NanoAOD baseline reconstruction; requires an explicit input path to prevent accidental use of the unvalidated outreach dataset.
@@ -44,6 +47,12 @@ The education/outreach sample remains useful for pipeline development only. The 
 - `.github/workflows/official-data-smoke-test.yml` — hard-capped 10,000-event remote access/pipeline smoke test with a 30-minute limit and artifact upload; the successful run is linked in the smoke-test report.
 - `.github/workflows/research-level-schema-audit.yml` — manual-only workflow for one checksum-verified file each from Run2012B/C. It is currently on the unmerged research branch. GitHub requires a `workflow_dispatch` workflow to exist on the default branch before manual dispatch is available; therefore, this revised workflow has not yet run. Once deliberately exposed on the default branch, it will run candidate and independent ROOT/RDataFrame histograms on the same first 100,000 events with 30,000 bins, compare counts bin-by-bin (edge tolerance 1e-12 GeV; exact integer counts required), independently compare event cut flow and shared histogram configuration, and preserve reports if either gate fails. The earlier schema-only run 40403830670 does not validate this revised workflow or establish spectrum parity.
 - `src/cms_dimuon_robustness/monte_carlo.py` — exact binomial confidence intervals and a sample-size planning approximation.
+- `configs/confirmatory_global_calibration_protocol.yaml` and `scripts/validate_confirmatory_protocol.py` — machine-readable draft and fail-closed structural gate for confirmatory global-calibration runs; the current draft is intentionally blocked until data parity, literature review, and protocol review are complete. Tests live in `tests/test_protocol_validator.py`.
+- `docs/expanded_literature_matrix_2026-10-28.md` — an expanded, explicitly preliminary literature matrix covering model-selection uncertainty, look-elsewhere calibration, BumpHunter, CMS Open Data dimuon searches, data-directed searches, Gaussian-process backgrounds, and background sculpting; it states the unresolved research gap and current no-go gates.
+- `docs/estimand_comparator_design_memo_2026-10-28.md` — a non-confirmatory design memo defining the candidate global type-I-error estimand, development/calibration/held-out separation, fair comparators, illustrative Monte Carlo precision planning, algorithm-freeze fields, and go/no-go rules.
+- `docs/implemented_algorithm_vs_proposed_estimand_audit_2026-10-28.md` — source-level audit showing the current repository is a histogram-reconstruction scaffold; bump-hunt fitting, model selection, scan statistics, and global calibration are not yet implemented.
+- `src/cms_dimuon_robustness/global_scan.py` and `tests/test_global_scan.py` — exploratory one-sided Poisson excess statistic scanned across declared contiguous bin widths, with synthetic unit tests; no background fitting or calibrated global p-value is provided.
+- `docs/exploratory_scan_statistic_implementation_2026-10-28.md` — equations, scope boundaries, validation limitations, and next tests for the exploratory scan component.
 
 ## Setup
 Python 3.10 or newer:
