@@ -406,3 +406,10 @@ The revised bounded baseline/parity workflow has not run. A dispatch-path audit 
 - Statistical caution: `nominal_residual_degrees_of_freedom = n_bins - n_fitted_parameters` is only a bookkeeping quantity here, not a guarantee that a chi-square reference law applies. Parameters may be constrained, estimated from the same observations, or selected after inspecting the data. No calibrated goodness-of-fit claim should be based on this field.
 - Next gate: verify current-head CI, then build a predeclared simulation-based fit-check/calibration workflow with independent calibration and evaluation samples before connecting fitted backgrounds to the global scan. Do not run the confirmatory campaign until the algorithm, null-generating assumptions, fit-failure policy, scan range/windows, and acceptance criteria are frozen and independently reviewed.
 - Unchanged blockers: real-data reference-spectrum parity, event/trigger semantics, literature novelty, and end-to-end global false-positive calibration remain unresolved. No resonance finding or publication claim is supported.
+
+## Held-out calibration regression tests — 2026-10-28
+
+- Added regression tests for `evaluate_fixed_background_false_positive_rate`: deterministic reproducibility, confidence-interval containment, reporting of empirical p-value resolution, explicit detection when calibration size cannot resolve the requested alpha, and validation of distinct seeds/alpha.
+- Test commit: `e02de2b200a48cbc61f79ae3708e80e336aaa341`.
+- CI run for that commit: [40730847349](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40730847349), queued at the time of this entry. Do not claim these new tests pass until the run finishes.
+- These are small deterministic software regression tests, not a confirmatory false-positive study. Their toy data use a fixed, known Poisson background and do not establish fitted-background calibration or CMS validity.
