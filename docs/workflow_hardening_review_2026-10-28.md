@@ -4,22 +4,21 @@
 
 This branch makes three narrowly scoped changes to the bounded CMS data-validation workflow:
 
-1. **Input hash in both exporter metadata files.** The manual workflow now passes `--sha256-input` to both the Uproot candidate and ROOT reference exporter. This causes each exporter to record the SHA-256 of the local ROOT input, allowing the comparison evidence to identify the same exact file. The workflow separately retains the download manifest and checksum verification.
-2. **Per-record failure isolation.** The manual workflow records download, schema, candidate, reference, histogram-comparison, and metadata-comparison exit statuses. A failed download or export for Run2012B no longer automatically prevents attempting Run2012C. If either exporter fails, comparison is explicitly marked as not run (status 125) rather than being mistaken for a pass. Logs are retained in the uploaded artifact.
-3. **Pin the PyPI ROOT distribution used by current CI.** The latest successful integration run installed `ROOT==0.1a12`; both the manual workflow and integration workflow now pin that distribution instead of resolving an unspecified latest version.
+1. **Input hash in both exporter metadata files.** The manual workflow passes `--sha256-input` to both the Uproot candidate and ROOT reference exporter. Each metadata output should therefore record the SHA-256 of the same local ROOT input; the workflow also retains the download manifest and checksum verification.
+2. **Per-record failure isolation.** The manual workflow records download, schema, candidate, reference, histogram-comparison, and metadata-comparison exit statuses. A failed download for Run2012B should not prevent an attempt at Run2012C. If either exporter fails, comparison is marked as not run (status 125), not passed. Logs are retained in the artifact.
+3. **Pin the PyPI ROOT distribution used by current CI.** Both workflows pin `ROOT==0.1a12` rather than resolving an unspecified latest version.
 
-## Important limitation of the pin
+## Validation of this review branch
 
-The successful integration log explicitly warns that this PyPI ROOT distribution is in alpha stage and should not be relied on for production purposes. Pinning makes the environment more repeatable, but it does not remove that upstream limitation. The workflow records the actual ROOT runtime version. Before making a scientific claim, review the warning and consider moving to a supported, versioned ROOT container/environment if practical.
+- Test-suite run [40615374989](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40615374989) completed successfully. The Python 3.10, 3.11, and 3.12 jobs passed tests, compilation, and Ruff checks.
+- ROOT-reference integration run [40615374994](https://github.com/vedantkushwah033-blip/cms-dimuon-resonance-robustness/actions/runs/40615374994) completed successfully, including the synthetic-data ROOT exporter test.
+- These runs validate the PR's automated tests and synthetic integration only. They do **not** establish parity on CERN's real data.
+- The manual workflow has **not** been dispatched by this branch, and no multi-gigabyte ROOT files were downloaded by these runs.
+- The real-data comparison for records 31123 and 31129 remains **NOT ESTABLISHED** until the manual workflow is explicitly dispatched, completes, and its actual artifacts are independently inspected.
 
-## Validation state
+## Important limitation of the ROOT environment
 
-- This change is on a review branch and has not been merged.
-- The manual workflow has **not** been dispatched by this change.
-- No large ROOT file was downloaded by this change.
-- The latest earlier test-suite and synthetic ROOT integration runs passed on commit `1a03a01411a0e133820c0bf3341a8a27863539f0`. Those runs predate these workflow edits and therefore do not validate the revised workflow.
-- Passing synthetic integration tests is not real-data numerical parity.
-- The real-data comparison for records 31123 and 31129 remains NOT ESTABLISHED until the revised manual workflow is explicitly dispatched, completes, and its actual artifacts are independently inspected.
+The successful integration log warns that the PyPI ROOT distribution is alpha-stage and should not be relied on for production purposes. Pinning improves repeatability but does not remove that limitation. Before relying on ROOT output as a scientific reference, assess whether a supported, versioned ROOT container/environment is feasible and document the environment.
 
 ## Scope boundaries
 
