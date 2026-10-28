@@ -134,6 +134,9 @@ jobs:
                 --reference "$record_dir/reference/reference_metadata.json" \
                 --expected-sha256 "$sha256" \
                 --expected-bytes "$bytes" \
+                --candidate-csv "$record_dir/baseline/dimuon_mass_histogram.csv" \
+                --reference-csv "$record_dir/reference/dimuon_mass_histogram.csv" \
+                --expected-max-events 100000 \
                 --output "$record_dir/metadata_comparison.json" > "$record_dir/metadata_comparison.log" 2>&1; then
                 metadata_status=0
               else
