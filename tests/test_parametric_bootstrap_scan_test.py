@@ -73,7 +73,7 @@ def test_parametric_bootstrap_scan_test_rejects_too_few_bins_for_fit():
 
 
 def test_parametric_bootstrap_scan_test_validates_scan_before_fit():
-    with pytest.raises(ValueError, match="window widths"):
+    with pytest.raises(ValueError, match="window width"):
         parametric_bootstrap_scan_test(
             [3, 4, 5, 6],
             window_widths=[0],
