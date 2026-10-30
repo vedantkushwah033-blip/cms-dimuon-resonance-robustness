@@ -380,3 +380,13 @@ Cross-chat consistency notes:
 
 - Follow-up hardening of the metadata gate requires bounded event-limit values to be exact nonnegative integers and verifies the reference selection metadata explicitly; a regression test now rejects a reference that changes `nMuon == 2` to `nMuon >= 2`. Commits: `9da4340e9260f2d6bf36925aa75e29b80cdb91e2` and `29b1a521650726aaa3cdba3c6d75f69353197b2b`. Test/CI status remains **unverified**.
 - Added output-path protection to the metadata comparator so it cannot overwrite either input JSON, with a regression test that verifies the original input bytes remain unchanged. Commits: `21004e3217833a6f7aa34f614f75442cbaf20196` and `6e88ab162a7d98e6524ca89f334cd64583680fdc`. This test is also not yet executed in the current session.
+
+
+
+## 2026-10-30 research-branch continuation — plug-in bootstrap and provenance clarification
+
+- Added `docs/cms_data_provenance_decision_log_2026-10-30.md` to consolidate official CERN record distinctions and trigger-semantics limitations.
+- Added `docs/selection_calibration_protocol_v1_2026-10-30.md` as a focused supplement to, not a replacement for, the existing confirmatory protocol. The existing NO-GO gate remains authoritative.
+- Added `parametric_bootstrap_scan_test` to `src/cms_dimuon_robustness/calibration.py`. It fits the observed spectrum, uses the fitted mean vector as the plug-in null generator, refits each calibration toy, repeats the declared scan, and computes a plus-one empirical-rank p-value. This is a fixed-order plug-in parametric bootstrap only; it does not establish composite-null-uniform size or CMS validity.
+- Added `tests/test_parametric_bootstrap_scan_test.py` with seeded reproducibility and input-validation cases. A GitHub Actions run for the exact new branch commit has not been retrieved; the available commit-run lookup returned no run. Local test execution was also unavailable in this environment. CI status is therefore **UNVERIFIED**, not passed.
+- No confirmatory Monte Carlo campaign or new real-data analysis was executed. No numerical scientific finding is reported.
