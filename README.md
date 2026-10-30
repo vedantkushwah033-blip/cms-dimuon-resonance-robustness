@@ -94,3 +94,10 @@ After any new-file smoke test, inspect the output, verify event-level masses aga
 - Williams (2017), bump-hunting model selection: https://doi.org/10.1088/1748-0221/12/09/P09034
 - Cesarotti et al. (2019), CMS Open Data dimuon resonance search: https://doi.org/10.1103/PhysRevD.100.015021
 - Gross & Vitells (2010), look-elsewhere effect: https://doi.org/10.1140/epjc/s10052-010-1470-8
+
+## Current research-branch additions — 2026-10-30
+
+- `docs/cms_data_provenance_decision_log_2026-10-30.md` records the official distinction between Run2012B/C AOD, the reduced outreach file, and the public dimuon example, including the limits on trigger-efficiency claims.
+- `docs/selection_calibration_protocol_v1_2026-10-30.md` is a focused acceptance-distortion supplement to the existing confirmatory draft. It does not replace the main protocol or change the current NO-GO decision.
+- `parametric_bootstrap_scan_test` in `src/cms_dimuon_robustness/calibration.py` adds an exploratory end-to-end wrapper: fit the observed spectrum, generate calibration toys from the fitted null means, refit each toy, repeat the scan, and calculate a plus-one empirical-rank p-value. It is a plug-in bootstrap, not a guarantee of composite-null calibration or a CMS result.
+- `tests/test_parametric_bootstrap_scan_test.py` adds deterministic and input-validation tests. CI for this new code has not yet been observed; do not treat it as verified until the exact branch commit passes.
