@@ -1,12 +1,12 @@
-# Protocol v1: calibration under acceptance-induced spectral distortion
+# Focused supplement: acceptance-induced spectral distortion
 
-**Protocol status:** proposed, not preregistered or executed.  
+**Status:** exploratory supplement to `docs/confirmatory_study_protocol_draft.md`, not a replacement or freeze. It is proposed, not preregistered or executed.  
 **Prepared:** 2026-10-30  
 **Code branch:** research/acceptance-distortion-calibration-2026-10-30  
 **Primary evidence class:** model-generated null pseudoexperiments.  
 **Observed CMS data role:** descriptive reproduction and external context only until trigger, prescale, certification, and efficiency semantics are independently validated.
 
-## 1. Narrow research question
+## Relationship to the existing protocol\n\nThis document does not resolve the open items in the main confirmatory protocol: the end-to-end pipeline, fair comparator, numerical scenario matrix, fit-failure policy, Monte Carlo precision target, real-data baseline parity, and external review remain open. Do not interpret the candidate P0/P1/P2 procedure labels below as approved implementation choices. The existing repository decision remains NO-GO for confirmatory simulation.\n\n## 1. Narrow research question
 
 For a fully specified local dimuon bump-hunt pipeline, how does its null false-positive rate change when the observed spectrum contains a localized or smoothly varying acceptance distortion that is not represented in the fitted background model? Can a predeclared acceptance-aware model or sideband-only diagnostic improve calibration without absorbing a genuine narrow signal?
 
@@ -113,4 +113,4 @@ The auditor must not simply compare a saved summary with a duplicate of itself. 
 6. A manuscript with explicit separation of observed-data, pseudoexperiment, and stress-test evidence.
 7. Independent review by a particle-physics/statistics researcher.
 
-**Current decision:** protocol design only. No confirmatory experiment, real-data parity result, detector-level trigger validation, or novelty finding is claimed by this document.
+**Current decision: NO-GO for confirmatory simulation remains unchanged.** This supplement only sharpens one candidate acceptance-distortion direction. The governing documents remain `docs/confirmatory_study_protocol_draft.md`, `docs/confirmatory_protocol_freeze_checklist.md`, and `docs/next_experiment_decision.md`. No confirmatory experiment, real-data parity result, detector-level trigger validation, or novelty finding is claimed by this document.
