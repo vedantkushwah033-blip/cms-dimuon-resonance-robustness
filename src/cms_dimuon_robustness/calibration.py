@@ -381,3 +381,95 @@ def evaluate_fixed_background_false_positive_rate(
         "calibration_minimum_resolvable_pvalue": float(1 / (int(n_calibration) + 1)),
         "interpretation": "fixed-known-background toy simulation only; not CMS validation",
     }
+
+
+
+def parametric_bootstrap_scan_test(
+    observed_counts: ArrayLike,
+    window_widths: tuple[int, ...] | list[int],
+    n_calibration: int,
+    seed: int,
+    background_order: int = 1,
+) -> dict[str, object]:
+    """Calibrate one observed scan with a plug-in refitted-background bootstrap.
+
+    The observed spectrum is first fit with the declared fixed-order
+    log-polynomial background. Calibration pseudoexperiments are generated
+    from that fitted mean vector; each pseudoexperiment is refit with the same
+    background order before the identical scan is recomputed.
+
+    This closes the mechanical loop from observed counts to a bootstrap
+    empirical-rank p-value for this fixed pipeline. It is still a plug-in
+    parametric bootstrap: it does not prove composite-null or nuisance-uniform
+    type-I control, validate the background family, perform model selection,
+    include detector effects, or validate CMS data. The fit family, order,
+    binning, scan windows, and failure policy must be frozen independently of
+    any inspected excess before interpreting the result.
+    """
+    observed = np.asarray(observed_counts)
+    if observed.ndim != 1 or observed.size == 0:
+        raise ValueError("observed_counts must be a non-empty 1D array")
+    if not np.all(np.isfinite(observed)) or np.any(observed < 0):
+        raise ValueError("observed_counts must be finite and non-negative")
+    if not np.all(observed == np.floor(observed)):
+        raise ValueError("observed_counts must be integer-valued")
+    if isinstance(n_calibration, bool) or not isinstance(
+        n_calibration, (int, np.integer)
+    ) or n_calibration <= 0:
+        raise ValueError("n_calibration must be a positive integer")
+    if isinstance(seed, bool) or not isinstance(seed, (int, np.integer)) or seed < 0:
+        raise ValueError("seed must be a non-negative integer")
+    if isinstance(background_order, bool) or not isinstance(
+        background_order, (int, np.integer)
+    ) or background_order < 0:
+        raise ValueError("background_order must be a non-negative integer")
+    if observed.size <= int(background_order) + 1:
+        raise ValueError("number of bins must exceed the number of fitted coefficients")
+
+    from cms_dimuon_robustness.background_fit import fit_log_polynomial_background
+    from cms_dimuon_robustness.global_scan import scan_poisson_excess
+
+    counts = observed.astype(np.int64, copy=False)
+    # Validate the scan design before fitting or allocating calibration work.
+    scan_poisson_excess(
+        np.zeros(counts.size, dtype=np.int64),
+        np.ones(counts.size, dtype=float),
+        window_widths,
+    )
+
+    try:
+        observed_fit = fit_log_polynomial_background(
+            counts, order=int(background_order)
+        )
+    except Exception as exc:
+        raise RuntimeError(
+            "Observed-spectrum background fit failed; no scan p-value was produced."
+        ) from exc
+
+    fitted_means = np.asarray(observed_fit["expected_counts"], dtype=float)
+    observed_scan = scan_poisson_excess(counts, fitted_means, window_widths)
+    calibration = simulate_refitted_background_null(
+        null_generating_means=fitted_means,
+        window_widths=window_widths,
+        n_experiments=int(n_calibration),
+        seed=int(seed),
+        background_order=int(background_order),
+    )
+    rank = empirical_upper_tail_pvalue(
+        float(observed_scan["global_statistic_q0"]),
+        calibration["null_statistics"],
+    )
+    return {
+        "observed_scan": observed_scan,
+        "observed_background_fit": observed_fit,
+        "calibration": calibration,
+        "empirical_rank": rank,
+        "background_order": int(background_order),
+        "window_widths_bins": list(dict.fromkeys(int(width) for width in window_widths)),
+        "n_calibration": int(n_calibration),
+        "seed": int(seed),
+        "interpretation": (
+            "exploratory plug-in parametric bootstrap for a fixed-order refitted "
+            "background and fixed scan; not composite-null-uniform or CMS validation"
+        ),
+    }
