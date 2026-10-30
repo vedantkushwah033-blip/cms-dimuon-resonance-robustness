@@ -120,3 +120,12 @@
 - No simulations were run. The confirmatory study remains **NO-GO** pending independent review and frozen design; no CMS-data validation or resonance claim is supported.
 
 - Follow-up test hardening: the first CI run exposed a too-strict exact-zero assertion in the projected-gradient test; the remaining slope component had a floating-point residual of approximately (1.9\times10^{-6}). Replaced exact equality with a tight numerical tolerance and added direction-sensitive fixtures for upper/lower bounds, checking that outward-pointing gradients are projected while inward-pointing gradients remain visible. Test-fix commit: `c5c1b5c9c562dd6c8df98d524cf51ebc18e5419c`; bound-direction tests: `0f3aa81d59b3219b7c9cd5543998870e2a3238d3`. CI for the latest commit must pass before verification is claimed.
+
+
+
+## Focused acceptance-distortion supplement and plug-in bootstrap wrapper — 2026-10-30
+- Added a provenance decision log that distinguishes the official Run2012B/C AOD records, the 2019 reduced outreach NanoAOD-like file, and the public dimuon analysis example. The log explicitly prohibits trigger-efficiency claims without event-level path semantics, run-dependent configuration, prescales/luminosity treatment, and a defensible denominator.
+- Added a focused acceptance-distortion supplement. It is explicitly subordinate to the existing confirmatory draft and does not change the current NO-GO decision or resolve the outstanding literature, baseline-parity, comparator, scenario-freeze, and external-review gates.
+- Added `parametric_bootstrap_scan_test`, which fits the observed binned spectrum with the existing fixed-order log-polynomial null, generates calibration pseudoexperiments from the fitted means, refits each pseudoexperiment, repeats the same scan, and reports a plus-one empirical-rank p-value. The function is explicitly labelled an exploratory plug-in parametric bootstrap; it does not claim uniform composite-null calibration, model-selection handling, detector effects, or CMS validation.
+- Added deterministic reproducibility and invalid-input tests. The exact new branch commit has not yet been validated by CI or local execution; do not describe the new function/tests as passing until a workflow run completes.
+- Confirmatory simulation remains **NO-GO**. No new CMS-data spectrum, trigger-efficiency estimate, resonance claim, or numerical scientific result was produced in this step.
